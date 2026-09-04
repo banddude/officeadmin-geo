@@ -73,8 +73,19 @@ const routes: MapRoute[] = [
   },
 ];
 
+const TOKEN_STORAGE_KEY = "officeadmin-geo.mapbox-public-token";
+
 function App() {
-  const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN as string | undefined;
+  const buildToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN as string | undefined;
+  const [accessToken, setAccessToken] = useState<string>(() => {
+    if (buildToken) return buildToken;
+    try {
+      return window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? "";
+    } catch {
+      return "";
+    }
+  });
+  const [tokenDraft, setTokenDraft] = useState("");
   const [selectedSiteId, setSelectedSiteId] = useState<string>();
   const [selectedTechnicianId, setSelectedTechnicianId] = useState<string>();
   const selectedSite = useMemo(
@@ -89,14 +100,41 @@ function App() {
   if (!accessToken) {
     return (
       <main className="setup-shell">
-        <section className="setup-card">
+        <form
+          className="setup-card"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const token = tokenDraft.trim();
+            if (!token.startsWith("pk.")) return;
+            try {
+              window.localStorage.setItem(TOKEN_STORAGE_KEY, token);
+            } catch {
+              // The map can still run for this session if storage is unavailable.
+            }
+            setAccessToken(token);
+          }}
+        >
           <p className="eyebrow">OfficeAdmin Geo</p>
-          <h1>Mapbox token required</h1>
+          <h1>Connect Mapbox</h1>
           <p>
-            Copy <code>.env.example</code> to <code>.env.local</code>, add a public Mapbox access token,
-            then run <code>pnpm dev</code> again.
+            Paste a public <code>pk.</code> Mapbox token once. It stays in this browser and is never
+            committed to GitHub.
           </p>
-        </section>
+          <label className="token-field">
+            <span>Public token</span>
+            <input
+              value={tokenDraft}
+              onChange={(event) => setTokenDraft(event.target.value)}
+              placeholder="pk.ey…"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+            />
+          </label>
+          <button className="primary-button" type="submit" disabled={!tokenDraft.trim().startsWith("pk.")}>
+            Open map
+          </button>
+        </form>
       </main>
     );
   }
