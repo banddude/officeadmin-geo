@@ -1,3 +1,5 @@
+import type { MultiPolygon, Polygon } from "geojson";
+
 export interface MapSite {
   id: string;
   name: string;
@@ -37,7 +39,7 @@ export interface MapRoute {
 export interface MapArea {
   id: string;
   name?: string;
-  geometry: GeoJSON.Polygon | GeoJSON.MultiPolygon;
+  geometry: Polygon | MultiPolygon;
   category?: string;
   metadata?: Record<string, unknown>;
 }
