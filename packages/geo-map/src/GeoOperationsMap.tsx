@@ -1,9 +1,15 @@
 import type { GeoOperationsMapData } from "@officeadmin-geo/geo-types";
-import { MapboxGeoMap } from "@officeadmin-geo/provider-mapbox";
+import {
+  MapboxGeoMap,
+  type GeoMapViewMode,
+  type GeoMapVisualTheme,
+} from "@officeadmin-geo/provider-mapbox";
 
 export interface GeoOperationsMapProps extends GeoOperationsMapData {
   mapboxAccessToken: string;
   className?: string;
+  visualTheme?: GeoMapVisualTheme;
+  viewMode?: GeoMapViewMode;
   selectedSiteId?: string;
   selectedTechnicianId?: string;
   onSiteSelected?: (siteId: string) => void;
@@ -14,6 +20,8 @@ export function GeoOperationsMap(props: GeoOperationsMapProps) {
   const {
     mapboxAccessToken,
     className,
+    visualTheme,
+    viewMode,
     sites,
     technicians,
     routes,
@@ -30,6 +38,8 @@ export function GeoOperationsMap(props: GeoOperationsMapProps) {
     <MapboxGeoMap
       accessToken={mapboxAccessToken}
       className={className}
+      visualTheme={visualTheme}
+      viewMode={viewMode}
       sites={sites}
       technicians={technicians}
       routes={routes}
