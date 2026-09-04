@@ -1,0 +1,219 @@
+{
+  "generatedAt": "2026-09-04T22:06:26.835Z",
+  "target": {
+    "address": "2629 Corralitas Dr, Los Angeles, CA 90039",
+    "latitude": 34.09962,
+    "longitude": -118.25278
+  },
+  "options": {
+    "radiusM": 500,
+    "imageLimit": 4,
+    "model": "gemma3:4b",
+    "visionEnabled": false
+  },
+  "primaryBuilding": {
+    "id": "883214",
+    "polygon": [
+      [
+        -118.25282617429762,
+        34.09965010631279
+      ],
+      [
+        -118.2528173966033,
+        34.09964557735164
+      ],
+      [
+        -118.25283207019723,
+        34.099625895957224
+      ],
+      [
+        -118.25284156317403,
+        34.09963079395018
+      ],
+      [
+        -118.25286164315656,
+        34.099603861036044
+      ],
+      [
+        -118.25285118199909,
+        34.09959846381893
+      ],
+      [
+        -118.25285363640747,
+        34.09959517079586
+      ],
+      [
+        -118.25279317162939,
+        34.099563971779624
+      ],
+      [
+        -118.2527811920635,
+        34.099580039602536
+      ],
+      [
+        -118.25273044496637,
+        34.09955385528098
+      ],
+      [
+        -118.2527193871429,
+        34.099568686071024
+      ],
+      [
+        -118.2527127118942,
+        34.09956524175564
+      ],
+      [
+        -118.25269117368543,
+        34.09959413041262
+      ],
+      [
+        -118.25273155190237,
+        34.099614965111435
+      ],
+      [
+        -118.25272137589091,
+        34.09962861305045
+      ],
+      [
+        -118.25273779918831,
+        34.09963708735819
+      ],
+      [
+        -118.25272336734271,
+        34.09965644458558
+      ],
+      [
+        -118.25273981995217,
+        34.09966493415783
+      ],
+      [
+        -118.25273053763351,
+        34.09967738479695
+      ],
+      [
+        -118.25278491658244,
+        34.099705443017974
+      ],
+      [
+        -118.25282617429762,
+        34.09965010631279
+      ]
+    ],
+    "heightM": 9.317736,
+    "roofElevationM": 174.20844,
+    "areaSqM": 136.9493190860802,
+    "provenance": {
+      "provider": "lacounty-building-2023",
+      "featureId": "883214",
+      "sourceUrl": "https://rpgis.isd.lacounty.gov/arcgis/rest/services/GISNET/GISNET_Public/MapServer/434",
+      "details": {
+        "status": "Modified",
+        "heightFeet": 30.57
+      }
+    }
+  },
+  "rankedImagery": [
+    {
+      "id": "308964131",
+      "provider": "kartaview",
+      "sequenceId": "1286515",
+      "latitude": 34.098822,
+      "longitude": -118.251454,
+      "capturedAt": "2018-09-04 16:33:00",
+      "imageUrl": "https://storage9.openstreetcam.org/files/photo/2018/9/4/proc/1286515_c1f81_1723.jpg",
+      "thumbnailUrl": "https://storage9.openstreetcam.org/files/photo/2018/9/4/th/1286515_c1f81_1723.jpg",
+      "provenance": {
+        "provider": "kartaview",
+        "featureId": "308964131",
+        "sourceUrl": "https://storage9.openstreetcam.org/files/photo/2018/9/4/proc/1286515_c1f81_1723.jpg",
+        "capturedAt": "2018-09-04 16:33:00"
+      },
+      "distanceToTargetM": 150.93263894572095,
+      "bearingToTargetDeg": 306.0086749705156,
+      "score": 0.5724886751306352,
+      "scoreReasons": [
+        "distance:150.9m",
+        "heading:unknown",
+        "age:8.0y"
+      ]
+    },
+    {
+      "id": "362624801",
+      "provider": "kartaview",
+      "sequenceId": "1342949",
+      "latitude": 34.098587,
+      "longitude": -118.251366,
+      "capturedAt": "2019-02-20 21:46:27",
+      "imageUrl": "https://storage11.openstreetcam.org/files/photo/2019/2/20/proc/1342949_12231_5c6dcab37996a.jpg",
+      "thumbnailUrl": "https://storage11.openstreetcam.org/files/photo/2019/2/20/th/1342949_12231_5c6dcab37996a.jpg",
+      "provenance": {
+        "provider": "kartaview",
+        "featureId": "362624801",
+        "sourceUrl": "https://storage11.openstreetcam.org/files/photo/2019/2/20/proc/1342949_12231_5c6dcab37996a.jpg",
+        "capturedAt": "2019-02-20 21:46:27"
+      },
+      "distanceToTargetM": 173.62362198490374,
+      "bearingToTargetDeg": 311.42026533706326,
+      "score": 0.5559275632361442,
+      "scoreReasons": [
+        "distance:173.6m",
+        "heading:unknown",
+        "age:7.5y"
+      ]
+    },
+    {
+      "id": "366237007",
+      "provider": "kartaview",
+      "sequenceId": "1347335",
+      "latitude": 34.098417,
+      "longitude": -118.251482,
+      "capturedAt": "2019-03-05 01:25:48",
+      "imageUrl": "https://storage11.openstreetcam.org/files/photo/2019/3/5/proc/1347335_81fb5_5c7dd01c8c3b7.jpg",
+      "thumbnailUrl": "https://storage11.openstreetcam.org/files/photo/2019/3/5/th/1347335_81fb5_5c7dd01c8c3b7.jpg",
+      "provenance": {
+        "provider": "kartaview",
+        "featureId": "366237007",
+        "sourceUrl": "https://storage11.openstreetcam.org/files/photo/2019/3/5/proc/1347335_81fb5_5c7dd01c8c3b7.jpg",
+        "capturedAt": "2019-03-05 01:25:48"
+      },
+      "distanceToTargetM": 179.38212857865273,
+      "bearingToTargetDeg": 318.22078682591246,
+      "score": 0.5510221677715144,
+      "scoreReasons": [
+        "distance:179.4m",
+        "heading:unknown",
+        "age:7.5y"
+      ]
+    },
+    {
+      "id": "381463594",
+      "provider": "kartaview",
+      "sequenceId": "1368286",
+      "latitude": 34.098503,
+      "longitude": -118.25126,
+      "capturedAt": "2019-04-09 00:26:18",
+      "imageUrl": "https://storage11.openstreetcam.org/files/photo/2019/4/9/proc/1368286_b4541_5cabe6a9e6c00.jpg",
+      "thumbnailUrl": "https://storage11.openstreetcam.org/files/photo/2019/4/9/th/1368286_b4541_5cabe6a9e6c00.jpg",
+      "provenance": {
+        "provider": "kartaview",
+        "featureId": "381463594",
+        "sourceUrl": "https://storage11.openstreetcam.org/files/photo/2019/4/9/proc/1368286_b4541_5cabe6a9e6c00.jpg",
+        "capturedAt": "2019-04-09 00:26:18"
+      },
+      "distanceToTargetM": 187.12279522534325,
+      "bearingToTargetDeg": 311.58780606119734,
+      "score": 0.544853164881794,
+      "scoreReasons": [
+        "distance:187.1m",
+        "heading:unknown",
+        "age:7.4y"
+      ]
+    }
+  ],
+  "observations": [],
+  "rejected": [],
+  "warnings": [
+    "No useful vision observations were available. Rendering measured geometry only.",
+    "Roof type is low confidence or disputed."
+  ]
+}
