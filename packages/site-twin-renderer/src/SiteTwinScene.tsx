@@ -79,17 +79,42 @@ function terrainHeightAtLocal(model: SemanticSiteModel, x: number, z: number) {
   const samples = model.geometry.terrain;
   if (!samples.length) return 0;
   const base = terrainBaseElevation(model);
-  let weightedElevation = 0;
-  let totalWeight = 0;
-  for (const sample of samples) {
-    const [sampleX, sampleZ] = localMeters([sample.coordinate.longitude, sample.coordinate.latitude], model.center);
-    const distanceSquared = (sampleX - x) ** 2 + (sampleZ - z) ** 2;
-    if (distanceSquared < 0.01) return sample.elevationM - base;
-    const weight = 1 / Math.max(1, distanceSquared);
-    weightedElevation += sample.elevationM * weight;
-    totalWeight += weight;
+  const local = samples.map((sample) => {
+    const [sx, sz] = localMeters([sample.coordinate.longitude, sample.coordinate.latitude], model.center);
+    return { x: sx, z: sz, elevationM: sample.elevationM };
+  });
+  const xs = [...new Set(local.map((sample) => sample.x))].sort((a, b) => a - b);
+  const zs = [...new Set(local.map((sample) => sample.z))].sort((a, b) => a - b);
+  if (xs.length < 2 || zs.length < 2) {
+    const nearest = [...local].sort((a, b) => Math.hypot(a.x - x, a.z - z) - Math.hypot(b.x - x, b.z - z))[0];
+    return nearest ? nearest.elevationM - base : 0;
   }
-  return totalWeight ? weightedElevation / totalWeight - base : 0;
+
+  const bracket = (values: number[], value: number) => {
+    if (value <= values[0]!) return [values[0]!, values[0]!] as const;
+    if (value >= values.at(-1)!) return [values.at(-1)!, values.at(-1)!] as const;
+    for (let index = 0; index < values.length - 1; index += 1) {
+      const low = values[index]!;
+      const high = values[index + 1]!;
+      if (value >= low && value <= high) return [low, high] as const;
+    }
+    return [values[0]!, values[0]!] as const;
+  };
+  const [x0, x1] = bracket(xs, x);
+  const [z0, z1] = bracket(zs, z);
+  const corner = (cx: number, cz: number) => local.reduce((best, sample) => {
+    const distance = Math.abs(sample.x - cx) + Math.abs(sample.z - cz);
+    return !best || distance < best.distance ? { sample, distance } : best;
+  }, undefined as { sample: (typeof local)[number]; distance: number } | undefined)?.sample.elevationM ?? base;
+  const e00 = corner(x0, z0);
+  const e10 = corner(x1, z0);
+  const e01 = corner(x0, z1);
+  const e11 = corner(x1, z1);
+  const tx = x1 === x0 ? 0 : Math.max(0, Math.min(1, (x - x0) / (x1 - x0)));
+  const tz = z1 === z0 ? 0 : Math.max(0, Math.min(1, (z - z0) / (z1 - z0)));
+  const low = e00 + (e10 - e00) * tx;
+  const high = e01 + (e11 - e01) * tx;
+  return low + (high - low) * tz - base;
 }
 
 function terrainHeightAtPosition(model: SemanticSiteModel, position: Position) {
