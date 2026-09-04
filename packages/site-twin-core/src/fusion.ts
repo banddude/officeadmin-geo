@@ -81,10 +81,13 @@ function fuseBoolean(
   }
 
   const total = positiveWeight + negativeWeight;
+  if (total === 0) {
+    return { value: false, confidence: 0, sourceImageIds: [] };
+  }
   const value = positiveWeight >= negativeWeight;
   return {
     value,
-    confidence: total > 0 ? Math.max(positiveWeight, negativeWeight) / total : 0,
+    confidence: Math.max(positiveWeight, negativeWeight) / total,
     sourceImageIds: [...new Set(positiveSources)],
   };
 }

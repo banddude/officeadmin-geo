@@ -78,4 +78,13 @@ describe("site twin fusion", () => {
     expect(model.site.stairs.value).toBe(true);
     expect(model.site.trees.value).toBe(true);
   });
+
+  it("treats missing boolean evidence as unknown-confidence false rather than true", () => {
+    const model = fuseSiteModel("Test", geometry, [], []);
+    expect(model.site.driveway.value).toBe(false);
+    expect(model.site.driveway.confidence).toBe(0);
+    expect(model.site.retainingWalls.value).toBe(false);
+    expect(model.site.fence.value).toBe(false);
+  });
+
 });
