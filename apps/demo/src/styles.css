@@ -185,3 +185,46 @@ code {
     border-radius: 16px;
   }
 }
+
+.token-field {
+  display: grid;
+  gap: 8px;
+  margin-top: 20px;
+  color: #334155;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.token-field input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 0 13px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 16px;
+  outline: none;
+}
+
+.token-field input:focus {
+  border-color: #64748b;
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.12);
+}
+
+.primary-button {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 12px;
+  background: #0f172a;
+  color: #ffffff;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.primary-button:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
