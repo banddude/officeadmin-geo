@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-04T22:38:33.567Z",
+  "generatedAt": "2026-09-04T23:33:24.316Z",
   "target": {
     "address": "2629 Corralitas Dr, Los Angeles, CA 90039",
     "latitude": 34.09962,
@@ -7,7 +7,7 @@
   },
   "options": {
     "radiusM": 500,
-    "imageLimit": 3,
+    "imageLimit": 4,
     "model": "gemma3:4b",
     "visionEnabled": true,
     "imageryProviders": [
@@ -114,7 +114,8 @@
         "status": "Modified",
         "heightFeet": 30.57
       }
-    }
+    },
+    "groundElevationM": 164.109527588
   },
   "rankedImagery": [
     {
@@ -137,7 +138,7 @@
       "distanceToTargetM": 20.034797729766538,
       "bearingToTargetDeg": 269.6923818714949,
       "headingErrorDeg": 0,
-      "score": 0.9339663669350166,
+      "score": 0.9339654811330755,
       "scoreReasons": [
         "distance:20.0m",
         "heading-error:0.0deg",
@@ -346,6 +347,82 @@
         "heading-error:0.0deg"
       ],
       "headingDeg": 31.65471398850599
+    },
+    {
+      "id": "364614501",
+      "provider": "kartaview",
+      "sequenceId": "1345431",
+      "latitude": 34.098527,
+      "longitude": -118.251177,
+      "headingDeg": 342.74,
+      "capturedAt": "2019-02-27 22:48:23",
+      "imageUrl": "https://cdn.kartaview.org/pr:sharp/aHR0cHM6Ly9zdG9yYWdlMTEub3BlbnN0cmVldGNhbS5vcmcvZmlsZXMvcGhvdG8vMjAxOS8yLzI3L3Byb2MvMTM0NTQzMV85NzMxMF81Yzc3MTNiNjVhNDk0LmpwZw",
+      "thumbnailUrl": "https://cdn.kartaview.org/pr:sharp/aHR0cHM6Ly9zdG9yYWdlMTEub3BlbnN0cmVldGNhbS5vcmcvZmlsZXMvcGhvdG8vMjAxOS8yLzI3L2x0aC8xMzQ1NDMxXzk3MzEwXzVjNzcxM2I2NWE0OTQuanBn",
+      "provenance": {
+        "provider": "kartaview",
+        "featureId": "364614501",
+        "sourceUrl": "https://cdn.kartaview.org/pr:sharp/aHR0cHM6Ly9zdG9yYWdlMTEub3BlbnN0cmVldGNhbS5vcmcvZmlsZXMvcGhvdG8vMjAxOS8yLzI3L3Byb2MvMTM0NTQzMV85NzMxMF81Yzc3MTNiNjVhNDk0LmpwZw",
+        "capturedAt": "2019-02-27 22:48:23"
+      },
+      "distanceToTargetM": 191.1982234170707,
+      "bearingToTargetDeg": 309.4690759009406,
+      "headingErrorDeg": 33.27092409905936,
+      "score": 0.6291614357459455,
+      "scoreReasons": [
+        "distance:191.2m",
+        "heading-error:33.3deg",
+        "age:7.5y"
+      ]
+    },
+    {
+      "id": "376879384",
+      "provider": "kartaview",
+      "sequenceId": "1360948",
+      "latitude": 34.101999,
+      "longitude": -118.249231,
+      "headingDeg": 233.77,
+      "capturedAt": "2019-03-31 18:44:19",
+      "imageUrl": "https://cdn.kartaview.org/pr:sharp/aHR0cHM6Ly9zdG9yYWdlMTEub3BlbnN0cmVldGNhbS5vcmcvZmlsZXMvcGhvdG8vMjAxOS8zLzMxL3Byb2MvMTM2MDk0OF81MF81MmYyN18xNy5qcGc",
+      "thumbnailUrl": "https://cdn.kartaview.org/pr:sharp/aHR0cHM6Ly9zdG9yYWdlMTEub3BlbnN0cmVldGNhbS5vcmcvZmlsZXMvcGhvdG8vMjAxOS8zLzMxL2x0aC8xMzYwOTQ4XzUwXzUyZjI3XzE3LmpwZw",
+      "provenance": {
+        "provider": "kartaview",
+        "featureId": "376879384",
+        "sourceUrl": "https://cdn.kartaview.org/pr:sharp/aHR0cHM6Ly9zdG9yYWdlMTEub3BlbnN0cmVldGNhbS5vcmcvZmlsZXMvcGhvdG8vMjAxOS8zLzMxL3Byb2MvMTM2MDk0OF81MF81MmYyN18xNy5qcGc",
+        "capturedAt": "2019-03-31 18:44:19"
+      },
+      "distanceToTargetM": 420.4282847421963,
+      "bearingToTargetDeg": 231.00993705583159,
+      "headingErrorDeg": 2.760062944168453,
+      "score": 0.548397766363593,
+      "scoreReasons": [
+        "distance:420.4m",
+        "heading-error:2.8deg",
+        "age:7.4y"
+      ]
+    },
+    {
+      "id": "610658078",
+      "provider": "kartaview",
+      "sequenceId": "2096626",
+      "latitude": 34.101868,
+      "longitude": -118.249418,
+      "capturedAt": "2020-03-31 01:05:48",
+      "imageUrl": "https://cdn.kartaview.org/pr:sharp/aHR0cHM6Ly9zdG9yYWdlMTMub3BlbnN0cmVldGNhbS5vcmcvZmlsZXMvcGhvdG8vMjAyMC8zLzMwL3Byb2MvMjA5NjYyNl8zN2ZjYl8xNDQxMS5qcGc",
+      "thumbnailUrl": "https://cdn.kartaview.org/pr:sharp/aHR0cHM6Ly9zdG9yYWdlMTMub3BlbnN0cmVldGNhbS5vcmcvZmlsZXMvcGhvdG8vMjAyMC8zLzMwL2x0aC8yMDk2NjI2XzM3ZmNiXzE0NDExLmpwZw",
+      "provenance": {
+        "provider": "kartaview",
+        "featureId": "610658078",
+        "sourceUrl": "https://cdn.kartaview.org/pr:sharp/aHR0cHM6Ly9zdG9yYWdlMTMub3BlbnN0cmVldGNhbS5vcmcvZmlsZXMvcGhvdG8vMjAyMC8zLzMwL3Byb2MvMjA5NjYyNl8zN2ZjYl8xNDQxMS5qcGc",
+        "capturedAt": "2020-03-31 01:05:48"
+      },
+      "distanceToTargetM": 397.88084601352796,
+      "bearingToTargetDeg": 231.0802029677834,
+      "score": 0.3633153015253845,
+      "scoreReasons": [
+        "distance:397.9m",
+        "heading:unknown",
+        "age:6.4y"
+      ]
     }
   ],
   "attemptedImagery": [
@@ -369,7 +446,7 @@
       "distanceToTargetM": 20.034797729766538,
       "bearingToTargetDeg": 269.6923818714949,
       "headingErrorDeg": 0,
-      "score": 0.9339663669350166,
+      "score": 0.9339654811330755,
       "scoreReasons": [
         "distance:20.0m",
         "heading-error:0.0deg",
@@ -428,6 +505,56 @@
         "heading-error:0.0deg"
       ],
       "headingDeg": 215.00510173593327
+    },
+    {
+      "id": "o2Wjj74LRbH-fG5IWsCX-w",
+      "provider": "google-streetview-research",
+      "latitude": 34.09957821776173,
+      "longitude": -118.2531625351468,
+      "imageUrl": "google-streetview-research://o2Wjj74LRbH-fG5IWsCX-w",
+      "provenance": {
+        "provider": "google-streetview-research",
+        "featureId": "o2Wjj74LRbH-fG5IWsCX-w",
+        "details": {
+          "panoramaHeadingDeg": 21.73652076721191,
+          "pitchDeg": 87.33965301513672,
+          "rollDeg": 0.9307949542999268
+        }
+      },
+      "distanceToTargetM": 35.52765222440528,
+      "bearingToTargetDeg": 82.48575688225321,
+      "headingErrorDeg": 0,
+      "score": 0.9080251129980352,
+      "scoreReasons": [
+        "distance:35.5m",
+        "heading-error:0.0deg"
+      ],
+      "headingDeg": 82.48575688225321
+    },
+    {
+      "id": "McTJ15Z3rBYI31wBsO3BwQ",
+      "provider": "google-streetview-research",
+      "latitude": 34.09929886196537,
+      "longitude": -118.2526499437002,
+      "imageUrl": "google-streetview-research://McTJ15Z3rBYI31wBsO3BwQ",
+      "provenance": {
+        "provider": "google-streetview-research",
+        "featureId": "McTJ15Z3rBYI31wBsO3BwQ",
+        "details": {
+          "panoramaHeadingDeg": 209.8921051025391,
+          "pitchDeg": 86.7916259765625,
+          "rollDeg": 357.3748779296875
+        }
+      },
+      "distanceToTargetM": 37.66344679126113,
+      "bearingToTargetDeg": 341.4609164306635,
+      "headingErrorDeg": 0,
+      "score": 0.9061028978878651,
+      "scoreReasons": [
+        "distance:37.7m",
+        "heading-error:0.0deg"
+      ],
+      "headingDeg": 341.4609164306635
     }
   ],
   "observations": [
@@ -453,27 +580,72 @@
           ],
           "windows": [
             {
-              "x": 0.35,
-              "y": 0.65,
-              "width": 0.18,
-              "height": 0.32,
+              "x": 0.18,
+              "y": 0.63,
+              "width": 0.24,
+              "height": 0.23,
               "confidence": 0.95,
               "color": "dark",
+              "shape": "rect"
+            },
+            {
+              "x": 0.73,
+              "y": 0.08,
+              "width": 0.12,
+              "height": 0.34,
+              "confidence": 0.95,
+              "color": "brown",
               "shape": "rect"
             }
           ],
           "doors": [
             {
-              "x": 0.75,
-              "y": 0.05,
-              "width": 0.14,
-              "height": 0.28,
+              "x": 0.76,
+              "y": 0.02,
+              "width": 0.12,
+              "height": 0.34,
               "confidence": 0.95,
               "color": "brown",
               "material": "wood",
               "shape": "rect"
             }
           ]
+        },
+        {
+          "wall": "rear",
+          "confidence": 0.8,
+          "colors": [
+            "gray"
+          ],
+          "materials": [
+            "concrete"
+          ],
+          "windows": [],
+          "doors": []
+        },
+        {
+          "wall": "left",
+          "confidence": 0.7,
+          "colors": [
+            "gray"
+          ],
+          "materials": [
+            "concrete"
+          ],
+          "windows": [],
+          "doors": []
+        },
+        {
+          "wall": "right",
+          "confidence": 0.7,
+          "colors": [
+            "gray"
+          ],
+          "materials": [
+            "concrete"
+          ],
+          "windows": [],
+          "doors": []
         }
       ],
       "site": {
@@ -484,9 +656,7 @@
         "trees": true,
         "dominantHardscape": "concrete"
       },
-      "notes": [
-        "The building appears to be a two-story structure with stucco exterior."
-      ]
+      "notes": []
     },
     {
       "sourceImageId": "nEbwXhyt7GxeKcN0YYyvyQ",
@@ -510,21 +680,30 @@
           ],
           "windows": [
             {
-              "x": 0.35,
-              "y": 0.65,
-              "width": 0.2,
-              "height": 0.25,
+              "x": 0.18,
+              "y": 0.63,
+              "width": 0.24,
+              "height": 0.23,
               "confidence": 0.95,
               "color": "dark",
+              "shape": "rect"
+            },
+            {
+              "x": 0.73,
+              "y": 0.08,
+              "width": 0.12,
+              "height": 0.34,
+              "confidence": 0.95,
+              "color": "light gray",
               "shape": "rect"
             }
           ],
           "doors": [
             {
-              "x": 0.75,
-              "y": 0.1,
-              "width": 0.1,
-              "height": 0.2,
+              "x": 0.76,
+              "y": 0.02,
+              "width": 0.12,
+              "height": 0.34,
               "confidence": 0.95,
               "color": "brown",
               "material": "wood",
@@ -541,10 +720,7 @@
         "trees": true,
         "dominantHardscape": "concrete"
       },
-      "notes": [
-        "The building appears to be a two-story structure with a flat roof.",
-        "The facade is primarily stucco and white in color."
-      ]
+      "notes": []
     },
     {
       "sourceImageId": "vM0lvFfkARmcElUoxHItbw",
@@ -568,21 +744,133 @@
           ],
           "windows": [
             {
-              "x": 0.35,
-              "y": 0.65,
-              "width": 0.2,
-              "height": 0.25,
+              "x": 0.18,
+              "y": 0.63,
+              "width": 0.24,
+              "height": 0.23,
               "confidence": 0.95,
               "color": "dark",
+              "shape": "rect"
+            },
+            {
+              "x": 0.73,
+              "y": 0.08,
+              "width": 0.12,
+              "height": 0.34,
+              "confidence": 0.95,
+              "color": "brown",
               "shape": "rect"
             }
           ],
           "doors": [
             {
-              "x": 0.75,
-              "y": 0.1,
-              "width": 0.1,
-              "height": 0.2,
+              "x": 0.76,
+              "y": 0.02,
+              "width": 0.12,
+              "height": 0.34,
+              "confidence": 0.95,
+              "color": "brown",
+              "material": "wood",
+              "shape": "rect"
+            }
+          ]
+        },
+        {
+          "wall": "rear",
+          "confidence": 0.8,
+          "colors": [
+            "gray"
+          ],
+          "materials": [
+            "stucco"
+          ],
+          "windows": [],
+          "doors": []
+        },
+        {
+          "wall": "left",
+          "confidence": 0.7,
+          "colors": [
+            "white"
+          ],
+          "materials": [
+            "stucco"
+          ],
+          "windows": [],
+          "doors": []
+        },
+        {
+          "wall": "right",
+          "confidence": 0.7,
+          "colors": [
+            "white"
+          ],
+          "materials": [
+            "stucco"
+          ],
+          "windows": [],
+          "doors": []
+        }
+      ],
+      "site": {
+        "stairs": true,
+        "grass": true,
+        "sidewalk": true,
+        "curb": true,
+        "trees": true,
+        "dominantHardscape": "concrete"
+      },
+      "notes": []
+    },
+    {
+      "sourceImageId": "McTJ15Z3rBYI31wBsO3BwQ",
+      "visible": true,
+      "confidence": 0.95,
+      "storiesApprox": 2,
+      "roof": {
+        "type": "flat",
+        "color": "dark gray",
+        "material": "membrane"
+      },
+      "facades": [
+        {
+          "wall": "front",
+          "confidence": 0.95,
+          "colors": [
+            "white",
+            "dark",
+            "brown"
+          ],
+          "materials": [
+            "stucco",
+            "wood"
+          ],
+          "windows": [
+            {
+              "x": 0.18,
+              "y": 0.62,
+              "width": 0.23,
+              "height": 0.24,
+              "confidence": 0.95,
+              "color": "dark",
+              "shape": "rect"
+            },
+            {
+              "x": 0.67,
+              "y": 0.08,
+              "width": 0.12,
+              "height": 0.34,
+              "confidence": 0.95,
+              "color": "brown",
+              "shape": "rect"
+            }
+          ],
+          "doors": [
+            {
+              "x": 0.72,
+              "y": 0.02,
+              "width": 0.12,
+              "height": 0.34,
               "confidence": 0.95,
               "color": "brown",
               "material": "wood",
@@ -592,7 +880,7 @@
         }
       ],
       "site": {
-        "stairs": false,
+        "stairs": true,
         "grass": true,
         "sidewalk": true,
         "curb": true,
@@ -600,11 +888,17 @@
         "dominantHardscape": "concrete"
       },
       "notes": [
-        "The target building is a single-story dwelling with a flat roof."
+        "The building is a single-family residence with a garage."
       ]
     }
   ],
-  "rejected": [],
-  "warnings": [],
-  "recomputedFromSavedObservations": true
+  "rejected": [
+    {
+      "imageId": "o2Wjj74LRbH-fG5IWsCX-w",
+      "error": "Ollama returned invalid JSON: Expected ',' or ']' after array element in JSON at position 830 (line 17 column 1)"
+    }
+  ],
+  "warnings": [
+    "1 imagery observations failed or were rejected."
+  ]
 }
