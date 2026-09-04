@@ -157,8 +157,8 @@ export async function downloadGoogleStreetViewFrame(
     "--pano-id", image.id,
     "--pano-heading", String(panoHeading),
     "--view-heading", String(viewHeading),
-    "--zoom", String(options.zoom ?? 3),
-    "--fov", String(options.fovDeg ?? 100),
+    "--zoom", String(options.zoom ?? 4),
+    "--fov", String(options.fovDeg ?? 110),
   ];
 
   return new Promise<Buffer>((resolve, reject) => {

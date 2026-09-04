@@ -220,3 +220,9 @@ Debug overlays are essential during research and should not dictate the final pr
 A single detailed site scene should remain smooth on current desktop Safari/Chrome and modern iPhone/iPad hardware.
 
 The first prototype should stay below a few thousand draw calls and should prefer instanced vegetation when counts increase.
+
+## Hillside placement
+
+All buildings share the same absolute terrain datum. Each rendered building uses its sampled local ground elevation for its base and County roof elevation for its top when those measurements are available. Terrain and land-cover meshes must cover the complete visible building context so neighboring structures are never positioned by extrapolating a target-parcel-only height field.
+
+Only the primary target building receives target-specific AI facade materials/openings. Neighbor buildings render neutral measured massing until they receive their own observations.

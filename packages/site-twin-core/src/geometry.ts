@@ -112,6 +112,44 @@ export function selectDistinctStreetImages(images: StreetImageCandidate[], count
   return selected;
 }
 
+export function extentPolygon(polygons: Position[][]): Position[] {
+  const points = polygons.flat().filter((point): point is Position =>
+    Array.isArray(point) && Number.isFinite(point[0]) && Number.isFinite(point[1]),
+  );
+  if (!points.length) return [];
+  const longitudes = points.map(([longitude]) => longitude);
+  const latitudes = points.map(([, latitude]) => latitude);
+  const minLongitude = Math.min(...longitudes);
+  const maxLongitude = Math.max(...longitudes);
+  const minLatitude = Math.min(...latitudes);
+  const maxLatitude = Math.max(...latitudes);
+  return [
+    [minLongitude, minLatitude],
+    [maxLongitude, minLatitude],
+    [maxLongitude, maxLatitude],
+    [minLongitude, maxLatitude],
+    [minLongitude, minLatitude],
+  ];
+}
+
+export function renderedBuildingHeightM(building: {
+  heightM?: number;
+  groundElevationM?: number;
+  roofElevationM?: number;
+}, fallbackHeightM = 6.2) {
+  if (
+    typeof building.groundElevationM === "number" && Number.isFinite(building.groundElevationM) &&
+    typeof building.roofElevationM === "number" && Number.isFinite(building.roofElevationM) &&
+    building.roofElevationM > building.groundElevationM
+  ) {
+    const derived = building.roofElevationM - building.groundElevationM;
+    if (derived >= 1.5 && derived <= 30) return derived;
+  }
+  if (typeof building.heightM === "number" && Number.isFinite(building.heightM) && building.heightM >= 1.5 && building.heightM <= 30) {
+    return building.heightM;
+  }
+  return fallbackHeightM;
+}
 
 export function nearestFacadeEdgeIndex(
   polygon: Position[],

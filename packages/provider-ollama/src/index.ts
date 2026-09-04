@@ -106,6 +106,8 @@ function prompt(options: OllamaVisionOptions) {
     "Use null or omit an optional fact when the relevant area is hidden, cropped, occluded, or ambiguous. False means the feature is clearly absent in a visible relevant area, not merely unseen.",
     "Calibrate confidence conservatively: 0.95+ only for unusually clear and unambiguous target evidence; use 0.55-0.8 for partial or oblique views and below 0.5 when target identity is uncertain.",
     "For rooftopDeck specifically, report true only when a rooftop deck/guard/terrace is directly visible, false only when the roof is sufficiently visible to rule one out, otherwise null.",
+    "Enumerate EVERY distinct visible window and door separately. Do not collapse a row of openings into one representative opening and do not report only the most obvious opening.",
+    "Scan each visible target facade left-to-right and bottom-to-top before finalizing the windows and doors arrays. Include partially visible openings when their position is clear, with lower confidence.",
     "For every visible facade opening use normalized coordinates relative to that facade: x=0 left, x=1 right, y=0 bottom, y=1 top. width and height are normalized fractions.",
     "Use roof type only: flat, gable, hip, shed, mansard, unknown.",
     "Use wall only: front, rear, left, right, unknown.",

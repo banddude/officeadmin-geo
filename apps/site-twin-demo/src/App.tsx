@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { SemanticSiteModel } from "@officeadmin-geo/site-twin-core";
+import { renderedBuildingHeightM } from "@officeadmin-geo/site-twin-core";
 import { SiteTwinScene } from "@officeadmin-geo/site-twin-renderer";
 
 function feet(meters?: number) {
@@ -10,6 +11,7 @@ export function App() {
   const [model, setModel] = useState<SemanticSiteModel | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [debug, setDebug] = useState(true);
+  const [view, setView] = useState<"facade" | "overview">("facade");
 
   useEffect(() => {
     fetch("./site-twin.json")
@@ -49,11 +51,15 @@ export function App() {
             <p className="eyebrow">SITE TWIN LAB</p>
             <h1>Corralitas prototype</h1>
           </div>
-          <button className={debug ? "toggle active" : "toggle"} onClick={() => setDebug((value) => !value)}>
-            {debug ? "Debug on" : "Debug off"}
-          </button>
+          <div className="view-controls">
+            <button className={view === "facade" ? "toggle active" : "toggle"} onClick={() => setView("facade")}>House</button>
+            <button className={view === "overview" ? "toggle active" : "toggle"} onClick={() => setView("overview")}>Hill</button>
+            <button className={debug ? "toggle active" : "toggle"} onClick={() => setDebug((value) => !value)}>
+              {debug ? "Debug on" : "Debug off"}
+            </button>
+          </div>
         </header>
-        <SiteTwinScene model={model} debug={debug} className="scene" />
+        <SiteTwinScene model={model} debug={debug} view={view} className="scene" />
         <div className="hint">Drag to orbit. Scroll to zoom.</div>
       </section>
 
@@ -66,7 +72,9 @@ export function App() {
 
         <div className="metric-grid">
           <div><span>Building</span><strong>{primaryBuilding?.id ?? "none"}</strong></div>
-          <div><span>Measured height</span><strong>{feet(primaryBuilding?.heightM)}</strong></div>
+          <div><span>Rendered height</span><strong>{primaryBuilding ? feet(renderedBuildingHeightM(primaryBuilding)) : "unknown"}</strong></div>
+          <div><span>Roof elevation</span><strong>{feet(primaryBuilding?.roofElevationM)}</strong></div>
+          <div><span>Ground elevation</span><strong>{feet(primaryBuilding?.groundElevationM)}</strong></div>
           <div><span>Roof</span><strong>{model.roof.value.type}</strong></div>
           <div><span>Roof confidence</span><strong>{Math.round(model.roof.confidence * 100)}%</strong></div>
           <div><span>Street frames</span><strong>{model.imagery.length}</strong></div>

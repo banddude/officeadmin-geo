@@ -25,6 +25,7 @@ export interface BuildingFeature {
   id: string;
   polygon: Position[];
   heightM?: number;
+  groundElevationM?: number;
   roofElevationM?: number;
   areaSqM?: number;
   levels?: number;

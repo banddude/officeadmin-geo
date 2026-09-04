@@ -208,3 +208,5 @@ button { font: inherit; }
   .scene-panel { border-right: 0; border-bottom: 1px solid rgba(31, 41, 38, 0.12); }
   .inspector { height: auto; overflow: visible; }
 }
+
+.view-controls { display: flex; gap: 8px; align-items: center; }
