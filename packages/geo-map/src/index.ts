@@ -8,3 +8,5 @@ export type {
   MapSite,
   MapTechnician,
 } from "@officeadmin-geo/geo-types";
+
+export type { GeoMapViewMode, GeoMapVisualTheme } from "@officeadmin-geo/provider-mapbox";
