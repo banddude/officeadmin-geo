@@ -28,6 +28,8 @@ Deliver:
 - conversion of feet to meters,
 - provenance records,
 - USGS terrain grid sampling,
+- LA County four-inch land-cover sampling,
+- measured neighborhood building context,
 - Corralitas integration fixture generated from live county data.
 
 Exit criteria:
@@ -38,7 +40,8 @@ Exit criteria:
 
 Deliver:
 
-- KartaView nearby search,
+- Google Street View research discovery and target-facing crop generation,
+- KartaView nearby search and heading-enriched fallback,
 - normalized photo metadata,
 - distance/bearing calculations,
 - heading-based ranking,
@@ -119,12 +122,12 @@ Exit criteria:
 
 ## Milestone H: automate additional imagery providers
 
-After the first address works, add additional street-level adapters behind the same interface so coverage is not dependent on KartaView alone.
+Continue adding street-level adapters behind the same interface so coverage is not dependent on one provider. Google Street View research and KartaView are now implemented; Mapillary and Look Around remain candidates.
 
 Candidate research adapters:
 
 - Mapillary,
-- Google Street View research adapter,
+- Google Street View research adapter (implemented),
 - Apple Look Around research adapter,
 - other open street imagery.
 

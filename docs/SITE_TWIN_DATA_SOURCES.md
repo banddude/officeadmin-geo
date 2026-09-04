@@ -104,9 +104,15 @@ interface GeocodeResult {
 
 ## Street-level imagery
 
+### Google Street View research adapter
+
+Primary automatic research source for the Corralitas prototype because coverage is substantially closer to the parcel than the available open imagery. Discovery is automatic by coordinate. The adapter ranks nearby panoramas, computes the parcel bearing, converts that heading into panorama coordinates, fetches only the necessary tiles, and emits a target-facing crop for vision analysis.
+
+The resulting `StreetImageCandidate` remains provider-neutral to the core pipeline. Provider-specific panorama heading is preserved only in provenance.
+
 ### KartaView
 
-Primary automatic research source.
+Open automatic fallback source.
 
 Nearby endpoint:
 
@@ -159,7 +165,7 @@ score =
   qualityScore * 0.10
 ```
 
-Heading score is the most important factor because a close image facing away from the house is not useful.
+Heading score is the most important factor for directional still imagery because a close image facing away from the house is not useful. A 360-degree panorama is first converted into a target-facing view, so its generated view heading is the parcel bearing.
 
 ## Provider provenance
 
@@ -203,3 +209,19 @@ Future adapters can provide the same normalized data from:
 - other street imagery platforms.
 
 The fusion/renderer layers should not care which provider supplied the geometry.
+
+
+## High-resolution land cover
+
+LA County LARIAC 2023 exposes a public four-inch classified land-cover map service. The prototype samples it around the target parcel and normalizes cells to:
+
+- tree canopy,
+- grass/shrubs,
+- tall shrubs,
+- bare soil,
+- water,
+- buildings,
+- roads/railroads,
+- other paving.
+
+These cells drive deterministic stylized ground surfaces. AI may refine semantic details, but it does not need to guess where broad grass, paving, roads, or tree canopy exist when measured classification is available.

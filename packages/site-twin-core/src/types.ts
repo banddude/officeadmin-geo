@@ -176,6 +176,11 @@ export interface SemanticFacade {
 
 export interface SemanticSiteModel {
   schemaVersion: 1;
+  facadeAlignment?: {
+    frontEdgeIndex: number;
+    sourceImageId: string;
+    confidence: number;
+  };
   address: string;
   center: Coordinate;
   generatedAt: string;

@@ -111,3 +111,32 @@ export function selectDistinctStreetImages(images: StreetImageCandidate[], count
   }
   return selected;
 }
+
+
+export function nearestFacadeEdgeIndex(
+  polygon: Position[],
+  camera: Coordinate,
+  minEdgeLengthM = 1.5,
+) {
+  if (polygon.length < 2) return undefined;
+  const center = polygonCentroid(polygon);
+  const cameraLocal = localMeters([camera.longitude, camera.latitude], center);
+  const closed = polygon.length > 2 && polygon[0]?.[0] === polygon.at(-1)?.[0] && polygon[0]?.[1] === polygon.at(-1)?.[1]
+    ? polygon
+    : [...polygon, polygon[0]!];
+
+  let winner: { index: number; score: number } | undefined;
+  for (let index = 0; index < closed.length - 1; index += 1) {
+    const a = localMeters(closed[index]!, center);
+    const b = localMeters(closed[index + 1]!, center);
+    const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    if (length < minEdgeLengthM) continue;
+    const midpoint: [number, number] = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    const distance = Math.hypot(cameraLocal[0] - midpoint[0], cameraLocal[1] - midpoint[1]);
+    // Prefer the closest substantial facade run. A modest length bonus avoids
+    // selecting tiny architectural jogs in detailed County footprints.
+    const score = distance - Math.min(8, length) * 0.65;
+    if (!winner || score < winner.score) winner = { index, score };
+  }
+  return winner?.index;
+}

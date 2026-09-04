@@ -103,6 +103,9 @@ function prompt(options: OllamaVisionOptions) {
     "Describe only the primary target building that is visible in the direction of the supplied target context.",
     "If the target building is not confidently visible, set visible=false and do not describe a neighbor as the target.",
     "Never invent hidden windows, doors, roof geometry, stairs, or landscaping.",
+    "Use null or omit an optional fact when the relevant area is hidden, cropped, occluded, or ambiguous. False means the feature is clearly absent in a visible relevant area, not merely unseen.",
+    "Calibrate confidence conservatively: 0.95+ only for unusually clear and unambiguous target evidence; use 0.55-0.8 for partial or oblique views and below 0.5 when target identity is uncertain.",
+    "For rooftopDeck specifically, report true only when a rooftop deck/guard/terrace is directly visible, false only when the roof is sufficiently visible to rule one out, otherwise null.",
     "For every visible facade opening use normalized coordinates relative to that facade: x=0 left, x=1 right, y=0 bottom, y=1 top. width and height are normalized fractions.",
     "Use roof type only: flat, gable, hip, shed, mansard, unknown.",
     "Use wall only: front, rear, left, right, unknown.",
@@ -111,7 +114,7 @@ function prompt(options: OllamaVisionOptions) {
       visible: true,
       confidence: 0.8,
       storiesApprox: 2,
-      roof: { type: "flat", color: "dark gray", material: "membrane", rooftopDeck: false },
+      roof: { type: "flat", color: "dark gray", material: "membrane", rooftopDeck: null },
       facades: [{
         wall: "front",
         confidence: 0.8,
@@ -120,7 +123,7 @@ function prompt(options: OllamaVisionOptions) {
         windows: [{ x: 0.2, y: 0.6, width: 0.25, height: 0.2, confidence: 0.8, color: "dark", shape: "rect" }],
         doors: [{ x: 0.7, y: 0, width: 0.12, height: 0.34, confidence: 0.8, material: "wood", color: "brown" }],
       }],
-      site: { stairs: true, retainingWalls: false, driveway: false, grass: true, sidewalk: true, curb: true, trees: true, fence: false, dominantHardscape: "concrete" },
+      site: { stairs: true, retainingWalls: null, driveway: null, grass: true, sidewalk: true, curb: true, trees: true, fence: null, dominantHardscape: "concrete" },
       notes: [],
     }),
   ];

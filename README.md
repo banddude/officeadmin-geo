@@ -17,7 +17,8 @@ packages/
   site-twin-core/           Site Twin geometry, ranking, fusion, schemas
   provider-lacounty/        LA County parcel/building geometry adapter
   provider-openstreetmap/   Geocoding and local street context
-  provider-kartaview/       Automatic street-image discovery
+  provider-kartaview/       Open street-image discovery/fallback
+  provider-google-streetview-research/  Automatic research panorama discovery + target-facing crops
   provider-ollama/          Local Gemma vision extraction
   provider-usgs/            USGS terrain elevation sampling
   site-twin-renderer/       Deterministic stylized Three.js renderer
@@ -66,7 +67,9 @@ address / coordinates
   -> LA County parcel + 2023 building footprint/height
   -> OpenStreetMap street context
   -> USGS terrain grid
-  -> KartaView street-image discovery/ranking
+  -> Google Street View research panorama discovery + target-facing crops
+  -> KartaView open-imagery fallback
+  -> LA County 4-inch land-cover classification
   -> local Ollama Gemma structured visual extraction
   -> multi-view semantic fusion
   -> portable site-twin.json

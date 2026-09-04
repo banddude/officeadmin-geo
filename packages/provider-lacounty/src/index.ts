@@ -76,10 +76,13 @@ export async function getParcelAtPoint(point: Coordinate): Promise<ParcelFeature
   };
 }
 
-export async function getBuildingsNearPoint(point: Coordinate, distanceM = 80): Promise<BuildingFeature[]> {
-  let collection = await queryLayerByPoint(BUILDING_LAYER, point);
+export async function getBuildingsNearPoint(point: Coordinate, distanceM = 45): Promise<BuildingFeature[]> {
+  // Always request a small neighborhood, not just the building intersecting the
+  // address point. The primary building is selected separately; nearby measured
+  // massing makes the site twin read as a real street rather than an isolated prop.
+  let collection = await queryLayerByPoint(BUILDING_LAYER, point, { distanceM });
   if (collection.features.length === 0) {
-    collection = await queryLayerByPoint(BUILDING_LAYER, point, { distanceM });
+    collection = await queryLayerByPoint(BUILDING_LAYER, point);
   }
 
   return collection.features

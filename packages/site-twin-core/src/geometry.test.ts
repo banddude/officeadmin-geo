@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { angularDifferenceDegrees, bearingDegrees, haversineMeters, rankStreetImages, selectDistinctStreetImages } from "./geometry";
+import { angularDifferenceDegrees, bearingDegrees, haversineMeters, nearestFacadeEdgeIndex, rankStreetImages, selectDistinctStreetImages } from "./geometry";
 
 const target = { latitude: 34.09962, longitude: -118.25278 };
 
@@ -33,4 +33,17 @@ describe("site twin geometry", () => {
     expect(selected).toHaveLength(2);
     expect(new Set(selected.map((item) => item.id)).size).toBe(2);
   });
+
+  it("selects the substantial footprint edge nearest the camera", () => {
+    const polygon: [number, number][] = [
+      [-118.0001, 34.0000],
+      [-117.9999, 34.0000],
+      [-117.9999, 34.0001],
+      [-118.0001, 34.0001],
+      [-118.0001, 34.0000],
+    ];
+    const southCamera = { latitude: 33.9998, longitude: -118.0 };
+    expect(nearestFacadeEdgeIndex(polygon, southCamera)).toBe(0);
+  });
+
 });

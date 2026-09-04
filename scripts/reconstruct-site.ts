@@ -90,11 +90,11 @@ async function main() {
       console.warn(`Street context unavailable: ${error instanceof Error ? error.message : String(error)}`);
       return { roads: [], sidewalks: [] };
     }),
-    sampleTerrainGrid(terrainPolygon, 4, 18).catch((error) => {
+    sampleTerrainGrid(terrainPolygon, 5, 55).catch((error) => {
       console.warn(`Terrain unavailable: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }),
-    getLandCoverSamples(terrainPolygon, 24, 16).catch((error) => {
+    getLandCoverSamples(terrainPolygon, 36, 45).catch((error) => {
       console.warn(`Land cover unavailable: ${error instanceof Error ? error.message : String(error)}`);
       return { samples: [], provenance: undefined };
     }),

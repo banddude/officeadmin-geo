@@ -73,6 +73,10 @@ export function App() {
           <div><span>Useful AI views</span><strong>{model.observations.filter((item) => item.visible).length}</strong></div>
           <div><span>Terrain samples</span><strong>{model.geometry.terrain.length}</strong></div>
           <div><span>Terrain relief</span><strong>{model.geometry.terrain.length ? `${(Math.max(...model.geometry.terrain.map((sample) => sample.elevationM)) - Math.min(...model.geometry.terrain.map((sample) => sample.elevationM))).toFixed(1)} m` : "flat"}</strong></div>
+          <div><span>Measured buildings</span><strong>{model.geometry.buildings.length}</strong></div>
+          <div><span>Ground-cover cells</span><strong>{model.geometry.groundCover.length}</strong></div>
+          <div><span>Front wall edge</span><strong>{model.facadeAlignment ? `#${model.facadeAlignment.frontEdgeIndex}` : "unresolved"}</strong></div>
+          <div><span>Facade alignment</span><strong>{model.facadeAlignment ? `${Math.round(model.facadeAlignment.confidence * 100)}%` : "none"}</strong></div>
         </div>
 
         <section className="block">

@@ -57,14 +57,27 @@ Owns public LA County ArcGIS queries used by the prototype:
 
 - Parcel Boundary layer,
 - Building Outline 2023 layer,
-- future land-cover adapter,
-- future contour/elevation adapter.
+- 4-inch LARIAC 2023 land-cover sampling,
+- measured surrounding building context.
 
 It converts ArcGIS responses into provider-neutral core types.
 
+### provider-google-streetview-research
+
+Owns automatic research discovery of nearby Google Street View panoramas and deterministic target-facing frame extraction. The adapter does not require the rest of the pipeline to understand panorama tiles. It:
+
+1. discovers nearby current/historical panorama metadata,
+2. ranks panoramas by distance and recency,
+3. computes the bearing from each panorama to the target parcel,
+4. converts that compass bearing into panorama X using the panorama heading,
+5. downloads only the required panorama tiles,
+6. emits a cropped target-facing JPEG for Gemma.
+
+The adapter is deliberately isolated so it can be replaced without changing core, fusion, or rendering contracts.
+
 ### provider-kartaview
 
-Owns KartaView discovery and photo metadata normalization.
+Owns KartaView discovery and photo metadata normalization as the open street-imagery fallback.
 
 The initial flow is:
 

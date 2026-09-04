@@ -139,6 +139,26 @@ function TerrainGround({ model }: { model: SemanticSiteModel }) {
   );
 }
 
+
+function ContextBuilding({ building, model }: { building: BuildingFeature; model: SemanticSiteModel }) {
+  const { shape } = shapeFromPolygon(building.polygon, model.center);
+  const height = building.heightM ?? 6.2;
+  const centroid = polygonCentroid(building.polygon);
+  const baseY = terrainHeightAtPosition(model, [centroid.longitude, centroid.latitude]);
+  return (
+    <group position={[0, baseY, 0]}>
+      <mesh castShadow receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
+        <extrudeGeometry args={[shape, { depth: height, bevelEnabled: false }]} />
+        <meshStandardMaterial color="#d1d0c8" roughness={0.94} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, height + 0.025, 0]} receiveShadow>
+        <shapeGeometry args={[shape]} />
+        <meshStandardMaterial color="#b8b9b4" roughness={0.9} />
+      </mesh>
+    </group>
+  );
+}
+
 function BuildingMass({ building, model }: { building: BuildingFeature; model: SemanticSiteModel }) {
   const { shape } = shapeFromPolygon(building.polygon, model.center);
   const height = building.heightM ?? (model.storiesApprox?.value ?? 2) * 3.1;
@@ -242,6 +262,84 @@ function Roof({ building, model, height }: { building: BuildingFeature; model: S
   );
 }
 
+function AlignedFrontOpenings({
+  building,
+  model,
+  facade,
+  height,
+}: {
+  building: BuildingFeature;
+  model: SemanticSiteModel;
+  facade: SemanticFacade;
+  height: number;
+}) {
+  const alignment = model.facadeAlignment;
+  if (!alignment) return null;
+  const ring = building.polygon.length > 1 && building.polygon[0]?.[0] === building.polygon.at(-1)?.[0] && building.polygon[0]?.[1] === building.polygon.at(-1)?.[1]
+    ? building.polygon.slice(0, -1)
+    : building.polygon;
+  const aPosition = ring[alignment.frontEdgeIndex];
+  const bPosition = ring[(alignment.frontEdgeIndex + 1) % ring.length];
+  if (!aPosition || !bPosition) return null;
+
+  const [ax, az] = localMeters(aPosition, model.center);
+  const [bx, bz] = localMeters(bPosition, model.center);
+  const dx = bx - ax;
+  const dz = bz - az;
+  const edgeLength = Math.hypot(dx, dz);
+  if (edgeLength < 0.5) return null;
+  const midpointX = (ax + bx) / 2;
+  const midpointZ = (az + bz) / 2;
+  const sourceImage = model.imagery.find((image) => image.id === alignment.sourceImageId) ?? model.imagery[0];
+  const [cameraX, cameraZ] = sourceImage
+    ? localMeters([sourceImage.longitude, sourceImage.latitude], model.center)
+    : [midpointX, midpointZ + 10];
+  const forwardX = midpointX - cameraX;
+  const forwardZ = midpointZ - cameraZ;
+  const rightX = -forwardZ;
+  const rightZ = forwardX;
+  const imageXIncreasesAToB = dx * rightX + dz * rightZ >= 0;
+  const cameraDistance = Math.max(0.001, Math.hypot(cameraX - midpointX, cameraZ - midpointZ));
+  const offsetX = ((cameraX - midpointX) / cameraDistance) * 0.045;
+  const offsetZ = ((cameraZ - midpointZ) / cameraDistance) * 0.045;
+  const rotationY = -Math.atan2(dz, dx);
+
+  const atOpening = (opening: SemanticFacade["windows"][number]) => {
+    const t = imageXIncreasesAToB ? opening.x : 1 - opening.x;
+    return {
+      x: ax + dx * t + offsetX,
+      z: az + dz * t + offsetZ,
+      width: Math.max(0.65, edgeLength * opening.width),
+      height: Math.max(0.65, height * opening.height),
+    };
+  };
+
+  return (
+    <group>
+      {facade.windows.map((window, index) => {
+        const position = atOpening(window);
+        const y = Math.max(position.height / 2 + 0.35, window.y * height);
+        return (
+          <mesh key={`aligned-window-${index}`} position={[position.x, y, position.z]} rotation={[0, rotationY, 0]}>
+            <planeGeometry args={[position.width, position.height]} />
+            <meshStandardMaterial color={COLORS.glass} roughness={0.2} metalness={0.12} />
+          </mesh>
+        );
+      })}
+      {facade.doors.map((door, index) => {
+        const position = atOpening(door);
+        const doorHeight = Math.max(1.9, height * door.height);
+        return (
+          <mesh key={`aligned-door-${index}`} position={[position.x, doorHeight / 2, position.z]} rotation={[0, rotationY, 0]}>
+            <planeGeometry args={[Math.max(0.9, position.width), doorHeight]} />
+            <meshStandardMaterial color={mapColor([door.material ?? door.color ?? "wood"], COLORS.wood)} roughness={0.75} />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
 function FacadeOpenings({
   building,
   model,
@@ -256,6 +354,9 @@ function FacadeOpenings({
   side: "front" | "left";
 }) {
   if (!facade) return null;
+  if (side === "front" && model.facadeAlignment) {
+    return <AlignedFrontOpenings building={building} model={model} facade={facade} height={height} />;
+  }
   const bounds = boundsForBuilding(building, model.center);
   const width = bounds.maxX - bounds.minX;
   const depth = bounds.maxZ - bounds.minZ;
@@ -465,7 +566,9 @@ function SceneContents({ model, debug }: { model: SemanticSiteModel; debug: bool
       <GroundCoverLayer model={model} />
       <StreetContext model={model} />
       {model.geometry.buildings.map((building) => (
-        <BuildingMass key={building.id} building={building} model={model} />
+        building.id === model.geometry.primaryBuildingId
+          ? <BuildingMass key={building.id} building={building} model={model} />
+          : <ContextBuilding key={building.id} building={building} model={model} />
       ))}
       <SiteDetails model={model} />
       {debug && model.geometry.terrain.length < 4 ? <gridHelper args={[90, 45, "#9fa8a4", "#cbd0cb"]} position={[0, -0.03, 0]} /> : null}

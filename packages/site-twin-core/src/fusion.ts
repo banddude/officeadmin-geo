@@ -1,3 +1,4 @@
+import { nearestFacadeEdgeIndex } from "./geometry";
 import type {
   FusedAlternative,
   FusedValue,
@@ -251,8 +252,19 @@ export function fuseSiteModel(
 
   const sidewalkMeasured = geometry.sidewalks.length > 0;
 
+  const primaryBuilding = geometry.buildings.find((building) => building.id === geometry.primaryBuildingId) ?? geometry.buildings[0];
+  const alignmentSource = imagery[0];
+  const frontEdgeIndex = primaryBuilding && alignmentSource
+    ? nearestFacadeEdgeIndex(primaryBuilding.polygon, alignmentSource)
+    : undefined;
+
   return {
     schemaVersion: 1,
+    facadeAlignment: frontEdgeIndex != null && alignmentSource ? {
+      frontEdgeIndex,
+      sourceImageId: alignmentSource.id,
+      confidence: Math.max(0, Math.min(1, alignmentSource.score ?? 0.5)),
+    } : undefined,
     address,
     center: geometry.center,
     generatedAt: new Date().toISOString(),
@@ -263,7 +275,7 @@ export function fuseSiteModel(
         type: roofType.value,
         color: roofColor.value === "unknown" ? undefined : roofColor.value,
         material: roofMaterial.value === "unknown" ? undefined : roofMaterial.value,
-        rooftopDeck: rooftopDeck.value,
+        rooftopDeck: deckEntries.length ? rooftopDeck.value : undefined,
       },
       confidence: roofType.confidence,
       sourceImageIds: [...new Set([...roofType.sourceImageIds, ...roofColor.sourceImageIds, ...roofMaterial.sourceImageIds, ...rooftopDeck.sourceImageIds])],
