@@ -88,7 +88,7 @@ function App() {
     }
   });
   const [tokenDraft, setTokenDraft] = useState("");
-  const [visualTheme, setVisualTheme] = useState<GeoMapVisualTheme>("monochrome");
+  const [visualTheme, setVisualTheme] = useState<GeoMapVisualTheme>("faded");
   const [viewMode, setViewMode] = useState<GeoMapViewMode>("3d");
   const [selectedSiteId, setSelectedSiteId] = useState<string>();
   const [selectedTechnicianId, setSelectedTechnicianId] = useState<string>();
@@ -176,7 +176,7 @@ function App() {
               setSelectedSiteId("site-silver-lake");
             }}
           >
-            3D job view
+            Job view
           </button>
           <button
             type="button"
