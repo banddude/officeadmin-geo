@@ -153,6 +153,39 @@ function App() {
       </header>
 
       <section className="map-stage">
+        <nav className="demo-nav" aria-label="Demo camera shortcuts">
+          <button
+            type="button"
+            className={!selectedSiteId && !selectedTechnicianId ? "is-active" : undefined}
+            onClick={() => {
+              setSelectedSiteId(undefined);
+              setSelectedTechnicianId(undefined);
+            }}
+          >
+            LA overview
+          </button>
+          <button
+            type="button"
+            className={selectedSiteId === "site-silver-lake" ? "is-active" : undefined}
+            onClick={() => {
+              setSelectedTechnicianId(undefined);
+              setSelectedSiteId("site-silver-lake");
+            }}
+          >
+            3D job view
+          </button>
+          <button
+            type="button"
+            className={selectedTechnicianId === "tech-1" ? "is-active" : undefined}
+            onClick={() => {
+              setSelectedSiteId(undefined);
+              setSelectedTechnicianId("tech-1");
+            }}
+          >
+            Follow tech
+          </button>
+        </nav>
+
         <GeoOperationsMap
           mapboxAccessToken={accessToken}
           className="map-canvas"
