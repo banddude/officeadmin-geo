@@ -1,8 +1,8 @@
 import { Canvas } from "@react-three/fiber";
 import { Line, OrbitControls, Sky } from "@react-three/drei";
 import * as THREE from "three";
-import type { BuildingFeature, Position, SemanticFacade, SemanticSiteModel } from "@officeadmin-geo/site-twin-core";
-import { localMeters } from "@officeadmin-geo/site-twin-core";
+import type { BuildingFeature, GroundCoverClass, Position, SemanticFacade, SemanticSiteModel } from "@officeadmin-geo/site-twin-core";
+import { localMeters, polygonCentroid } from "@officeadmin-geo/site-twin-core";
 
 export interface SiteTwinSceneProps {
   model: SemanticSiteModel;
@@ -26,6 +26,16 @@ const COLORS = {
   parcel: "#a4b894",
   debug: "#d14f34",
 } as const;
+
+const GROUND_COVER_COLORS: Partial<Record<GroundCoverClass, string>> = {
+  tree_canopy: "#66875d",
+  grass_shrubs: "#91aa79",
+  tall_shrubs: "#8d9d67",
+  bare_soil: "#a98867",
+  water: "#769fb6",
+  road_railroad: "#707777",
+  other_paved: "#b8b7af",
+};
 
 function mapColor(values: string[], fallback: string = COLORS.warmWhite) {
   const value = values.join(" ").toLowerCase();
@@ -59,6 +69,76 @@ function boundsForBuilding(building: BuildingFeature, center: SemanticSiteModel[
   };
 }
 
+
+function terrainBaseElevation(model: SemanticSiteModel) {
+  if (!model.geometry.terrain.length) return 0;
+  return Math.min(...model.geometry.terrain.map((sample) => sample.elevationM));
+}
+
+function terrainHeightAtLocal(model: SemanticSiteModel, x: number, z: number) {
+  const samples = model.geometry.terrain;
+  if (!samples.length) return 0;
+  const base = terrainBaseElevation(model);
+  let weightedElevation = 0;
+  let totalWeight = 0;
+  for (const sample of samples) {
+    const [sampleX, sampleZ] = localMeters([sample.coordinate.longitude, sample.coordinate.latitude], model.center);
+    const distanceSquared = (sampleX - x) ** 2 + (sampleZ - z) ** 2;
+    if (distanceSquared < 0.01) return sample.elevationM - base;
+    const weight = 1 / Math.max(1, distanceSquared);
+    weightedElevation += sample.elevationM * weight;
+    totalWeight += weight;
+  }
+  return totalWeight ? weightedElevation / totalWeight - base : 0;
+}
+
+function terrainHeightAtPosition(model: SemanticSiteModel, position: Position) {
+  const [x, z] = localMeters(position, model.center);
+  return terrainHeightAtLocal(model, x, z);
+}
+
+function TerrainGround({ model }: { model: SemanticSiteModel }) {
+  const samples = model.geometry.terrain;
+  if (samples.length < 4) return null;
+  const latitudes = [...new Set(samples.map((sample) => sample.coordinate.latitude))].sort((a, b) => a - b);
+  const longitudes = [...new Set(samples.map((sample) => sample.coordinate.longitude))].sort((a, b) => a - b);
+  if (latitudes.length < 2 || longitudes.length < 2) return null;
+
+  const lookup = new Map(samples.map((sample) => [`${sample.coordinate.latitude}|${sample.coordinate.longitude}`, sample]));
+  const base = terrainBaseElevation(model);
+  const vertices: number[] = [];
+  for (const latitude of latitudes) {
+    for (const longitude of longitudes) {
+      const sample = lookup.get(`${latitude}|${longitude}`);
+      const [x, z] = localMeters([longitude, latitude], model.center);
+      vertices.push(x, (sample?.elevationM ?? base) - base, z);
+    }
+  }
+
+  const indices: number[] = [];
+  const columns = longitudes.length;
+  for (let row = 0; row < latitudes.length - 1; row += 1) {
+    for (let column = 0; column < columns - 1; column += 1) {
+      const a = row * columns + column;
+      const b = a + 1;
+      const c = a + columns;
+      const d = c + 1;
+      indices.push(a, c, b, b, c, d);
+    }
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+
+  return (
+    <mesh geometry={geometry} receiveShadow>
+      <meshStandardMaterial color={model.site.grass.value ? COLORS.grass : COLORS.soil} roughness={1} side={THREE.DoubleSide} />
+    </mesh>
+  );
+}
+
 function BuildingMass({ building, model }: { building: BuildingFeature; model: SemanticSiteModel }) {
   const { shape } = shapeFromPolygon(building.polygon, model.center);
   const height = building.heightM ?? (model.storiesApprox?.value ?? 2) * 3.1;
@@ -66,8 +146,10 @@ function BuildingMass({ building, model }: { building: BuildingFeature; model: S
   const side = model.facades.find((facade) => facade.wall === "left");
   const wallColor = mapColor([...(front?.colors.value ?? []), ...(side?.colors.value ?? [])]);
 
+  const buildingBaseY = terrainHeightAtPosition(model, [polygonCentroid(building.polygon).longitude, polygonCentroid(building.polygon).latitude]);
+
   return (
-    <group>
+    <group position={[0, buildingBaseY, 0]}>
       <mesh castShadow receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
         <extrudeGeometry args={[shape, { depth: height, bevelEnabled: false }]} />
         <meshStandardMaterial color={wallColor} roughness={0.88} metalness={0.02} />
@@ -227,7 +309,7 @@ function StreetContext({ model }: { model: SemanticSiteModel }) {
           key={road.id}
           points={road.points.map((point) => {
             const [x, z] = localMeters(point, model.center);
-            return [x, 0.02, z] as [number, number, number];
+            return [x, terrainHeightAtPosition(model, point) + 0.08, z] as [number, number, number];
           })}
           color={COLORS.road}
           lineWidth={Math.max(6, Math.min(18, (road.widthM ?? 5) * 1.6))}
@@ -238,7 +320,7 @@ function StreetContext({ model }: { model: SemanticSiteModel }) {
           key={sidewalk.id}
           points={sidewalk.points.map((point) => {
             const [x, z] = localMeters(point, model.center);
-            return [x, 0.04, z] as [number, number, number];
+            return [x, terrainHeightAtPosition(model, point) + 0.12, z] as [number, number, number];
           })}
           color={COLORS.sidewalk}
           lineWidth={5}
@@ -248,8 +330,73 @@ function StreetContext({ model }: { model: SemanticSiteModel }) {
   );
 }
 
+function GroundCoverLayer({ model }: { model: SemanticSiteModel }) {
+  const samples = model.geometry.groundCover;
+  if (!samples.length) return null;
+  const longitudes = [...new Set(samples.map((sample) => sample.coordinate.longitude))].sort((a, b) => a - b);
+  const latitudes = [...new Set(samples.map((sample) => sample.coordinate.latitude))].sort((a, b) => a - b);
+  const widthM = longitudes.length > 1
+    ? Math.abs(localMeters([longitudes[1]!, model.center.latitude], model.center)[0] - localMeters([longitudes[0]!, model.center.latitude], model.center)[0])
+    : 2;
+  const depthM = latitudes.length > 1
+    ? Math.abs(localMeters([model.center.longitude, latitudes[1]!], model.center)[1] - localMeters([model.center.longitude, latitudes[0]!], model.center)[1])
+    : 2;
+
+  return (
+    <group>
+      {Object.entries(GROUND_COVER_COLORS).map(([rawClass, color]) => {
+        const className = rawClass as GroundCoverClass;
+        const classSamples = samples.filter((sample) => sample.className === className);
+        if (!classSamples.length || !color) return null;
+        const vertices: number[] = [];
+        const indices: number[] = [];
+        classSamples.forEach((sample, index) => {
+          const [x, z] = localMeters([sample.coordinate.longitude, sample.coordinate.latitude], model.center);
+          const y = terrainHeightAtLocal(model, x, z) + 0.055;
+          const halfW = widthM * 0.52;
+          const halfD = depthM * 0.52;
+          const offset = index * 4;
+          vertices.push(
+            x - halfW, y, z - halfD,
+            x + halfW, y, z - halfD,
+            x + halfW, y, z + halfD,
+            x - halfW, y, z + halfD,
+          );
+          indices.push(offset, offset + 2, offset + 1, offset, offset + 3, offset + 2);
+        });
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+        geometry.setIndex(indices);
+        geometry.computeVertexNormals();
+        return (
+          <mesh key={className} geometry={geometry} receiveShadow>
+            <meshStandardMaterial color={color} roughness={1} side={THREE.DoubleSide} />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
 function ParcelGround({ model, debug }: { model: SemanticSiteModel; debug: boolean }) {
   const parcel = model.geometry.parcel;
+  if (model.geometry.terrain.length >= 4) {
+    return (
+      <group>
+        <TerrainGround model={model} />
+        {parcel && debug ? (
+          <Line
+            points={parcel.polygon.map((point) => {
+              const [x, z] = localMeters(point, model.center);
+              return [x, terrainHeightAtPosition(model, point) + 0.12, z] as [number, number, number];
+            })}
+            color={COLORS.debug}
+            lineWidth={2}
+          />
+        ) : null}
+      </group>
+    );
+  }
   if (!parcel) {
     return (
       <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
@@ -266,11 +413,7 @@ function ParcelGround({ model, debug }: { model: SemanticSiteModel; debug: boole
         <meshStandardMaterial color={model.site.grass.value ? COLORS.grass : COLORS.parcel} roughness={1} />
       </mesh>
       {debug ? (
-        <Line
-          points={points.map(([x, z]) => [x, 0.08, z] as [number, number, number])}
-          color={COLORS.debug}
-          lineWidth={2}
-        />
+        <Line points={points.map(([x, z]) => [x, 0.08, z] as [number, number, number])} color={COLORS.debug} lineWidth={2} />
       ) : null}
     </group>
   );
@@ -283,9 +426,11 @@ function SiteDetails({ model }: { model: SemanticSiteModel }) {
   const width = bounds.maxX - bounds.minX;
   const centerX = (bounds.minX + bounds.maxX) / 2;
   const frontZ = bounds.maxZ;
+  const centroid = polygonCentroid(primary.polygon);
+  const siteBaseY = terrainHeightAtPosition(model, [centroid.longitude, centroid.latitude]);
 
   return (
-    <group>
+    <group position={[0, siteBaseY, 0]}>
       {model.site.stairs.value ? Array.from({ length: 6 }).map((_, index) => (
         <mesh key={`step-${index}`} position={[centerX + width * 0.28, 0.12 + index * 0.12, frontZ + 1.5 + index * 0.38]} castShadow receiveShadow>
           <boxGeometry args={[1.9, 0.22, 0.7]} />
@@ -317,12 +462,13 @@ function SceneContents({ model, debug }: { model: SemanticSiteModel; debug: bool
       <ambientLight intensity={1.25} />
       <directionalLight position={[18, 28, 14]} intensity={2.6} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} />
       <ParcelGround model={model} debug={debug} />
+      <GroundCoverLayer model={model} />
       <StreetContext model={model} />
       {model.geometry.buildings.map((building) => (
         <BuildingMass key={building.id} building={building} model={model} />
       ))}
       <SiteDetails model={model} />
-      <gridHelper args={[90, 45, "#9fa8a4", "#cbd0cb"]} position={[0, -0.03, 0]} />
+      {debug && model.geometry.terrain.length < 4 ? <gridHelper args={[90, 45, "#9fa8a4", "#cbd0cb"]} position={[0, -0.03, 0]} /> : null}
       <OrbitControls makeDefault target={[0, 3.2, 0]} minDistance={8} maxDistance={90} maxPolarAngle={Math.PI * 0.48} />
     </>
   );

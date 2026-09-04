@@ -1,11 +1,14 @@
 import type {
   BuildingFeature,
   Coordinate,
+  GroundCoverClass,
+  GroundCoverSample,
   ParcelFeature,
   Position,
   ProvenanceRecord,
   SiteGeometry,
 } from "@officeadmin-geo/site-twin-core";
+import { PNG } from "pngjs";
 import { haversineMeters, polygonCentroid } from "@officeadmin-geo/site-twin-core";
 
 const BASE = "https://rpgis.isd.lacounty.gov/arcgis/rest/services/GISNET/GISNET_Public/MapServer";
@@ -131,9 +134,87 @@ export async function getLosAngelesSiteGeometry(point: Coordinate): Promise<Site
     roads: [],
     sidewalks: [],
     terrain: [],
+    groundCover: [],
     provenance: [
       ...(parcel ? [parcel.provenance] : []),
       ...buildings.map((building) => building.provenance),
     ],
+  };
+}
+
+
+const LAND_COVER_SERVICE = "https://image.gis.lacounty.gov/image/rest/services/LARIAC7/LANDCOVER_2023/MapServer";
+
+const LAND_COVER_COLORS = new Map<string, GroundCoverClass>([
+  ["0,100,0", "tree_canopy"],
+  ["192,255,160", "grass_shrubs"],
+  ["255,255,0", "tall_shrubs"],
+  ["128,82,0", "bare_soil"],
+  ["0,0,255", "water"],
+  ["255,0,0", "building"],
+  ["0,0,0", "road_railroad"],
+  ["160,160,164", "other_paved"],
+]);
+
+function boundsForPolygon(polygon: Position[], marginM: number) {
+  const longitudes = polygon.map(([longitude]) => longitude);
+  const latitudes = polygon.map(([, latitude]) => latitude);
+  const centerLatitude = latitudes.reduce((sum, value) => sum + value, 0) / Math.max(1, latitudes.length);
+  const latMargin = marginM / 111_320;
+  const lonMargin = marginM / (111_320 * Math.cos((centerLatitude * Math.PI) / 180));
+  return {
+    minLongitude: Math.min(...longitudes) - lonMargin,
+    maxLongitude: Math.max(...longitudes) + lonMargin,
+    minLatitude: Math.min(...latitudes) - latMargin,
+    maxLatitude: Math.max(...latitudes) + latMargin,
+  };
+}
+
+export async function getLandCoverSamples(
+  polygon: Position[],
+  size = 24,
+  marginM = 16,
+): Promise<{ samples: GroundCoverSample[]; provenance: ProvenanceRecord }> {
+  if (polygon.length < 3) {
+    return { samples: [], provenance: { provider: "lacounty-land-cover-2023" } };
+  }
+  const dimension = Math.max(8, Math.min(64, Math.round(size)));
+  const bounds = boundsForPolygon(polygon, marginM);
+  const url = new URL(`${LAND_COVER_SERVICE}/export`);
+  url.searchParams.set("bbox", [bounds.minLongitude, bounds.minLatitude, bounds.maxLongitude, bounds.maxLatitude].join(","));
+  url.searchParams.set("bboxSR", "4326");
+  url.searchParams.set("imageSR", "4326");
+  url.searchParams.set("size", `${dimension},${dimension}`);
+  url.searchParams.set("format", "png32");
+  url.searchParams.set("transparent", "false");
+  url.searchParams.set("layers", "show:0");
+  url.searchParams.set("f", "image");
+
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`LA County land-cover export failed with ${response.status}`);
+  const png = PNG.sync.read(Buffer.from(await response.arrayBuffer()));
+  const samples: GroundCoverSample[] = [];
+  for (let row = 0; row < png.height; row += 1) {
+    for (let column = 0; column < png.width; column += 1) {
+      const offset = (row * png.width + column) * 4;
+      const key = `${png.data[offset]},${png.data[offset + 1]},${png.data[offset + 2]}`;
+      const className = LAND_COVER_COLORS.get(key);
+      if (!className) continue;
+      const longitude = bounds.minLongitude + ((column + 0.5) / png.width) * (bounds.maxLongitude - bounds.minLongitude);
+      const latitude = bounds.maxLatitude - ((row + 0.5) / png.height) * (bounds.maxLatitude - bounds.minLatitude);
+      samples.push({
+        coordinate: { latitude, longitude },
+        className,
+      });
+    }
+  }
+
+  return {
+    samples,
+    provenance: {
+      provider: "lacounty-land-cover-2023",
+      sourceUrl: `${LAND_COVER_SERVICE}/0`,
+      details: { sourceResolution: "4-inch", sampleGrid: `${png.width}x${png.height}` },
+    },
   };
 }

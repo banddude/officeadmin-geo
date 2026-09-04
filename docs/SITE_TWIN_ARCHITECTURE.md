@@ -33,6 +33,7 @@ packages/
   provider-lacounty/
   provider-kartaview/
   provider-ollama/
+  provider-usgs/
   site-twin-renderer/
 ```
 
@@ -74,6 +75,10 @@ The initial flow is:
 5. compare camera heading to target bearing,
 6. rank candidate views,
 7. expose image URLs for the reconstruction runner.
+
+### provider-usgs
+
+Owns local terrain sampling through USGS EPQS. It samples a regular grid around the parcel, preserves source-resolution provenance, and returns provider-neutral `TerrainSample` values.
 
 ### provider-ollama
 

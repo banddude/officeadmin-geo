@@ -45,6 +45,22 @@ export interface TerrainSample {
   provenance?: ProvenanceRecord;
 }
 
+export type GroundCoverClass =
+  | "tree_canopy"
+  | "grass_shrubs"
+  | "tall_shrubs"
+  | "bare_soil"
+  | "water"
+  | "building"
+  | "road_railroad"
+  | "other_paved";
+
+export interface GroundCoverSample {
+  coordinate: Coordinate;
+  className: GroundCoverClass;
+  provenance?: ProvenanceRecord;
+}
+
 export interface SiteGeometry {
   center: Coordinate;
   parcel?: ParcelFeature;
@@ -53,6 +69,7 @@ export interface SiteGeometry {
   roads: LineFeature[];
   sidewalks: LineFeature[];
   terrain: TerrainSample[];
+  groundCover: GroundCoverSample[];
   provenance: ProvenanceRecord[];
 }
 

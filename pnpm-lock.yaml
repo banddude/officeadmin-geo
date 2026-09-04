@@ -32,16 +32,16 @@ importers:
         version: 19.2.7(@types/react@19.2.18)
       '@vitejs/plugin-react':
         specifier: ^5.0.2
-        version: 5.2.0(vite@7.3.6(tsx@4.23.13))
+        version: 5.2.0(vite@7.3.6(@types/node@24.13.3)(tsx@4.23.13))
       typescript:
         specifier: ^5.9.2
         version: 5.9.3
       vite:
         specifier: ^7.1.3
-        version: 7.3.6(tsx@4.23.13)
+        version: 7.3.6(@types/node@24.13.3)(tsx@4.23.13)
       vitest:
         specifier: ^3.2.4
-        version: 3.2.7(tsx@4.23.13)
+        version: 3.2.7(@types/node@24.13.3)(tsx@4.23.13)
 
   apps/site-twin-demo:
     dependencies:
@@ -66,16 +66,16 @@ importers:
         version: 19.2.7(@types/react@19.2.18)
       '@vitejs/plugin-react':
         specifier: ^5.0.2
-        version: 5.2.0(vite@7.3.6(tsx@4.23.13))
+        version: 5.2.0(vite@7.3.6(@types/node@24.13.3)(tsx@4.23.13))
       typescript:
         specifier: ^5.9.2
         version: 5.9.3
       vite:
         specifier: ^7.1.3
-        version: 7.3.6(tsx@4.23.13)
+        version: 7.3.6(@types/node@24.13.3)(tsx@4.23.13)
       vitest:
         specifier: ^3.2.4
-        version: 3.2.7(tsx@4.23.13)
+        version: 3.2.7(@types/node@24.13.3)(tsx@4.23.13)
 
   packages/geo-map:
     dependencies:
@@ -97,7 +97,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.7(tsx@4.23.13)
+        version: 3.2.7(@types/node@24.13.3)(tsx@4.23.13)
 
   packages/geo-types:
     devDependencies:
@@ -109,7 +109,23 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.7(tsx@4.23.13)
+        version: 3.2.7(@types/node@24.13.3)(tsx@4.23.13)
+
+  packages/provider-google-streetview-research:
+    dependencies:
+      '@officeadmin-geo/site-twin-core':
+        specifier: workspace:*
+        version: link:../site-twin-core
+    devDependencies:
+      '@types/node':
+        specifier: ^24.3.0
+        version: 24.13.3
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.7(@types/node@24.13.3)(tsx@4.23.13)
 
   packages/provider-kartaview:
     dependencies:
@@ -122,20 +138,29 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.7(tsx@4.23.13)
+        version: 3.2.7(@types/node@24.13.3)(tsx@4.23.13)
 
   packages/provider-lacounty:
     dependencies:
       '@officeadmin-geo/site-twin-core':
         specifier: workspace:*
         version: link:../site-twin-core
+      pngjs:
+        specifier: ^7.0.0
+        version: 7.0.0
     devDependencies:
+      '@types/node':
+        specifier: ^24.3.0
+        version: 24.13.3
+      '@types/pngjs':
+        specifier: ^6.0.5
+        version: 6.0.5
       typescript:
         specifier: ^5.9.2
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.7(tsx@4.23.13)
+        version: 3.2.7(@types/node@24.13.3)(tsx@4.23.13)
 
   packages/provider-mapbox:
     dependencies:
@@ -157,7 +182,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.7(tsx@4.23.13)
+        version: 3.2.7(@types/node@24.13.3)(tsx@4.23.13)
 
   packages/provider-ollama:
     dependencies:
@@ -170,7 +195,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.7(tsx@4.23.13)
+        version: 3.2.7(@types/node@24.13.3)(tsx@4.23.13)
 
   packages/provider-openstreetmap:
     dependencies:
@@ -183,7 +208,20 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.7(tsx@4.23.13)
+        version: 3.2.7(@types/node@24.13.3)(tsx@4.23.13)
+
+  packages/provider-usgs:
+    dependencies:
+      '@officeadmin-geo/site-twin-core':
+        specifier: workspace:*
+        version: link:../site-twin-core
+    devDependencies:
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.7(@types/node@24.13.3)(tsx@4.23.13)
 
   packages/site-twin-core:
     devDependencies:
@@ -192,7 +230,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.7(tsx@4.23.13)
+        version: 3.2.7(@types/node@24.13.3)(tsx@4.23.13)
 
   packages/site-twin-renderer:
     dependencies:
@@ -223,7 +261,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.7(tsx@4.23.13)
+        version: 3.2.7(@types/node@24.13.3)(tsx@4.23.13)
 
 packages:
 
@@ -697,8 +735,14 @@ packages:
   '@types/geojson@7946.0.16':
     resolution: {integrity: sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg==}
 
+  '@types/node@24.13.3':
+    resolution: {integrity: sha512-Dh8vAsV36ig5wa9OX4pXvMc9D3Veibfw2wix0CUwYODLD8nkj9UsLjASr49nPg+2eKzxhBV+v7L8pXvT4e639Q==}
+
   '@types/offscreencanvas@2019.7.3':
     resolution: {integrity: sha512-ieXiYmgSRXUDeOntE1InxjWyvEelZGP63M+cGuquuRLuIKKT1osnkXjxev9B7d1nXSug5vpunx+gNlbVxMlC9A==}
+
+  '@types/pngjs@6.0.5':
+    resolution: {integrity: sha512-0k5eKfrA83JOZPppLtS2C7OUtyNAl2wKNxfyYl9Q5g9lPkgBl/9hNyAu6HuEH2J4XmIv2znEpkDd0SaZVxW6iQ==}
 
   '@types/react-dom@19.2.7':
     resolution: {integrity: sha512-I8bPpDLcHBv1qiIiXDCy71Rt8eQDKJP0sMSWJphDdAcdqiJ1sGpZamavoEIRZmYzjia9LuEb2HlYdDpmoENpvQ==}
@@ -990,6 +1034,10 @@ packages:
     resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
     engines: {node: '>=12'}
 
+  pngjs@7.0.0:
+    resolution: {integrity: sha512-LKWqWJRhstyYo9pGvgor/ivk2w94eSjE3RGVuzLGlr3NmD8bf7RcYGze1mNdEHRP6TRP6rMuDHk5t44hnTRyow==}
+    engines: {node: '>=14.19.0'}
+
   postcss@8.5.28:
     resolution: {integrity: sha512-RRuzqDtt5Y9h3quz5hWhK+TPnsmVs6WwSU6LkJMeY4HstUEDuYTG8UJSdawMRzmzAtV+KEoG8N3Qg2qLy5vM/A==}
     engines: {node: ^10 || ^12 || >=14}
@@ -1136,6 +1184,9 @@ packages:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
     hasBin: true
+
+  undici-types@7.18.2:
+    resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
 
   update-browserslist-db@1.3.2:
     resolution: {integrity: sha512-UQ+MSxlhRm1bzjhU+DcuXfjFO1FzNtqhK5+9Yvlp90ItDLk5vT932A0rFu619nf7RVS+Y/VeaUW1jaRDqZ8VJw==}
@@ -1668,7 +1719,15 @@ snapshots:
 
   '@types/geojson@7946.0.16': {}
 
+  '@types/node@24.13.3':
+    dependencies:
+      undici-types: 7.18.2
+
   '@types/offscreencanvas@2019.7.3': {}
+
+  '@types/pngjs@6.0.5':
+    dependencies:
+      '@types/node': 24.13.3
 
   '@types/react-dom@19.2.7(@types/react@19.2.18)':
     dependencies:
@@ -1703,7 +1762,7 @@ snapshots:
       '@use-gesture/core': 10.3.1
       react: 19.2.8
 
-  '@vitejs/plugin-react@5.2.0(vite@7.3.6(tsx@4.23.13))':
+  '@vitejs/plugin-react@5.2.0(vite@7.3.6(@types/node@24.13.3)(tsx@4.23.13))':
     dependencies:
       '@babel/core': 7.29.7
       '@babel/plugin-transform-react-jsx-self': 7.29.7(@babel/core@7.29.7)
@@ -1711,7 +1770,7 @@ snapshots:
       '@rolldown/pluginutils': 1.0.0-rc.3
       '@types/babel__core': 7.20.5
       react-refresh: 0.18.0
-      vite: 7.3.6(tsx@4.23.13)
+      vite: 7.3.6(@types/node@24.13.3)(tsx@4.23.13)
     transitivePeerDependencies:
       - supports-color
 
@@ -1723,13 +1782,13 @@ snapshots:
       chai: 5.3.3
       tinyrainbow: 2.0.0
 
-  '@vitest/mocker@3.2.7(vite@7.3.6(tsx@4.23.13))':
+  '@vitest/mocker@3.2.7(vite@7.3.6(@types/node@24.13.3)(tsx@4.23.13))':
     dependencies:
       '@vitest/spy': 3.2.7
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 7.3.6(tsx@4.23.13)
+      vite: 7.3.6(@types/node@24.13.3)(tsx@4.23.13)
 
   '@vitest/pretty-format@3.2.7':
     dependencies:
@@ -1950,6 +2009,8 @@ snapshots:
 
   picomatch@4.0.7: {}
 
+  pngjs@7.0.0: {}
+
   postcss@8.5.28:
     dependencies:
       nanoid: 3.3.18
@@ -2106,6 +2167,8 @@ snapshots:
 
   typescript@5.9.3: {}
 
+  undici-types@7.18.2: {}
+
   update-browserslist-db@1.3.2(browserslist@4.28.9):
     dependencies:
       browserslist: 4.28.9
@@ -2118,13 +2181,13 @@ snapshots:
 
   utility-types@3.11.0: {}
 
-  vite-node@3.2.4(tsx@4.23.13):
+  vite-node@3.2.4(@types/node@24.13.3)(tsx@4.23.13):
     dependencies:
       cac: 6.7.14
       debug: 4.4.3
       es-module-lexer: 1.7.0
       pathe: 2.0.3
-      vite: 7.3.6(tsx@4.23.13)
+      vite: 7.3.6(@types/node@24.13.3)(tsx@4.23.13)
     transitivePeerDependencies:
       - '@types/node'
       - jiti
@@ -2139,7 +2202,7 @@ snapshots:
       - tsx
       - yaml
 
-  vite@7.3.6(tsx@4.23.13):
+  vite@7.3.6(@types/node@24.13.3)(tsx@4.23.13):
     dependencies:
       esbuild: 0.28.2
       fdir: 6.5.0(picomatch@4.0.7)
@@ -2148,14 +2211,15 @@ snapshots:
       rollup: 4.63.1
       tinyglobby: 0.2.17
     optionalDependencies:
+      '@types/node': 24.13.3
       fsevents: 2.3.3
       tsx: 4.23.13
 
-  vitest@3.2.7(tsx@4.23.13):
+  vitest@3.2.7(@types/node@24.13.3)(tsx@4.23.13):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/expect': 3.2.7
-      '@vitest/mocker': 3.2.7(vite@7.3.6(tsx@4.23.13))
+      '@vitest/mocker': 3.2.7(vite@7.3.6(@types/node@24.13.3)(tsx@4.23.13))
       '@vitest/pretty-format': 3.2.7
       '@vitest/runner': 3.2.7
       '@vitest/snapshot': 3.2.7
@@ -2173,9 +2237,11 @@ snapshots:
       tinyglobby: 0.2.17
       tinypool: 1.1.1
       tinyrainbow: 2.0.0
-      vite: 7.3.6(tsx@4.23.13)
-      vite-node: 3.2.4(tsx@4.23.13)
+      vite: 7.3.6(@types/node@24.13.3)(tsx@4.23.13)
+      vite-node: 3.2.4(@types/node@24.13.3)(tsx@4.23.13)
       why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 24.13.3
     transitivePeerDependencies:
       - jiti
       - less

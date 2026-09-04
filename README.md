@@ -19,6 +19,7 @@ packages/
   provider-openstreetmap/   Geocoding and local street context
   provider-kartaview/       Automatic street-image discovery
   provider-ollama/          Local Gemma vision extraction
+  provider-usgs/            USGS terrain elevation sampling
   site-twin-renderer/       Deterministic stylized Three.js renderer
 docs/
   SPEC.md                    Operations-map product spec
@@ -64,6 +65,7 @@ Current automatic pipeline:
 address / coordinates
   -> LA County parcel + 2023 building footprint/height
   -> OpenStreetMap street context
+  -> USGS terrain grid
   -> KartaView street-image discovery/ranking
   -> local Ollama Gemma structured visual extraction
   -> multi-view semantic fusion

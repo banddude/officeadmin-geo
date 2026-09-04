@@ -71,6 +71,8 @@ export function App() {
           <div><span>Roof confidence</span><strong>{Math.round(model.roof.confidence * 100)}%</strong></div>
           <div><span>Street frames</span><strong>{model.imagery.length}</strong></div>
           <div><span>Useful AI views</span><strong>{model.observations.filter((item) => item.visible).length}</strong></div>
+          <div><span>Terrain samples</span><strong>{model.geometry.terrain.length}</strong></div>
+          <div><span>Terrain relief</span><strong>{model.geometry.terrain.length ? `${(Math.max(...model.geometry.terrain.map((sample) => sample.elevationM)) - Math.min(...model.geometry.terrain.map((sample) => sample.elevationM))).toFixed(1)} m` : "flat"}</strong></div>
         </div>
 
         <section className="block">

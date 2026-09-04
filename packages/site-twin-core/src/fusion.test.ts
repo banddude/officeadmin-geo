@@ -14,6 +14,7 @@ const geometry: SiteGeometry = {
   roads: [],
   sidewalks: [],
   terrain: [],
+  groundCover: [],
   provenance: [],
 };
 

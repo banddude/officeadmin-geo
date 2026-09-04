@@ -70,11 +70,17 @@ Relevant classes:
 
 This can later drive grass, paved surfaces, and vegetation placement without asking AI to guess every ground region.
 
-### Contours / elevation
+### Terrain elevation
 
-GISNET exposes contour layers. The research provider should support a future terrain adapter that samples local elevation around the parcel.
+USGS 3D Elevation Program Elevation Point Query Service (EPQS):
 
-Until that adapter is complete, the semantic scene can render a flat or manually parameterized slope but must mark terrain provenance as unresolved.
+`https://epqs.nationalmap.gov/v1/json`
+
+The research provider samples a small regular grid around the parcel and normalizes elevations to meters. The renderer uses relative local elevation so sloped sites such as Corralitas are represented as sloped geometry rather than a flat ground plane.
+
+Each terrain sample records the USGS raster ID and reported source resolution when returned.
+
+The initial Corralitas query resolves at approximately 1 meter source resolution.
 
 ## Geocoding
 

@@ -27,6 +27,7 @@ Deliver:
 - primary-building selection,
 - conversion of feet to meters,
 - provenance records,
+- USGS terrain grid sampling,
 - Corralitas integration fixture generated from live county data.
 
 Exit criteria:
