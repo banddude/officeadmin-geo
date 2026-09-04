@@ -12,38 +12,45 @@ export interface SiteTwinSceneProps {
 }
 
 const COLORS = {
-  warmWhite: "#e8e5db",
-  coolGray: "#b7bbb7",
-  charcoal: "#4e5557",
-  wood: "#9b6f48",
-  glass: "#6d8a91",
-  grass: "#8ba77d",
-  soil: "#aa8f71",
-  road: "#6f7677",
-  sidewalk: "#c9c7bb",
-  concrete: "#aaa89e",
-  tree: "#6e8c61",
-  treeDark: "#4f6548",
-  parcel: "#a4b894",
-  debug: "#d14f34",
+  warmWhite: "#f2f0e8",
+  warmWhiteShadow: "#deddd5",
+  coolGray: "#c8cbc7",
+  charcoal: "#344047",
+  roof: "#62696a",
+  wood: "#9a6742",
+  glass: "#557b88",
+  glassHighlight: "#9db6be",
+  grass: "#9ab78a",
+  grassLight: "#b7cba1",
+  soil: "#b49778",
+  road: "#62696a",
+  roadEdge: "#858c8b",
+  sidewalk: "#d6d2c5",
+  concrete: "#b9b5aa",
+  tree: "#6f9668",
+  treeLight: "#89aa77",
+  treeDark: "#557752",
+  parcel: "#a9be96",
+  debug: "#e36542",
 } as const;
 
 const GROUND_COVER_COLORS: Partial<Record<GroundCoverClass, string>> = {
-  tree_canopy: "#66875d",
-  grass_shrubs: "#91aa79",
-  tall_shrubs: "#8d9d67",
-  bare_soil: "#a98867",
-  water: "#769fb6",
-  road_railroad: "#707777",
-  other_paved: "#b8b7af",
+  tree_canopy: "#83a475",
+  grass_shrubs: "#a5bd90",
+  tall_shrubs: "#92aa78",
+  bare_soil: "#b79a79",
+  water: "#85aab9",
+  road_railroad: "#8f9694",
+  other_paved: "#c8c4b9",
+  building: "#a7b990",
 };
 
 function mapColor(values: string[], fallback: string = COLORS.warmWhite) {
   const value = values.join(" ").toLowerCase();
   if (value.includes("wood") || value.includes("brown") || value.includes("cedar")) return COLORS.wood;
   if (value.includes("black") || value.includes("charcoal") || value.includes("dark gray") || value.includes("dark grey")) return COLORS.charcoal;
-  if (value.includes("gray") || value.includes("grey") || value.includes("concrete")) return COLORS.coolGray;
   if (value.includes("white") || value.includes("cream") || value.includes("stucco")) return COLORS.warmWhite;
+  if (value.includes("gray") || value.includes("grey") || value.includes("concrete")) return COLORS.coolGray;
   return fallback;
 }
 
@@ -132,12 +139,28 @@ function TerrainGround({ model }: { model: SemanticSiteModel }) {
 
   const lookup = new Map(samples.map((sample) => [`${sample.coordinate.latitude}|${sample.coordinate.longitude}`, sample]));
   const base = terrainBaseElevation(model);
+  const cover = model.geometry.groundCover.map((sample) => {
+    const [x, z] = localMeters([sample.coordinate.longitude, sample.coordinate.latitude], model.center);
+    return { x, z, className: sample.className };
+  });
   const vertices: number[] = [];
+  const colors: number[] = [];
   for (const latitude of latitudes) {
     for (const longitude of longitudes) {
       const sample = lookup.get(`${latitude}|${longitude}`);
       const [x, z] = localMeters([longitude, latitude], model.center);
       vertices.push(x, (sample?.elevationM ?? base) - base, z);
+      let nearest = cover[0];
+      let nearestDistance = Number.POSITIVE_INFINITY;
+      for (const candidate of cover) {
+        const distance = (candidate.x - x) ** 2 + (candidate.z - z) ** 2;
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearest = candidate;
+        }
+      }
+      const color = new THREE.Color(nearest ? (GROUND_COVER_COLORS[nearest.className] ?? COLORS.grass) : COLORS.grass);
+      colors.push(color.r, color.g, color.b);
     }
   }
 
@@ -155,16 +178,16 @@ function TerrainGround({ model }: { model: SemanticSiteModel }) {
 
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+  geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
   geometry.setIndex(indices);
   geometry.computeVertexNormals();
 
   return (
     <mesh geometry={geometry} receiveShadow>
-      <meshStandardMaterial color={model.site.grass.value ? COLORS.grass : COLORS.soil} roughness={1} side={THREE.DoubleSide} />
+      <meshStandardMaterial vertexColors roughness={0.96} metalness={0} side={THREE.DoubleSide} />
     </mesh>
   );
 }
-
 
 function buildingBaseY(building: BuildingFeature, model: SemanticSiteModel) {
   if (typeof building.groundElevationM === "number" && Number.isFinite(building.groundElevationM)) {
@@ -218,10 +241,10 @@ function defaultCameraPosition(model: SemanticSiteModel, view: "facade" | "overv
   const dz = sourceZ - target[2];
   const distance = Math.hypot(dx, dz);
   if (distance < 1) return [target[0] + 22, target[1] + 6, target[2] + 22];
-  const horizontalDistance = Math.max(17, Math.min(23, distance));
+  const horizontalDistance = Math.max(29, Math.min(36, distance * 1.15));
   return [
     target[0] + (dx / distance) * horizontalDistance,
-    target[1] + 5.2,
+    target[1] + 7.4,
     target[2] + (dz / distance) * horizontalDistance,
   ];
 }
@@ -263,38 +286,198 @@ function terrainConformingWallGeometry(building: BuildingFeature, model: Semanti
   return geometry;
 }
 
+function buildingPalette(id: string) {
+  const palettes = [
+    { wall: "#e3e1d8", roof: "#b7b8b3" },
+    { wall: "#d8ddd9", roof: "#abb0ad" },
+    { wall: "#e6ded2", roof: "#b9b1a6" },
+    { wall: "#d6d7d2", roof: "#a8aaa7" },
+  ];
+  const hash = [...id].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  return palettes[hash % palettes.length]!;
+}
+
 function ContextBuilding({ building, model }: { building: BuildingFeature; model: SemanticSiteModel }) {
   if ((building.roofElevationM ?? 0) <= 0 && (building.heightM ?? 0) <= 0) return null;
   const { shape } = shapeFromPolygon(building.polygon, model.center);
   const topY = buildingTopY(building, model);
   const wallGeometry = terrainConformingWallGeometry(building, model);
+  const palette = buildingPalette(building.id);
   return (
     <group>
       <mesh geometry={wallGeometry} castShadow receiveShadow>
-        <meshStandardMaterial color="#d1d0c8" roughness={0.94} side={THREE.DoubleSide} />
+        <meshStandardMaterial color={palette.wall} roughness={0.9} side={THREE.DoubleSide} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, topY + 0.025, 0]} receiveShadow>
         <shapeGeometry args={[shape]} />
-        <meshStandardMaterial color="#b8b9b4" roughness={0.9} side={THREE.DoubleSide} />
+        <meshStandardMaterial color={palette.roof} roughness={0.88} side={THREE.DoubleSide} />
       </mesh>
     </group>
   );
 }
 
+function targetMassingAxes(building: BuildingFeature, model: SemanticSiteModel) {
+  const ring = building.polygon.length > 1 && building.polygon[0]?.[0] === building.polygon.at(-1)?.[0] && building.polygon[0]?.[1] === building.polygon.at(-1)?.[1]
+    ? building.polygon.slice(0, -1)
+    : building.polygon;
+  const centroid = polygonCentroid(building.polygon);
+  const [cx, cz] = localMeters([centroid.longitude, centroid.latitude], model.center);
+  const edgeIndex = model.facadeAlignment?.frontEdgeIndex ?? 0;
+  const a = ring[edgeIndex] ?? ring[0]!;
+  const b = ring[(edgeIndex + 1) % ring.length] ?? ring[1]!;
+  const [ax, az] = localMeters(a, model.center);
+  const [bx, bz] = localMeters(b, model.center);
+  const edgeLength = Math.max(0.001, Math.hypot(bx - ax, bz - az));
+  const tx = (bx - ax) / edgeLength;
+  const tz = (bz - az) / edgeLength;
+
+  let nx = -tz;
+  let nz = tx;
+  const source = model.facadeAlignment
+    ? model.imagery.find((image) => image.id === model.facadeAlignment?.sourceImageId)
+    : model.imagery[0];
+  if (source) {
+    const [cameraX, cameraZ] = localMeters([source.longitude, source.latitude], model.center);
+    if ((cameraX - cx) * nx + (cameraZ - cz) * nz < 0) { nx *= -1; nz *= -1; }
+  }
+
+  const projected = ring.map((position) => {
+    const [x, z] = localMeters(position, model.center);
+    const dx = x - cx;
+    const dz = z - cz;
+    return { t: dx * tx + dz * tz, n: dx * nx + dz * nz };
+  });
+  const minT = Math.min(...projected.map((point) => point.t));
+  const maxT = Math.max(...projected.map((point) => point.t));
+  const minN = Math.min(...projected.map((point) => point.n));
+  const maxN = Math.max(...projected.map((point) => point.n));
+  return { cx, cz, tx, tz, nx, nz, minT, maxT, minN, maxN, width: maxT - minT, depth: maxN - minN, rotationY: -Math.atan2(tz, tx) };
+}
+
+function setbackMeters(value: string | undefined, level: number) {
+  if (value === "deep") return 1.65 + level * 0.18;
+  if (value === "moderate") return 1.0 + level * 0.12;
+  if (value === "slight") return 0.5 + level * 0.08;
+  return level === 0 ? 0 : level * 0.18;
+}
+
+function StylizedMassingBuilding({ building, model }: { building: BuildingFeature; model: SemanticSiteModel }) {
+  const massing = model.massing;
+  if (!massing?.volumes.length) return null;
+  const axes = targetMassingAxes(building, model);
+  const totalHeight = renderedBuildingHeightM(building, (model.storiesApprox?.value ?? 2) * 3.1);
+  const levels = Math.max(massing.storiesVisible ?? 0, ...massing.volumes.map((volume) => volume.level + 1), 1);
+  const floorHeight = totalHeight / levels;
+  const baseY = buildingBaseY(building, model);
+  const front = model.facades.find((facade) => facade.wall === "front");
+  const volumes = massing.volumes;
+
+  const volumeLayout = volumes.map((volume) => {
+    const width = Math.max(4.2, axes.width * Math.max(0.42, Math.min(1, volume.widthFraction)));
+    const depth = Math.max(4.0, axes.depth * Math.max(0.45, Math.min(1, volume.depthFraction ?? (0.9 - volume.level * 0.05))));
+    const desiredCenterT = axes.minT + Math.max(0, Math.min(1, volume.horizontalCenter)) * axes.width;
+    const centerT = Math.max(axes.minT + width / 2, Math.min(axes.maxT - width / 2, desiredCenterT));
+    const frontN = axes.maxN - setbackMeters(volume.setback, volume.level);
+    const centerN = frontN - depth / 2;
+    return {
+      ...volume, width, depth, frontN, centerN, centerT,
+      x: axes.cx + axes.tx * centerT + axes.nx * centerN,
+      z: axes.cz + axes.tz * centerT + axes.nz * centerN,
+      y: baseY + floorHeight * (volume.level + 0.5),
+    };
+  }).sort((a, b) => a.level - b.level);
+
+  const layoutForY = (normalizedY: number) => {
+    const level = Math.max(0, Math.min(levels - 1, Math.floor(Math.max(0, Math.min(0.999, normalizedY)) * levels)));
+    return volumeLayout.find((volume) => volume.level === level) ?? volumeLayout[Math.min(level, volumeLayout.length - 1)]!;
+  };
+  const pointOnFront = (normalizedX: number, layout: (typeof volumeLayout)[number]) => {
+    const t = layout.centerT + (normalizedX - 0.5) * layout.width;
+    return {
+      x: axes.cx + axes.tx * t + axes.nx * (layout.frontN + 0.055),
+      z: axes.cz + axes.tz * t + axes.nz * (layout.frontN + 0.055),
+    };
+  };
+
+  const doors = front?.doors ?? [];
+  const windows = (front?.windows ?? []).filter((window) => !doors.some((door) => Math.abs(window.x - door.x) < 0.14 && Math.abs(window.y - door.y) < 0.18));
+
+  return (
+    <group>
+      {volumeLayout.map((volume, index) => {
+        const wallColor = mapColor([volume.color ?? "white", volume.material ?? "stucco"], COLORS.warmWhite);
+        return (
+          <group key={`massing-${volume.level}`}>
+            <mesh position={[volume.x, volume.y, volume.z]} rotation={[0, axes.rotationY, 0]} castShadow receiveShadow>
+              <boxGeometry args={[volume.width, floorHeight - 0.08, volume.depth]} />
+              <meshStandardMaterial color={wallColor} roughness={0.82} metalness={0.01} />
+            </mesh>
+            {index > 0 ? (
+              <mesh position={[volume.x + axes.nx * 0.12, baseY + floorHeight * volume.level + 0.035, volume.z + axes.nz * 0.12]} rotation={[0, axes.rotationY, 0]} castShadow receiveShadow>
+                <boxGeometry args={[volume.width + 0.35, 0.07, volume.depth + 0.25]} />
+                <meshStandardMaterial color={COLORS.concrete} roughness={0.88} />
+              </mesh>
+            ) : null}
+          </group>
+        );
+      })}
+
+      {windows.map((window, index) => {
+        const layout = layoutForY(window.y);
+        const point = pointOnFront(window.x, layout);
+        const width = Math.max(0.85, axes.width * Math.min(0.32, window.width));
+        const height = Math.max(0.85, totalHeight * Math.min(0.28, window.height));
+        const y = baseY + Math.max(height / 2 + 0.32, window.y * totalHeight);
+        return (
+          <group key={`massing-window-${index}`} position={[point.x, y, point.z]} rotation={[0, axes.rotationY, 0]}>
+            <mesh><planeGeometry args={[width + 0.16, height + 0.16]} /><meshStandardMaterial color="#263239" roughness={0.42} side={THREE.DoubleSide} /></mesh>
+            <mesh position={[0, 0, 0.012]}><planeGeometry args={[width, height]} /><meshPhysicalMaterial color={COLORS.glass} roughness={0.1} metalness={0.04} clearcoat={0.55} clearcoatRoughness={0.12} side={THREE.DoubleSide} /></mesh>
+            <mesh position={[0, 0, 0.024]}><planeGeometry args={[Math.max(0.035, width * 0.025), height]} /><meshStandardMaterial color={COLORS.glassHighlight} roughness={0.22} transparent opacity={0.45} /></mesh>
+          </group>
+        );
+      })}
+
+      {doors.map((door, index) => {
+        const layout = layoutForY(Math.max(0.02, door.y));
+        const point = pointOnFront(door.x, layout);
+        const width = Math.max(0.95, axes.width * Math.min(0.18, door.width));
+        const height = Math.max(2.05, Math.min(2.65, totalHeight * door.height));
+        return (
+          <group key={`massing-door-${index}`} position={[point.x, baseY + height / 2 + 0.08, point.z]} rotation={[0, axes.rotationY, 0]}>
+            <mesh><planeGeometry args={[width + 0.14, height + 0.14]} /><meshStandardMaterial color="#313b3e" roughness={0.5} side={THREE.DoubleSide} /></mesh>
+            <mesh position={[0, 0, 0.012]}><planeGeometry args={[width, height]} /><meshStandardMaterial color={COLORS.wood} roughness={0.68} side={THREE.DoubleSide} /></mesh>
+          </group>
+        );
+      })}
+
+      {(() => {
+        const top = volumeLayout.at(-1)!;
+        return (
+          <mesh position={[top.x, baseY + totalHeight + 0.16, top.z]} rotation={[0, axes.rotationY, 0]} castShadow receiveShadow>
+            <boxGeometry args={[top.width + 0.12, 0.32, top.depth + 0.12]} />
+            <meshStandardMaterial color={COLORS.roof} roughness={0.84} />
+          </mesh>
+        );
+      })()}
+    </group>
+  );
+}
+
 function BuildingMass({ building, model }: { building: BuildingFeature; model: SemanticSiteModel }) {
+  if (model.massing?.volumes.length) return <StylizedMassingBuilding building={building} model={model} />;
   const { shape } = shapeFromPolygon(building.polygon, model.center);
   const height = renderedBuildingHeightM(building, (model.storiesApprox?.value ?? 2) * 3.1);
   const front = model.facades.find((facade) => facade.wall === "front");
   const side = model.facades.find((facade) => facade.wall === "left");
-  const wallColor = mapColor([...(front?.colors.value ?? []), ...(side?.colors.value ?? [])]);
+  const wallColor = mapColor(front?.colors.value ?? ["white"], COLORS.warmWhite);
 
   const baseY = buildingBaseY(building, model);
 
   return (
     <group position={[0, baseY, 0]}>
       <mesh castShadow receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
-        <extrudeGeometry args={[shape, { depth: height, bevelEnabled: false }]} />
-        <meshStandardMaterial color={wallColor} roughness={0.88} metalness={0.02} />
+        <extrudeGeometry args={[shape, { depth: height, bevelEnabled: true, bevelSize: 0.045, bevelThickness: 0.045, bevelSegments: 2 }]} />
+        <meshStandardMaterial color={wallColor} roughness={0.82} metalness={0.01} />
       </mesh>
       <Roof building={building} model={model} height={height} />
       <FacadeOpenings building={building} model={model} facade={front} height={height} side="front" />
@@ -445,11 +628,11 @@ function AlignedFrontOpenings({
           <group key={`aligned-window-${index}`} position={[position.x, y, position.z]} rotation={[0, rotationY, 0]}>
             <mesh>
               <planeGeometry args={[position.width + 0.12, position.height + 0.12]} />
-              <meshStandardMaterial color={COLORS.charcoal} roughness={0.55} side={THREE.DoubleSide} />
+              <meshStandardMaterial color="#29343a" roughness={0.48} side={THREE.DoubleSide} />
             </mesh>
             <mesh position={[0, 0, 0.012]}>
               <planeGeometry args={[position.width, position.height]} />
-              <meshStandardMaterial color={COLORS.glass} roughness={0.18} metalness={0.16} side={THREE.DoubleSide} />
+              <meshPhysicalMaterial color={COLORS.glass} roughness={0.12} metalness={0.05} clearcoat={0.45} clearcoatRoughness={0.16} side={THREE.DoubleSide} />
             </mesh>
           </group>
         );
@@ -536,78 +719,105 @@ function FacadeOpenings({
   return <group>{elements}</group>;
 }
 
+function ribbonGeometry(points: Position[], model: SemanticSiteModel, widthM: number, yOffset: number) {
+  if (points.length < 2) return undefined;
+  const local = points.map((point) => {
+    const [x, z] = localMeters(point, model.center);
+    return { x, z, y: terrainHeightAtPosition(model, point) + yOffset };
+  });
+  const vertices: number[] = [];
+  for (let index = 0; index < local.length; index += 1) {
+    const current = local[index]!;
+    const previous = local[Math.max(0, index - 1)]!;
+    const next = local[Math.min(local.length - 1, index + 1)]!;
+    let dx = next.x - previous.x;
+    let dz = next.z - previous.z;
+    const length = Math.max(0.001, Math.hypot(dx, dz));
+    dx /= length;
+    dz /= length;
+    const nx = -dz * widthM * 0.5;
+    const nz = dx * widthM * 0.5;
+    vertices.push(current.x + nx, current.y, current.z + nz, current.x - nx, current.y, current.z - nz);
+  }
+  const indices: number[] = [];
+  for (let index = 0; index < local.length - 1; index += 1) {
+    const a = index * 2;
+    indices.push(a, a + 2, a + 1, a + 1, a + 2, a + 3);
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
 function StreetContext({ model }: { model: SemanticSiteModel }) {
   return (
     <group>
-      {model.geometry.roads.map((road) => (
-        <Line
-          key={road.id}
-          points={road.points.map((point) => {
-            const [x, z] = localMeters(point, model.center);
-            return [x, terrainHeightAtPosition(model, point) + 0.08, z] as [number, number, number];
-          })}
-          color={COLORS.road}
-          lineWidth={Math.max(6, Math.min(18, (road.widthM ?? 5) * 1.6))}
-        />
-      ))}
-      {model.geometry.sidewalks.map((sidewalk) => (
-        <Line
-          key={sidewalk.id}
-          points={sidewalk.points.map((point) => {
-            const [x, z] = localMeters(point, model.center);
-            return [x, terrainHeightAtPosition(model, point) + 0.12, z] as [number, number, number];
-          })}
-          color={COLORS.sidewalk}
-          lineWidth={5}
-        />
-      ))}
+      {model.geometry.roads.map((road) => {
+        const geometry = ribbonGeometry(road.points, model, Math.max(4.8, road.widthM ?? 6.2), 0.09);
+        if (!geometry) return null;
+        return (
+          <mesh key={road.id} geometry={geometry} receiveShadow>
+            <meshStandardMaterial color={COLORS.road} roughness={0.98} side={THREE.DoubleSide} />
+          </mesh>
+        );
+      })}
+      {model.geometry.sidewalks.map((sidewalk) => {
+        const geometry = ribbonGeometry(sidewalk.points, model, 1.55, 0.12);
+        if (!geometry) return null;
+        return (
+          <mesh key={sidewalk.id} geometry={geometry} receiveShadow>
+            <meshStandardMaterial color={COLORS.sidewalk} roughness={0.94} side={THREE.DoubleSide} />
+          </mesh>
+        );
+      })}
     </group>
   );
 }
 
-function GroundCoverLayer({ model }: { model: SemanticSiteModel }) {
-  const samples = model.geometry.groundCover;
-  if (!samples.length) return null;
-  const longitudes = [...new Set(samples.map((sample) => sample.coordinate.longitude))].sort((a, b) => a - b);
-  const latitudes = [...new Set(samples.map((sample) => sample.coordinate.latitude))].sort((a, b) => a - b);
-  const widthM = longitudes.length > 1
-    ? Math.abs(localMeters([longitudes[1]!, model.center.latitude], model.center)[0] - localMeters([longitudes[0]!, model.center.latitude], model.center)[0])
-    : 2;
-  const depthM = latitudes.length > 1
-    ? Math.abs(localMeters([model.center.longitude, latitudes[1]!], model.center)[1] - localMeters([model.center.longitude, latitudes[0]!], model.center)[1])
-    : 2;
+function LowPolyTree({ x, y, z, scale, tone }: { x: number; y: number; z: number; scale: number; tone: number }) {
+  const canopy = tone % 3 === 0 ? COLORS.treeLight : tone % 3 === 1 ? COLORS.tree : COLORS.treeDark;
+  return (
+    <group position={[x, y, z]} scale={scale}>
+      <mesh position={[0, 1.25, 0]} castShadow>
+        <cylinderGeometry args={[0.13, 0.19, 2.5, 7]} />
+        <meshStandardMaterial color="#806145" roughness={1} />
+      </mesh>
+      <mesh position={[0, 3.0, 0]} castShadow receiveShadow>
+        <icosahedronGeometry args={[1.45, 1]} />
+        <meshStandardMaterial color={canopy} roughness={0.96} flatShading />
+      </mesh>
+      <mesh position={[0.75, 3.35, -0.2]} castShadow>
+        <icosahedronGeometry args={[0.9, 1]} />
+        <meshStandardMaterial color={tone % 2 ? COLORS.treeLight : COLORS.treeDark} roughness={0.96} flatShading />
+      </mesh>
+    </group>
+  );
+}
 
+function VegetationLayer({ model }: { model: SemanticSiteModel }) {
+  const clusters = new Map<string, { x: number; z: number; count: number }>();
+  for (const sample of model.geometry.groundCover) {
+    if (sample.className !== "tree_canopy") continue;
+    const [x, z] = localMeters([sample.coordinate.longitude, sample.coordinate.latitude], model.center);
+    const cellSize = 7.5;
+    const key = `${Math.round(x / cellSize)}|${Math.round(z / cellSize)}`;
+    const existing = clusters.get(key);
+    if (existing) {
+      existing.x += x;
+      existing.z += z;
+      existing.count += 1;
+    } else clusters.set(key, { x, z, count: 1 });
+  }
   return (
     <group>
-      {Object.entries(GROUND_COVER_COLORS).map(([rawClass, color]) => {
-        const className = rawClass as GroundCoverClass;
-        const classSamples = samples.filter((sample) => sample.className === className);
-        if (!classSamples.length || !color) return null;
-        const vertices: number[] = [];
-        const indices: number[] = [];
-        classSamples.forEach((sample, index) => {
-          const [x, z] = localMeters([sample.coordinate.longitude, sample.coordinate.latitude], model.center);
-          const y = terrainHeightAtLocal(model, x, z) + 0.055;
-          const halfW = widthM * 0.52;
-          const halfD = depthM * 0.52;
-          const offset = index * 4;
-          vertices.push(
-            x - halfW, y, z - halfD,
-            x + halfW, y, z - halfD,
-            x + halfW, y, z + halfD,
-            x - halfW, y, z + halfD,
-          );
-          indices.push(offset, offset + 2, offset + 1, offset, offset + 3, offset + 2);
-        });
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
-        geometry.setIndex(indices);
-        geometry.computeVertexNormals();
-        return (
-          <mesh key={className} geometry={geometry} receiveShadow>
-            <meshStandardMaterial color={color} roughness={1} side={THREE.DoubleSide} />
-          </mesh>
-        );
+      {[...clusters.values()].slice(0, 34).map((cluster, index) => {
+        const x = cluster.x / cluster.count;
+        const z = cluster.z / cluster.count;
+        const y = terrainHeightAtLocal(model, x, z);
+        const scale = 0.78 + ((index * 37) % 23) / 50;
+        return <LowPolyTree key={`${x.toFixed(1)}-${z.toFixed(1)}`} x={x} y={y} z={z} scale={scale} tone={index} />;
       })}
     </group>
   );
@@ -678,13 +888,7 @@ function SiteDetails({ model }: { model: SemanticSiteModel }) {
           <meshStandardMaterial color={COLORS.concrete} roughness={0.95} />
         </mesh>
       ) : null}
-      {model.site.trees.value ? (
-        <group position={[bounds.minX - 2.4, 0, frontZ + 1.2]}>
-          <mesh position={[0, 1.2, 0]} castShadow><cylinderGeometry args={[0.18, 0.24, 2.4, 8]} /><meshStandardMaterial color={COLORS.wood} /></mesh>
-          <mesh position={[0, 3.1, 0]} castShadow><dodecahedronGeometry args={[1.6, 0]} /><meshStandardMaterial color={COLORS.tree} roughness={1} /></mesh>
-          <mesh position={[0.8, 3.6, -0.3]} castShadow><dodecahedronGeometry args={[1.0, 0]} /><meshStandardMaterial color={COLORS.treeDark} roughness={1} /></mesh>
-        </group>
-      ) : null}
+
     </group>
   );
 }
@@ -693,21 +897,34 @@ function SceneContents({ model, debug }: { model: SemanticSiteModel; debug: bool
   const orbitTarget = defaultCameraTarget(model);
   return (
     <>
-      <color attach="background" args={["#dfe8ee"]} />
-      <Sky sunPosition={[6, 10, 4]} turbidity={8} rayleigh={2.2} />
-      <ambientLight intensity={1.25} />
-      <directionalLight position={[18, 28, 14]} intensity={2.6} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} />
+      <color attach="background" args={["#dce7e7"]} />
+      <fog attach="fog" args={["#dce7e7", 95, 190]} />
+      <Sky sunPosition={[7, 12, 5]} turbidity={4.5} rayleigh={1.5} mieCoefficient={0.004} mieDirectionalG={0.78} />
+      <hemisphereLight args={["#f4fbff", "#9a997d", 1.45]} />
+      <ambientLight intensity={0.42} />
+      <directionalLight
+        position={[30, 42, 18]}
+        intensity={3.1}
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-left={-80}
+        shadow-camera-right={80}
+        shadow-camera-top={80}
+        shadow-camera-bottom={-80}
+        shadow-bias={-0.00018}
+      />
       <ParcelGround model={model} debug={debug} />
-      <GroundCoverLayer model={model} />
       <StreetContext model={model} />
       {model.geometry.buildings.map((building) => (
         building.id === model.geometry.primaryBuildingId
           ? <BuildingMass key={building.id} building={building} model={model} />
           : <ContextBuilding key={building.id} building={building} model={model} />
       ))}
+      <VegetationLayer model={model} />
       <SiteDetails model={model} />
       {debug && model.geometry.terrain.length < 4 ? <gridHelper args={[90, 45, "#9fa8a4", "#cbd0cb"]} position={[0, -0.03, 0]} /> : null}
-      <OrbitControls makeDefault target={orbitTarget} minDistance={6} maxDistance={90} maxPolarAngle={Math.PI * 0.48} />
+      <OrbitControls makeDefault target={orbitTarget} minDistance={9} maxDistance={115} maxPolarAngle={Math.PI * 0.48} enableDamping dampingFactor={0.06} />
     </>
   );
 }
@@ -716,7 +933,14 @@ export function SiteTwinScene({ model, debug = false, className, view = "facade"
   const cameraPosition = defaultCameraPosition(model, view);
   return (
     <div className={className} style={{ width: "100%", height: "100%" }}>
-      <Canvas key={view} shadows camera={{ position: cameraPosition, fov: view === "facade" ? 38 : 44, near: 0.1, far: 500 }} dpr={[1, 2]}>
+      <Canvas
+        key={view}
+        shadows
+        camera={{ position: cameraPosition, fov: view === "facade" ? 42 : 46, near: 0.1, far: 500 }}
+        dpr={[1, 1.75]}
+        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.08 }}
+        onCreated={({ gl }) => { gl.outputColorSpace = THREE.SRGBColorSpace; }}
+      >
         <SceneContents model={model} debug={debug} />
       </Canvas>
     </div>

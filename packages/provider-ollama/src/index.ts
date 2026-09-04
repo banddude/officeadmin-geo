@@ -1,6 +1,8 @@
 import type {
   RoofType,
   VisualFacadeObservation,
+  VisualMassingObservation,
+  VisualMassingVolume,
   VisualObservation,
   VisualOpening,
   WallName,
@@ -45,6 +47,39 @@ function opening(value: unknown): VisualOpening | undefined {
   };
 }
 
+function massingVolume(value: unknown): VisualMassingVolume | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const record = value as Record<string, unknown>;
+  const level = Number(record.level);
+  if (!Number.isFinite(level)) return undefined;
+  const rawSetback = typeof record.setback === "string" ? record.setback.toLowerCase() : "unknown";
+  const setback = rawSetback === "none" || rawSetback === "slight" || rawSetback === "moderate" || rawSetback === "deep" ? rawSetback : "unknown";
+  return {
+    level: Math.max(0, Math.round(level)),
+    widthFraction: Math.max(0.25, Math.min(1, Number(record.widthFraction) || 1)),
+    depthFraction: Number.isFinite(Number(record.depthFraction)) ? Math.max(0.3, Math.min(1, Number(record.depthFraction))) : undefined,
+    horizontalCenter: clamp01(record.horizontalCenter, 0.5),
+    setback,
+    color: typeof record.color === "string" ? record.color : undefined,
+    material: typeof record.material === "string" ? record.material : undefined,
+    confidence: clamp01(record.confidence, 0.6),
+  };
+}
+
+function massing(value: unknown): VisualMassingObservation | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const record = value as Record<string, unknown>;
+  const volumes = Array.isArray(record.volumes) ? record.volumes.map(massingVolume).filter((item): item is VisualMassingVolume => Boolean(item)) : [];
+  if (!volumes.length) return undefined;
+  const storiesVisible = Number(record.storiesVisible);
+  return {
+    storiesVisible: Number.isFinite(storiesVisible) ? Math.max(1, Math.round(storiesVisible)) : undefined,
+    stepped: typeof record.stepped === "boolean" ? record.stepped : undefined,
+    volumes: volumes.sort((a, b) => a.level - b.level),
+    confidence: clamp01(record.confidence, 0.6),
+  };
+}
+
 function facade(value: unknown): VisualFacadeObservation | undefined {
   if (!value || typeof value !== "object") return undefined;
   const record = value as Record<string, unknown>;
@@ -79,6 +114,7 @@ export function normalizeVisualObservation(sourceImageId: string, value: unknown
       material: typeof rawRoof.material === "string" ? rawRoof.material : undefined,
       rooftopDeck: typeof rawRoof.rooftopDeck === "boolean" ? rawRoof.rooftopDeck : undefined,
     },
+    massing: massing(record.massing),
     facades: Array.isArray(record.facades) ? record.facades.map(facade).filter((item): item is VisualFacadeObservation => Boolean(item)) : [],
     site: {
       stairs: typeof rawSite.stairs === "boolean" ? rawSite.stairs : undefined,
@@ -107,6 +143,9 @@ function prompt(options: OllamaVisionOptions) {
     "Calibrate confidence conservatively: 0.95+ only for unusually clear and unambiguous target evidence; use 0.55-0.8 for partial or oblique views and below 0.5 when target identity is uncertain.",
     "For rooftopDeck specifically, report true only when a rooftop deck/guard/terrace is directly visible, false only when the roof is sufficiently visible to rule one out, otherwise null.",
     "Enumerate EVERY distinct visible window and door separately. Do not collapse a row of openings into one representative opening and do not report only the most obvious opening.",
+    "MASSING IS REQUIRED when the target is visible: describe each visible street-facing floor/volume separately instead of treating the measured footprint as one full-height extrusion.",
+    "For massing.volumes, widthFraction and depthFraction are fractions of the measured footprint envelope, horizontalCenter is 0 left to 1 right as seen from the target-facing camera, and setback describes how far that level sits behind the street-facing plane.",
+    "Set massing.stepped=true when floors/volumes visibly terrace, step back, cantilever, or have different street-facing planes. Do not infer hidden rear geometry.",
     "Scan each visible target facade left-to-right and bottom-to-top before finalizing the windows and doors arrays. Include partially visible openings when their position is clear, with lower confidence.",
     "For every visible facade opening use normalized coordinates relative to that facade: x=0 left, x=1 right, y=0 bottom, y=1 top. width and height are normalized fractions.",
     "Use roof type only: flat, gable, hip, shed, mansard, unknown.",
@@ -117,6 +156,16 @@ function prompt(options: OllamaVisionOptions) {
       confidence: 0.8,
       storiesApprox: 2,
       roof: { type: "flat", color: "dark gray", material: "membrane", rooftopDeck: null },
+      massing: {
+        storiesVisible: 3,
+        stepped: true,
+        confidence: 0.8,
+        volumes: [
+          { level: 0, widthFraction: 0.82, depthFraction: 0.9, horizontalCenter: 0.5, setback: "none", color: "white", material: "stucco", confidence: 0.8 },
+          { level: 1, widthFraction: 0.72, depthFraction: 0.82, horizontalCenter: 0.52, setback: "slight", color: "white", material: "stucco", confidence: 0.8 },
+          { level: 2, widthFraction: 0.62, depthFraction: 0.72, horizontalCenter: 0.5, setback: "moderate", color: "white", material: "stucco", confidence: 0.8 },
+        ],
+      },
       facades: [{
         wall: "front",
         confidence: 0.8,
