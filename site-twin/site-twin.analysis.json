@@ -1,0 +1,610 @@
+{
+  "generatedAt": "2026-09-04T22:38:33.567Z",
+  "target": {
+    "address": "2629 Corralitas Dr, Los Angeles, CA 90039",
+    "latitude": 34.09962,
+    "longitude": -118.25278
+  },
+  "options": {
+    "radiusM": 500,
+    "imageLimit": 3,
+    "model": "gemma3:4b",
+    "visionEnabled": true,
+    "imageryProviders": [
+      "google",
+      "kartaview"
+    ]
+  },
+  "primaryBuilding": {
+    "id": "883214",
+    "polygon": [
+      [
+        -118.25282617429762,
+        34.09965010631279
+      ],
+      [
+        -118.2528173966033,
+        34.09964557735164
+      ],
+      [
+        -118.25283207019723,
+        34.099625895957224
+      ],
+      [
+        -118.25284156317403,
+        34.09963079395018
+      ],
+      [
+        -118.25286164315656,
+        34.099603861036044
+      ],
+      [
+        -118.25285118199909,
+        34.09959846381893
+      ],
+      [
+        -118.25285363640747,
+        34.09959517079586
+      ],
+      [
+        -118.25279317162939,
+        34.099563971779624
+      ],
+      [
+        -118.2527811920635,
+        34.099580039602536
+      ],
+      [
+        -118.25273044496637,
+        34.09955385528098
+      ],
+      [
+        -118.2527193871429,
+        34.099568686071024
+      ],
+      [
+        -118.2527127118942,
+        34.09956524175564
+      ],
+      [
+        -118.25269117368543,
+        34.09959413041262
+      ],
+      [
+        -118.25273155190237,
+        34.099614965111435
+      ],
+      [
+        -118.25272137589091,
+        34.09962861305045
+      ],
+      [
+        -118.25273779918831,
+        34.09963708735819
+      ],
+      [
+        -118.25272336734271,
+        34.09965644458558
+      ],
+      [
+        -118.25273981995217,
+        34.09966493415783
+      ],
+      [
+        -118.25273053763351,
+        34.09967738479695
+      ],
+      [
+        -118.25278491658244,
+        34.099705443017974
+      ],
+      [
+        -118.25282617429762,
+        34.09965010631279
+      ]
+    ],
+    "heightM": 9.317736,
+    "roofElevationM": 174.20844,
+    "areaSqM": 136.9493190860802,
+    "provenance": {
+      "provider": "lacounty-building-2023",
+      "featureId": "883214",
+      "sourceUrl": "https://rpgis.isd.lacounty.gov/arcgis/rest/services/GISNET/GISNET_Public/MapServer/434",
+      "details": {
+        "status": "Modified",
+        "heightFeet": 30.57
+      }
+    }
+  },
+  "rankedImagery": [
+    {
+      "id": "ZbZi32upfDcCdgarXH_tTQ",
+      "provider": "google-streetview-research",
+      "latitude": 34.0996209675484,
+      "longitude": -118.2525624148768,
+      "capturedAt": "2020-12-01 00:00:00",
+      "imageUrl": "google-streetview-research://ZbZi32upfDcCdgarXH_tTQ",
+      "provenance": {
+        "provider": "google-streetview-research",
+        "featureId": "ZbZi32upfDcCdgarXH_tTQ",
+        "capturedAt": "2020-12-01 00:00:00",
+        "details": {
+          "panoramaHeadingDeg": 2.82819676399231,
+          "pitchDeg": 94.54593658447266,
+          "rollDeg": 3.967260837554932
+        }
+      },
+      "distanceToTargetM": 20.034797729766538,
+      "bearingToTargetDeg": 269.6923818714949,
+      "headingErrorDeg": 0,
+      "score": 0.9339663669350166,
+      "scoreReasons": [
+        "distance:20.0m",
+        "heading-error:0.0deg",
+        "age:5.8y"
+      ],
+      "headingDeg": 269.6923818714949
+    },
+    {
+      "id": "nEbwXhyt7GxeKcN0YYyvyQ",
+      "provider": "google-streetview-research",
+      "latitude": 34.09947039180013,
+      "longitude": -118.2525774937496,
+      "imageUrl": "google-streetview-research://nEbwXhyt7GxeKcN0YYyvyQ",
+      "provenance": {
+        "provider": "google-streetview-research",
+        "featureId": "nEbwXhyt7GxeKcN0YYyvyQ",
+        "details": {
+          "panoramaHeadingDeg": 189.9227447509766,
+          "pitchDeg": 86.1716537475586,
+          "rollDeg": 357.6427917480469,
+          "elevationM": 0
+        }
+      },
+      "distanceToTargetM": 24.988475714535515,
+      "bearingToTargetDeg": 311.73877229268663,
+      "headingErrorDeg": 0,
+      "score": 0.9175103718569181,
+      "scoreReasons": [
+        "distance:25.0m",
+        "heading-error:0.0deg"
+      ],
+      "headingDeg": 311.73877229268663
+    },
+    {
+      "id": "vM0lvFfkARmcElUoxHItbw",
+      "provider": "google-streetview-research",
+      "latitude": 34.09985585140137,
+      "longitude": -118.2525805273689,
+      "imageUrl": "google-streetview-research://vM0lvFfkARmcElUoxHItbw",
+      "provenance": {
+        "provider": "google-streetview-research",
+        "featureId": "vM0lvFfkARmcElUoxHItbw",
+        "details": {
+          "panoramaHeadingDeg": 194.931640625,
+          "pitchDeg": 87.20557403564453,
+          "rollDeg": 2.226801633834839,
+          "elevationM": 0
+        }
+      },
+      "distanceToTargetM": 32.01741736374789,
+      "bearingToTargetDeg": 215.00510173593327,
+      "headingErrorDeg": 0,
+      "score": 0.911184324372627,
+      "scoreReasons": [
+        "distance:32.0m",
+        "heading-error:0.0deg"
+      ],
+      "headingDeg": 215.00510173593327
+    },
+    {
+      "id": "o2Wjj74LRbH-fG5IWsCX-w",
+      "provider": "google-streetview-research",
+      "latitude": 34.09957821776173,
+      "longitude": -118.2531625351468,
+      "imageUrl": "google-streetview-research://o2Wjj74LRbH-fG5IWsCX-w",
+      "provenance": {
+        "provider": "google-streetview-research",
+        "featureId": "o2Wjj74LRbH-fG5IWsCX-w",
+        "details": {
+          "panoramaHeadingDeg": 21.73652076721191,
+          "pitchDeg": 87.33965301513672,
+          "rollDeg": 0.9307949542999268
+        }
+      },
+      "distanceToTargetM": 35.52765222440528,
+      "bearingToTargetDeg": 82.48575688225321,
+      "headingErrorDeg": 0,
+      "score": 0.9080251129980352,
+      "scoreReasons": [
+        "distance:35.5m",
+        "heading-error:0.0deg"
+      ],
+      "headingDeg": 82.48575688225321
+    },
+    {
+      "id": "McTJ15Z3rBYI31wBsO3BwQ",
+      "provider": "google-streetview-research",
+      "latitude": 34.09929886196537,
+      "longitude": -118.2526499437002,
+      "imageUrl": "google-streetview-research://McTJ15Z3rBYI31wBsO3BwQ",
+      "provenance": {
+        "provider": "google-streetview-research",
+        "featureId": "McTJ15Z3rBYI31wBsO3BwQ",
+        "details": {
+          "panoramaHeadingDeg": 209.8921051025391,
+          "pitchDeg": 86.7916259765625,
+          "rollDeg": 357.3748779296875
+        }
+      },
+      "distanceToTargetM": 37.66344679126113,
+      "bearingToTargetDeg": 341.4609164306635,
+      "headingErrorDeg": 0,
+      "score": 0.9061028978878651,
+      "scoreReasons": [
+        "distance:37.7m",
+        "heading-error:0.0deg"
+      ],
+      "headingDeg": 341.4609164306635
+    },
+    {
+      "id": "cJJyFxv2Xl8O7xbqJi18Hw",
+      "provider": "google-streetview-research",
+      "latitude": 34.09941664254486,
+      "longitude": -118.2532473869509,
+      "imageUrl": "google-streetview-research://cJJyFxv2Xl8O7xbqJi18Hw",
+      "provenance": {
+        "provider": "google-streetview-research",
+        "featureId": "cJJyFxv2Xl8O7xbqJi18Hw",
+        "details": {
+          "panoramaHeadingDeg": 197.5177154541016,
+          "pitchDeg": 93.04578399658203,
+          "rollDeg": 1.758127927780151
+        }
+      },
+      "distanceToTargetM": 48.61450901976992,
+      "bearingToTargetDeg": 62.28085784440134,
+      "headingErrorDeg": 0,
+      "score": 0.8962469418822071,
+      "scoreReasons": [
+        "distance:48.6m",
+        "heading-error:0.0deg"
+      ],
+      "headingDeg": 62.28085784440134
+    },
+    {
+      "id": "MlI654WMg1i8egWCos2gWw",
+      "provider": "google-streetview-research",
+      "latitude": 34.09915016462285,
+      "longitude": -118.2527921667898,
+      "imageUrl": "google-streetview-research://MlI654WMg1i8egWCos2gWw",
+      "provenance": {
+        "provider": "google-streetview-research",
+        "featureId": "MlI654WMg1i8egWCos2gWw",
+        "details": {
+          "panoramaHeadingDeg": 48.16328048706055,
+          "pitchDeg": 94.17562866210938,
+          "rollDeg": 2.083572864532471
+        }
+      },
+      "distanceToTargetM": 52.25539243723192,
+      "bearingToTargetDeg": 1.2284296818869507,
+      "headingErrorDeg": 0,
+      "score": 0.8929701468064913,
+      "scoreReasons": [
+        "distance:52.3m",
+        "heading-error:0.0deg"
+      ],
+      "headingDeg": 1.2284296818869507
+    },
+    {
+      "id": "ineOX31GR_gGm-p-J5WZLw",
+      "provider": "google-streetview-research",
+      "latitude": 34.09905620800495,
+      "longitude": -118.2529833736807,
+      "imageUrl": "google-streetview-research://ineOX31GR_gGm-p-J5WZLw",
+      "provenance": {
+        "provider": "google-streetview-research",
+        "featureId": "ineOX31GR_gGm-p-J5WZLw",
+        "details": {
+          "panoramaHeadingDeg": 69.48233795166016,
+          "pitchDeg": 92.08824920654297,
+          "rollDeg": 0.610296905040741
+        }
+      },
+      "distanceToTargetM": 65.42791936253879,
+      "bearingToTargetDeg": 16.63104543401562,
+      "headingErrorDeg": 0,
+      "score": 0.8811148725737152,
+      "scoreReasons": [
+        "distance:65.4m",
+        "heading-error:0.0deg"
+      ],
+      "headingDeg": 16.63104543401562
+    },
+    {
+      "id": "2AVSB5icogyRThwGXwt_-g",
+      "provider": "google-streetview-research",
+      "latitude": 34.09905132279972,
+      "longitude": -118.2532033996381,
+      "imageUrl": "google-streetview-research://2AVSB5icogyRThwGXwt_-g",
+      "provenance": {
+        "provider": "google-streetview-research",
+        "featureId": "2AVSB5icogyRThwGXwt_-g",
+        "details": {
+          "panoramaHeadingDeg": 121.5841064453125,
+          "pitchDeg": 91.34223937988281,
+          "rollDeg": 359.8468627929688
+        }
+      },
+      "distanceToTargetM": 74.28600037215969,
+      "bearingToTargetDeg": 31.65471398850599,
+      "headingErrorDeg": 0,
+      "score": 0.8731425996650564,
+      "scoreReasons": [
+        "distance:74.3m",
+        "heading-error:0.0deg"
+      ],
+      "headingDeg": 31.65471398850599
+    }
+  ],
+  "attemptedImagery": [
+    {
+      "id": "ZbZi32upfDcCdgarXH_tTQ",
+      "provider": "google-streetview-research",
+      "latitude": 34.0996209675484,
+      "longitude": -118.2525624148768,
+      "capturedAt": "2020-12-01 00:00:00",
+      "imageUrl": "google-streetview-research://ZbZi32upfDcCdgarXH_tTQ",
+      "provenance": {
+        "provider": "google-streetview-research",
+        "featureId": "ZbZi32upfDcCdgarXH_tTQ",
+        "capturedAt": "2020-12-01 00:00:00",
+        "details": {
+          "panoramaHeadingDeg": 2.82819676399231,
+          "pitchDeg": 94.54593658447266,
+          "rollDeg": 3.967260837554932
+        }
+      },
+      "distanceToTargetM": 20.034797729766538,
+      "bearingToTargetDeg": 269.6923818714949,
+      "headingErrorDeg": 0,
+      "score": 0.9339663669350166,
+      "scoreReasons": [
+        "distance:20.0m",
+        "heading-error:0.0deg",
+        "age:5.8y"
+      ],
+      "headingDeg": 269.6923818714949
+    },
+    {
+      "id": "nEbwXhyt7GxeKcN0YYyvyQ",
+      "provider": "google-streetview-research",
+      "latitude": 34.09947039180013,
+      "longitude": -118.2525774937496,
+      "imageUrl": "google-streetview-research://nEbwXhyt7GxeKcN0YYyvyQ",
+      "provenance": {
+        "provider": "google-streetview-research",
+        "featureId": "nEbwXhyt7GxeKcN0YYyvyQ",
+        "details": {
+          "panoramaHeadingDeg": 189.9227447509766,
+          "pitchDeg": 86.1716537475586,
+          "rollDeg": 357.6427917480469,
+          "elevationM": 0
+        }
+      },
+      "distanceToTargetM": 24.988475714535515,
+      "bearingToTargetDeg": 311.73877229268663,
+      "headingErrorDeg": 0,
+      "score": 0.9175103718569181,
+      "scoreReasons": [
+        "distance:25.0m",
+        "heading-error:0.0deg"
+      ],
+      "headingDeg": 311.73877229268663
+    },
+    {
+      "id": "vM0lvFfkARmcElUoxHItbw",
+      "provider": "google-streetview-research",
+      "latitude": 34.09985585140137,
+      "longitude": -118.2525805273689,
+      "imageUrl": "google-streetview-research://vM0lvFfkARmcElUoxHItbw",
+      "provenance": {
+        "provider": "google-streetview-research",
+        "featureId": "vM0lvFfkARmcElUoxHItbw",
+        "details": {
+          "panoramaHeadingDeg": 194.931640625,
+          "pitchDeg": 87.20557403564453,
+          "rollDeg": 2.226801633834839,
+          "elevationM": 0
+        }
+      },
+      "distanceToTargetM": 32.01741736374789,
+      "bearingToTargetDeg": 215.00510173593327,
+      "headingErrorDeg": 0,
+      "score": 0.911184324372627,
+      "scoreReasons": [
+        "distance:32.0m",
+        "heading-error:0.0deg"
+      ],
+      "headingDeg": 215.00510173593327
+    }
+  ],
+  "observations": [
+    {
+      "sourceImageId": "ZbZi32upfDcCdgarXH_tTQ",
+      "visible": true,
+      "confidence": 0.95,
+      "storiesApprox": 2,
+      "roof": {
+        "type": "flat",
+        "color": "dark gray",
+        "material": "membrane"
+      },
+      "facades": [
+        {
+          "wall": "front",
+          "confidence": 0.95,
+          "colors": [
+            "white"
+          ],
+          "materials": [
+            "stucco"
+          ],
+          "windows": [
+            {
+              "x": 0.35,
+              "y": 0.65,
+              "width": 0.18,
+              "height": 0.32,
+              "confidence": 0.95,
+              "color": "dark",
+              "shape": "rect"
+            }
+          ],
+          "doors": [
+            {
+              "x": 0.75,
+              "y": 0.05,
+              "width": 0.14,
+              "height": 0.28,
+              "confidence": 0.95,
+              "color": "brown",
+              "material": "wood",
+              "shape": "rect"
+            }
+          ]
+        }
+      ],
+      "site": {
+        "stairs": true,
+        "grass": true,
+        "sidewalk": true,
+        "curb": true,
+        "trees": true,
+        "dominantHardscape": "concrete"
+      },
+      "notes": [
+        "The building appears to be a two-story structure with stucco exterior."
+      ]
+    },
+    {
+      "sourceImageId": "nEbwXhyt7GxeKcN0YYyvyQ",
+      "visible": true,
+      "confidence": 0.95,
+      "storiesApprox": 2,
+      "roof": {
+        "type": "flat",
+        "color": "dark gray",
+        "material": "membrane"
+      },
+      "facades": [
+        {
+          "wall": "front",
+          "confidence": 0.95,
+          "colors": [
+            "white"
+          ],
+          "materials": [
+            "stucco"
+          ],
+          "windows": [
+            {
+              "x": 0.35,
+              "y": 0.65,
+              "width": 0.2,
+              "height": 0.25,
+              "confidence": 0.95,
+              "color": "dark",
+              "shape": "rect"
+            }
+          ],
+          "doors": [
+            {
+              "x": 0.75,
+              "y": 0.1,
+              "width": 0.1,
+              "height": 0.2,
+              "confidence": 0.95,
+              "color": "brown",
+              "material": "wood",
+              "shape": "rect"
+            }
+          ]
+        }
+      ],
+      "site": {
+        "stairs": true,
+        "grass": true,
+        "sidewalk": true,
+        "curb": true,
+        "trees": true,
+        "dominantHardscape": "concrete"
+      },
+      "notes": [
+        "The building appears to be a two-story structure with a flat roof.",
+        "The facade is primarily stucco and white in color."
+      ]
+    },
+    {
+      "sourceImageId": "vM0lvFfkARmcElUoxHItbw",
+      "visible": true,
+      "confidence": 0.95,
+      "storiesApprox": 2,
+      "roof": {
+        "type": "flat",
+        "color": "dark gray",
+        "material": "membrane"
+      },
+      "facades": [
+        {
+          "wall": "front",
+          "confidence": 0.95,
+          "colors": [
+            "white"
+          ],
+          "materials": [
+            "stucco"
+          ],
+          "windows": [
+            {
+              "x": 0.35,
+              "y": 0.65,
+              "width": 0.2,
+              "height": 0.25,
+              "confidence": 0.95,
+              "color": "dark",
+              "shape": "rect"
+            }
+          ],
+          "doors": [
+            {
+              "x": 0.75,
+              "y": 0.1,
+              "width": 0.1,
+              "height": 0.2,
+              "confidence": 0.95,
+              "color": "brown",
+              "material": "wood",
+              "shape": "rect"
+            }
+          ]
+        }
+      ],
+      "site": {
+        "stairs": false,
+        "grass": true,
+        "sidewalk": true,
+        "curb": true,
+        "trees": true,
+        "dominantHardscape": "concrete"
+      },
+      "notes": [
+        "The target building is a single-story dwelling with a flat roof."
+      ]
+    }
+  ],
+  "rejected": [],
+  "warnings": [],
+  "recomputedFromSavedObservations": true
+}
