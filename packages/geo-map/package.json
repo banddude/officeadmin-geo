@@ -1,0 +1,26 @@
+{
+  "name": "@officeadmin-geo/geo-map",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": "./src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@officeadmin-geo/geo-types": "workspace:*",
+    "@officeadmin-geo/provider-mapbox": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=19"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.11",
+    "react": "^19.1.1",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}
