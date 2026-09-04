@@ -29,9 +29,11 @@ select {
 }
 
 .app-shell {
-  min-height: 100vh;
+  height: 100vh;
+  min-height: 560px;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
 }
 
 .topbar {
@@ -88,7 +90,7 @@ select {
 
 .map-stage {
   position: relative;
-  min-height: 720px;
+  min-height: 0;
   overflow: hidden;
   background: #e2e8f0;
 }
@@ -132,6 +134,57 @@ select {
   cursor: pointer;
 }
 
+.demo-nav {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  display: flex;
+  gap: 6px;
+  max-width: calc(100% - 90px);
+  padding: 5px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.demo-nav button {
+  min-height: 36px;
+  border: 0;
+  border-radius: 10px;
+  padding: 0 12px;
+  background: transparent;
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.demo-nav button.is-active {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    min-height: 520px;
+  }
+
+  .demo-nav {
+    top: 10px;
+    left: 10px;
+    max-width: calc(100% - 72px);
+    overflow-x: auto;
+  }
+
+  .demo-nav button {
+    min-height: 40px;
+  }
+}
+
 .setup-shell {
   min-height: 100vh;
   display: grid;
@@ -172,10 +225,6 @@ code {
 
   .status-summary span {
     padding: 6px 8px;
-  }
-
-  .map-stage {
-    min-height: 680px;
   }
 
   .floating-panel {
