@@ -14,7 +14,8 @@ export function App() {
   const [view, setView] = useState<"facade" | "overview">("facade");
 
   useEffect(() => {
-    fetch("./site-twin.json")
+    const modelUrl = `./site-twin.json?v=${Date.now()}`;
+    fetch(modelUrl, { cache: "no-store" })
       .then(async (response) => {
         if (!response.ok) throw new Error(`site-twin.json returned ${response.status}`);
         return response.json() as Promise<SemanticSiteModel>;
