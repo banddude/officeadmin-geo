@@ -5,6 +5,8 @@ import {
   type MapRoute,
   type MapSite,
   type MapTechnician,
+  type GeoMapViewMode,
+  type GeoMapVisualTheme,
 } from "@officeadmin-geo/geo-map";
 import "./styles.css";
 
@@ -86,6 +88,8 @@ function App() {
     }
   });
   const [tokenDraft, setTokenDraft] = useState("");
+  const [visualTheme, setVisualTheme] = useState<GeoMapVisualTheme>("monochrome");
+  const [viewMode, setViewMode] = useState<GeoMapViewMode>("3d");
   const [selectedSiteId, setSelectedSiteId] = useState<string>();
   const [selectedTechnicianId, setSelectedTechnicianId] = useState<string>();
   const selectedSite = useMemo(
@@ -184,11 +188,28 @@ function App() {
           >
             Follow tech
           </button>
+          <span className="demo-nav-separator" aria-hidden="true" />
+          <button
+            type="button"
+            className={visualTheme === "monochrome" ? "is-active" : undefined}
+            onClick={() => setVisualTheme(visualTheme === "monochrome" ? "faded" : "monochrome")}
+          >
+            {visualTheme === "monochrome" ? "Clean" : "Natural"}
+          </button>
+          <button
+            type="button"
+            className={viewMode === "3d" ? "is-active" : undefined}
+            onClick={() => setViewMode(viewMode === "3d" ? "2d" : "3d")}
+          >
+            {viewMode === "3d" ? "3D" : "2D"}
+          </button>
         </nav>
 
         <GeoOperationsMap
           mapboxAccessToken={accessToken}
           className="map-canvas"
+          visualTheme={visualTheme}
+          viewMode={viewMode}
           sites={sites}
           technicians={technicians}
           routes={routes}
