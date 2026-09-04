@@ -11,9 +11,14 @@ import type {
 const DEFAULT_CENTER: [number, number] = [-118.2437, 34.0522];
 const STALE_AFTER_MS = 15 * 60 * 1000;
 
+export type GeoMapVisualTheme = "monochrome" | "faded";
+export type GeoMapViewMode = "2d" | "3d";
+
 export interface MapboxGeoMapProps extends GeoOperationsMapData {
   accessToken: string;
   className?: string;
+  visualTheme?: GeoMapVisualTheme;
+  viewMode?: GeoMapViewMode;
   selectedSiteId?: string;
   selectedTechnicianId?: string;
   onSiteSelected?: (siteId: string) => void;
@@ -266,6 +271,7 @@ function fitOperationsOverview(
   sites: MapSite[],
   technicians: MapTechnician[],
   duration = 0,
+  viewMode: GeoMapViewMode = "3d",
 ) {
   const coordinates: [number, number][] = [
     ...sites.map((site): [number, number] => [site.longitude, site.latitude]),
@@ -275,7 +281,13 @@ function fitOperationsOverview(
   ];
 
   if (!coordinates.length) {
-    map.easeTo({ center: DEFAULT_CENTER, zoom: 10.6, pitch: 52, bearing: -10, duration });
+    map.easeTo({
+      center: DEFAULT_CENTER,
+      zoom: 10.6,
+      pitch: viewMode === "3d" ? 52 : 0,
+      bearing: viewMode === "3d" ? -10 : 0,
+      duration,
+    });
     return;
   }
 
@@ -287,8 +299,8 @@ function fitOperationsOverview(
   map.fitBounds(bounds, {
     padding: { top: 110, right: 90, bottom: 110, left: 90 },
     maxZoom: 11.4,
-    pitch: 52,
-    bearing: -10,
+    pitch: viewMode === "3d" ? 52 : 0,
+    bearing: viewMode === "3d" ? -10 : 0,
     duration,
   });
 }
@@ -296,6 +308,8 @@ function fitOperationsOverview(
 export function MapboxGeoMap({
   accessToken,
   className,
+  visualTheme = "monochrome",
+  viewMode = "3d",
   sites = [],
   technicians = [],
   routes = [],
@@ -322,19 +336,21 @@ export function MapboxGeoMap({
       style: "mapbox://styles/mapbox/standard",
       config: {
         basemap: {
-          theme: "monochrome",
+          theme: visualTheme,
           lightPreset: "day",
-          show3dObjects: true,
+          show3dObjects: viewMode === "3d",
           showPointOfInterestLabels: false,
           showTransitLabels: false,
+          showPlaceLabels: false,
+          showRoadLabels: false,
           showPedestrianRoads: false,
           showAdminBoundaries: false,
         },
       },
       center: DEFAULT_CENTER,
       zoom: 10.6,
-      pitch: 52,
-      bearing: -10,
+      pitch: viewMode === "3d" ? 52 : 0,
+      bearing: viewMode === "3d" ? -10 : 0,
       antialias: true,
     });
 
@@ -343,15 +359,17 @@ export function MapboxGeoMap({
 
     map.on("style.load", () => {
       try {
-        map.setConfigProperty("basemap", "theme", "monochrome");
+        map.setConfigProperty("basemap", "theme", visualTheme);
         map.setConfigProperty("basemap", "lightPreset", "day");
-        map.setConfigProperty("basemap", "show3dObjects", true);
-        map.setConfigProperty("basemap", "show3dBuildings", true);
-        map.setConfigProperty("basemap", "show3dTrees", true);
-        map.setConfigProperty("basemap", "show3dLandmarks", true);
-        map.setConfigProperty("basemap", "show3dFacades", true);
+        map.setConfigProperty("basemap", "show3dObjects", viewMode === "3d");
+        map.setConfigProperty("basemap", "show3dBuildings", viewMode === "3d");
+        map.setConfigProperty("basemap", "show3dTrees", viewMode === "3d");
+        map.setConfigProperty("basemap", "show3dLandmarks", viewMode === "3d");
+        map.setConfigProperty("basemap", "show3dFacades", viewMode === "3d");
         map.setConfigProperty("basemap", "showPointOfInterestLabels", false);
         map.setConfigProperty("basemap", "showTransitLabels", false);
+        map.setConfigProperty("basemap", "showPlaceLabels", false);
+        map.setConfigProperty("basemap", "showRoadLabels", false);
         map.setConfigProperty("basemap", "showPedestrianRoads", false);
         map.setConfigProperty("basemap", "showAdminBoundaries", false);
       } catch {
@@ -360,7 +378,7 @@ export function MapboxGeoMap({
 
       upsertSources(map, sites, technicians, routes);
       if (!selectedSiteId && !selectedTechnicianId) {
-        fitOperationsOverview(map, sites, technicians);
+        fitOperationsOverview(map, sites, technicians, 0, viewMode);
       }
     });
 
@@ -416,18 +434,45 @@ export function MapboxGeoMap({
     const map = mapRef.current;
     if (!map) return;
 
+    const applyAppearance = () => {
+      try {
+        map.setConfigProperty("basemap", "theme", visualTheme);
+        map.setConfigProperty("basemap", "show3dObjects", viewMode === "3d");
+        map.setConfigProperty("basemap", "show3dBuildings", viewMode === "3d");
+        map.setConfigProperty("basemap", "show3dTrees", viewMode === "3d");
+        map.setConfigProperty("basemap", "show3dLandmarks", viewMode === "3d");
+        map.setConfigProperty("basemap", "show3dFacades", viewMode === "3d");
+        map.setConfigProperty("basemap", "showPlaceLabels", false);
+        map.setConfigProperty("basemap", "showRoadLabels", false);
+      } catch {
+        // Preserve the current map if a newly introduced Standard option is unavailable.
+      }
+
+      const pitch = viewMode === "2d" ? 0 : selectedSiteId ? 64 : selectedTechnicianId ? 58 : 52;
+      const bearing = viewMode === "2d" ? 0 : selectedSiteId ? -18 : selectedTechnicianId ? -14 : -10;
+      map.easeTo({ pitch, bearing, duration: 650, essential: true });
+    };
+
+    if (map.isStyleLoaded()) applyAppearance();
+    else map.once("style.load", applyAppearance);
+  }, [visualTheme, viewMode, selectedSiteId, selectedTechnicianId]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
     const site = sites.find((candidate) => candidate.id === selectedSiteId);
     if (site) {
       map.flyTo({
         center: [site.longitude, site.latitude],
         zoom: 17.1,
-        pitch: 64,
-        bearing: -18,
+        pitch: viewMode === "3d" ? 64 : 0,
+        bearing: viewMode === "3d" ? -18 : 0,
         duration: 1100,
         essential: true,
       });
     }
-  }, [selectedSiteId, sites]);
+  }, [selectedSiteId, sites, viewMode]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -440,19 +485,19 @@ export function MapboxGeoMap({
       map.flyTo({
         center: [technician.longitude, technician.latitude],
         zoom: 15.2,
-        pitch: 58,
-        bearing: -14,
+        pitch: viewMode === "3d" ? 58 : 0,
+        bearing: viewMode === "3d" ? -14 : 0,
         duration: 1000,
         essential: true,
       });
     }
-  }, [selectedTechnicianId, technicians]);
+  }, [selectedTechnicianId, technicians, viewMode]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map || selectedSiteId || selectedTechnicianId || !map.isStyleLoaded()) return;
-    fitOperationsOverview(map, sites, technicians, 850);
-  }, [selectedSiteId, selectedTechnicianId, sites, technicians]);
+    fitOperationsOverview(map, sites, technicians, 850, viewMode);
+  }, [selectedSiteId, selectedTechnicianId, sites, technicians, viewMode]);
 
   return <div ref={containerRef} className={className} />;
 }
