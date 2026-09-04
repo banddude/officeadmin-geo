@@ -168,6 +168,14 @@ select {
   color: #ffffff;
 }
 
+.demo-nav-separator {
+  width: 1px;
+  align-self: stretch;
+  margin: 4px 1px;
+  background: #e2e8f0;
+  flex: 0 0 1px;
+}
+
 @media (max-width: 640px) {
   .app-shell {
     min-height: 520px;
