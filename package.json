@@ -8,6 +8,12 @@
     "dev": "pnpm --filter @officeadmin-geo/demo dev",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "dev:site-twin": "pnpm --filter @officeadmin-geo/site-twin-demo dev",
+    "site-twin:reconstruct": "tsx scripts/reconstruct-site.ts",
+    "site-twin:corralitas": "tsx scripts/reconstruct-site.ts --address \"2629 Corralitas Dr, Los Angeles, CA 90039\" --latitude 34.09962 --longitude -118.25278 --output apps/site-twin-demo/public/site-twin.json"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.5"
   }
 }
