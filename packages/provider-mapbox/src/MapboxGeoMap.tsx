@@ -320,15 +320,17 @@ export function MapboxGeoMap({
       if (typeof id === "string") technicianCallbackRef.current?.(id);
     });
 
-    map.on("click", "oa-site-clusters", async (event) => {
+    map.on("click", "oa-site-clusters", (event) => {
       const feature = event.features?.[0];
       const clusterId = feature?.properties?.cluster_id;
       const coordinates = feature?.geometry.type === "Point" ? feature.geometry.coordinates : null;
       const source = map.getSource("oa-sites") as GeoJSONSource | undefined;
 
       if (source && typeof clusterId === "number" && coordinates) {
-        const zoom = await source.getClusterExpansionZoom(clusterId);
-        map.easeTo({ center: coordinates as [number, number], zoom });
+        source.getClusterExpansionZoom(clusterId, (error, zoom) => {
+          if (error || typeof zoom !== "number") return;
+          map.easeTo({ center: coordinates as [number, number], zoom });
+        });
       }
     });
 
