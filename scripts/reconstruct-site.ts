@@ -5,7 +5,7 @@ import { assessFacadeComposition, bearingDegrees, extentPolygon, fuseSiteModel, 
 import { getLandCoverSamples, getLosAngelesSiteGeometry } from "../packages/provider-lacounty/src/index.ts";
 import { findKartaViewImages } from "../packages/provider-kartaview/src/index.ts";
 import { downloadGoogleStreetViewFrame, findGoogleStreetViewImages } from "../packages/provider-google-streetview-research/src/index.ts";
-import { analyzeFacadeBandsWithOllama, analyzeFacadeRegionWithOllama, analyzeImageWithOllama, cropImageRegion, locateTargetHouseWithOllama, type FacadeRegionPosition, type TargetHouseRegion } from "../packages/provider-ollama/src/index.ts";
+import { analyzeFacadeBandsWithOllama, analyzeFacadeRegionWithOllama, analyzeImageWithOllama, analyzeSiteContextWithOllama, cropImageRegion, locateTargetHouseWithOllama, type FacadeRegionPosition, type TargetHouseRegion } from "../packages/provider-ollama/src/index.ts";
 import { geocodeAddress, getNearbyStreetContext } from "../packages/provider-openstreetmap/src/index.ts";
 import { getElevation, sampleTerrainGrid } from "../packages/provider-usgs/src/index.ts";
 
@@ -110,23 +110,6 @@ function componentSetback(projection: "projects" | "flush" | "setback") {
   if (projection === "projects") return "none" as const;
   if (projection === "setback") return "moderate" as const;
   return "slight" as const;
-}
-
-function mergeTargetArchitecture(fullFrame: VisualObservation, targetCrop: VisualObservation): VisualObservation {
-  return {
-    ...fullFrame,
-    visible: fullFrame.visible || targetCrop.visible,
-    confidence: Math.max(fullFrame.confidence, targetCrop.confidence),
-    storiesApprox: targetCrop.storiesApprox ?? fullFrame.storiesApprox,
-    roof: targetCrop.roof ?? fullFrame.roof,
-    massing: targetCrop.massing ?? fullFrame.massing,
-    facadeComposition: targetCrop.facadeComposition ?? fullFrame.facadeComposition,
-    facades: targetCrop.facades.length ? targetCrop.facades : fullFrame.facades,
-    // Site context belongs to the uncropped street frame. A tight building crop is
-    // intentionally not allowed to erase retaining walls, stairs, curb, or vegetation.
-    site: fullFrame.site,
-    notes: [...new Set([...(fullFrame.notes ?? []), ...(targetCrop.notes ?? [])])],
-  };
 }
 
 async function refinePrimaryFacade(
@@ -305,57 +288,61 @@ async function main() {
           const targetDescription = image.provider === "google-streetview-research"
             ? `Target address is ${options.address}. This image was programmatically cropped to face the target parcel, so the target should be near the center of frame. Do not describe a different building if the target is occluded.${isPrimaryResearchView ? " For facadeComposition, cover the complete visible target-house width and keep primary masses separate where facade plane, height, or dominant wall material clearly changes." : ""}`
             : `Target address is ${options.address}. The target is the property near the target coordinate, not merely any nearby house.`;
-          let observation = await analyzeImageWithOllama(image.id, bytes.toString("base64"), {
-            model: options.model,
-            context: {
-              targetBearingDeg: image.bearingToTargetDeg,
-              expectedBuildingHeightM: primary?.heightM,
-              targetDescription,
-            },
-          });
+          let observation: VisualObservation;
           if (isPrimaryResearchView && primary) {
-            try {
-              const region = await locateTargetHouseWithOllama(bytes.toString("base64"), {
+            const region = await locateTargetHouseWithOllama(bytes.toString("base64"), {
+              model: options.model,
+              context: {
+                targetBearingDeg: image.bearingToTargetDeg,
+                expectedBuildingHeightM: primary.heightM,
+                targetDescription,
+              },
+            });
+            localizedTargets.push({ imageId: image.id, region });
+            console.log(`  target bbox: x=${region.x.toFixed(3)} y=${region.y.toFixed(3)} w=${region.width.toFixed(3)} h=${region.height.toFixed(3)} confidence=${region.confidence.toFixed(2)} visible=${region.visible}`);
+            if (!region.visible || region.confidence < 0.45) {
+              throw new Error(`target localization was not reliable enough (${region.confidence.toFixed(2)})`);
+            }
+
+            const targetBytes = await cropImageRegion(bytes, region, { paddingFraction: 0.06 });
+            const [targetObservation, site] = await Promise.all([
+              analyzeImageWithOllama(image.id, targetBytes.toString("base64"), {
                 model: options.model,
                 context: {
-                  targetBearingDeg: image.bearingToTargetDeg,
                   expectedBuildingHeightM: primary.heightM,
-                  targetDescription,
+                  targetDescription: `This image is already cropped tightly around the target building at ${options.address}. Analyze only this building. Reconstruct the complete visible facade from left edge to right edge. Keep large architectural masses separate where plane, height, or dominant material clearly changes. Edge vegetation may remain from occlusion, but it is not architecture.`,
                 },
-              });
-              localizedTargets.push({ imageId: image.id, region });
-              console.log(`  target bbox: x=${region.x.toFixed(3)} y=${region.y.toFixed(3)} w=${region.width.toFixed(3)} h=${region.height.toFixed(3)} confidence=${region.confidence.toFixed(2)} visible=${region.visible}`);
-              if (region.visible && region.confidence >= 0.45) {
-                const targetBytes = await cropImageRegion(bytes, region, { paddingFraction: 0.06 });
-                const targetObservation = await analyzeImageWithOllama(image.id, targetBytes.toString("base64"), {
-                  model: options.model,
-                  context: {
-                    expectedBuildingHeightM: primary.heightM,
-                    targetDescription: `This image is already cropped tightly around the target building at ${options.address}. Analyze only this building. Reconstruct the complete visible facade from left edge to right edge. Keep large architectural masses separate where plane, height, or dominant material clearly changes. Edge vegetation may remain from occlusion, but it is not architecture.`,
-                  },
-                });
-                observation = mergeTargetArchitecture(observation, targetObservation);
-                if (targetObservation.visible && targetObservation.confidence >= 0.45) {
-                  const targetQuality = assessFacadeComposition(targetObservation.facadeComposition);
-                  const refined = await refinePrimaryFacade(targetBytes, options.model, region.confidence);
-                  const refinedWins = refined?.quality.acceptable
-                    && (!targetQuality.acceptable || refined.quality.structuralScore > targetQuality.structuralScore);
-                  if (refinedWins && refined) {
-                    observation.facadeComposition = refined.composition;
-                    console.log(`  selected focused facade score=${refined.quality.structuralScore.toFixed(3)} over target-crop=${targetQuality.structuralScore.toFixed(3)}`);
-                  } else if (targetQuality.acceptable) {
-                    observation.facadeComposition = targetObservation.facadeComposition;
-                    console.log(`  selected target-crop facade score=${targetQuality.structuralScore.toFixed(3)} over focused=${refined?.quality.structuralScore.toFixed(3) ?? "n/a"}`);
-                  } else {
-                    observation.facadeComposition = undefined;
-                    const reasons = refined?.quality.reasons.length ? refined.quality.reasons : targetQuality.reasons;
-                    console.warn(`  refusing incomplete facade composition: ${reasons.join("; ") || "no acceptable target-facade parse"}`);
-                  }
-                }
+              }),
+              analyzeSiteContextWithOllama(bytes.toString("base64"), { model: options.model }),
+            ]);
+            observation = { ...targetObservation, site };
+
+            if (targetObservation.visible && targetObservation.confidence >= 0.45) {
+              const targetQuality = assessFacadeComposition(targetObservation.facadeComposition);
+              const refined = await refinePrimaryFacade(targetBytes, options.model, region.confidence);
+              const refinedWins = refined?.quality.acceptable
+                && (!targetQuality.acceptable || refined.quality.structuralScore > targetQuality.structuralScore);
+              if (refinedWins && refined) {
+                observation.facadeComposition = refined.composition;
+                console.log(`  selected focused facade score=${refined.quality.structuralScore.toFixed(3)} over target-crop=${targetQuality.structuralScore.toFixed(3)}`);
+              } else if (targetQuality.acceptable) {
+                observation.facadeComposition = targetObservation.facadeComposition;
+                console.log(`  selected target-crop facade score=${targetQuality.structuralScore.toFixed(3)} over focused=${refined?.quality.structuralScore.toFixed(3) ?? "n/a"}`);
+              } else {
+                observation.facadeComposition = undefined;
+                const reasons = refined?.quality.reasons.length ? refined.quality.reasons : targetQuality.reasons;
+                console.warn(`  refusing incomplete facade composition: ${reasons.join("; ") || "no acceptable target-facade parse"}`);
               }
-            } catch (error) {
-              console.warn(`  target-first facade refinement failed: ${error instanceof Error ? error.message : String(error)}`);
             }
+          } else {
+            observation = await analyzeImageWithOllama(image.id, bytes.toString("base64"), {
+              model: options.model,
+              context: {
+                targetBearingDeg: image.bearingToTargetDeg,
+                expectedBuildingHeightM: primary?.heightM,
+                targetDescription,
+              },
+            });
           }
           observations.push(observation);
           if (observation.visible && observation.confidence >= 0.45) usefulCount += 1;

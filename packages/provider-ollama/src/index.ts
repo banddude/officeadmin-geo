@@ -50,7 +50,18 @@ function clamp01(value: unknown, fallback = 0.5) {
 export function normalizeTargetHouseRegion(value: unknown): TargetHouseRegion {
   if (!value || typeof value !== "object") throw new Error("Target localization result must be an object");
   const root = value as Record<string, unknown>;
-  const raw = root.bbox && typeof root.bbox === "object" ? root.bbox as Record<string, unknown> : root;
+  const firstBox = Array.isArray(root.bboxes) && root.bboxes[0] && typeof root.bboxes[0] === "object"
+    ? root.bboxes[0] as Record<string, unknown>
+    : undefined;
+  const rawValue = firstBox?.bbox ?? root.bbox ?? root;
+  let raw: Record<string, unknown>;
+  if (Array.isArray(rawValue) && rawValue.length >= 4) {
+    raw = { left: rawValue[0], top: rawValue[1], right: rawValue[2], bottom: rawValue[3] };
+  } else if (rawValue && typeof rawValue === "object") {
+    raw = rawValue as Record<string, unknown>;
+  } else {
+    throw new Error("Target localization result is missing bbox coordinates");
+  }
   const left = clamp01(raw.left ?? raw.xMin ?? raw.x ?? 0);
   const top = clamp01(raw.top ?? raw.yMin ?? raw.y ?? 0);
   const rawRight = raw.right ?? raw.xMax;
@@ -67,7 +78,7 @@ export function normalizeTargetHouseRegion(value: unknown): TargetHouseRegion {
     y: top,
     width,
     height,
-    confidence: clamp01(root.confidence, 0.5),
+    confidence: clamp01(firstBox?.confidence ?? root.confidence, 0.5),
   };
 }
 
@@ -281,7 +292,7 @@ export async function analyzeImageWithOllama(
       messages: [{ role: "user", content: prompt(options), images: [imageBase64] }],
       stream: false,
       format: "json",
-      options: { temperature: 0.1 },
+      options: { temperature: 0.1, num_predict: 1_400 },
     }),
   });
   if (!response.ok) throw new Error(`Ollama vision request failed with ${response.status}`);
@@ -312,7 +323,7 @@ export async function locateTargetHouseWithOllama(
     "If the target cannot be distinguished confidently, set visible=false rather than guessing.",
     context?.targetDescription ? `Target context: ${context.targetDescription}` : undefined,
   ].filter((line): line is string => Boolean(line)).join("\n");
-  const parsed = await requestOllamaJson(imageBase64, instruction, options);
+  const parsed = await requestOllamaJson(imageBase64, instruction, options, 256);
   return normalizeTargetHouseRegion(parsed);
 }
 
@@ -354,6 +365,30 @@ export async function cropImageRegion(
   });
 }
 
+export async function analyzeSiteContextWithOllama(
+  imageBase64: string,
+  options: OllamaVisionOptions = {},
+): Promise<VisualObservation["site"]> {
+  const parsed = await requestOllamaJson(imageBase64, [
+    "Analyze only the SITE CONTEXT around the target house in this street-level frame. Do not analyze the house architecture.",
+    "Return ONLY one JSON object with optional keys stairs, retainingWalls, driveway, grass, sidewalk, curb, trees, fence, dominantHardscape.",
+    "For stairs, retainingWalls, driveway, grass, sidewalk, curb, trees, and fence: use true only when clearly visible, false only when the relevant visible area clearly rules it out, otherwise omit the key.",
+    "Do not treat a balcony railing as a fence. Do not treat a sloped retaining wall as stairs. Do not infer hidden site features behind vegetation.",
+  ].join("\n"), options, 320);
+  const record = parsed && typeof parsed === "object" ? parsed as Record<string, unknown> : {};
+  return {
+    stairs: typeof record.stairs === "boolean" ? record.stairs : undefined,
+    retainingWalls: typeof record.retainingWalls === "boolean" ? record.retainingWalls : undefined,
+    driveway: typeof record.driveway === "boolean" ? record.driveway : undefined,
+    grass: typeof record.grass === "boolean" ? record.grass : undefined,
+    sidewalk: typeof record.sidewalk === "boolean" ? record.sidewalk : undefined,
+    curb: typeof record.curb === "boolean" ? record.curb : undefined,
+    trees: typeof record.trees === "boolean" ? record.trees : undefined,
+    fence: typeof record.fence === "boolean" ? record.fence : undefined,
+    dominantHardscape: typeof record.dominantHardscape === "string" ? record.dominantHardscape : undefined,
+  };
+}
+
 export type FacadeBandHeight = "low" | "medium" | "tall";
 export type FacadeBandPlane = "projects" | "flush" | "setback";
 export type FacadeRegionPosition = "left" | "center" | "right";
@@ -384,7 +419,7 @@ export interface FacadeRegionObservation {
   confidence: number;
 }
 
-async function requestOllamaJson(imageBase64: string, instruction: string, options: OllamaVisionOptions) {
+async function requestOllamaJson(imageBase64: string, instruction: string, options: OllamaVisionOptions, maxPredict = 600) {
   const baseUrl = options.baseUrl ?? "http://127.0.0.1:11434";
   const model = options.model ?? "gemma3:4b";
   const response = await fetch(`${baseUrl}/api/chat`, {
@@ -395,7 +430,7 @@ async function requestOllamaJson(imageBase64: string, instruction: string, optio
       messages: [{ role: "user", content: instruction, images: [imageBase64] }],
       stream: false,
       format: "json",
-      options: { temperature: 0 },
+      options: { temperature: 0, num_predict: maxPredict },
     }),
   });
   if (!response.ok) throw new Error(`Ollama vision request failed with ${response.status}`);

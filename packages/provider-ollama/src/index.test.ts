@@ -78,4 +78,19 @@ describe("Ollama visual observation normalization", () => {
     expect(region.visible).toBe(false);
   });
 
+  it("accepts Gemma bboxes-array localization output", () => {
+    const region = normalizeTargetHouseRegion({
+      bboxes: [{ confidence: 0.95, bbox: [0.32, 0.46, 0.78, 0.91] }],
+    });
+
+    expect(region).toEqual({
+      visible: true,
+      confidence: 0.95,
+      x: 0.32,
+      y: 0.46,
+      width: 0.46,
+      height: 0.45,
+    });
+  });
+
 });
