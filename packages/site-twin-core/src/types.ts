@@ -130,6 +130,28 @@ export interface VisualMassingVolume {
   confidence: number;
 }
 
+
+export type FacadeComponentKind = "volume" | "tower" | "balcony" | "chimney" | "other";
+
+export interface VisualFacadeComponent {
+  kind: FacadeComponentKind;
+  x: number;
+  width: number;
+  bottom: number;
+  top: number;
+  depthFraction?: number;
+  setback?: "none" | "slight" | "moderate" | "deep" | "unknown";
+  roofType?: RoofType;
+  color?: string;
+  material?: string;
+  confidence: number;
+}
+
+export interface VisualFacadeComposition {
+  components: VisualFacadeComponent[];
+  confidence: number;
+}
+
 export interface VisualMassingObservation {
   storiesVisible?: number;
   stepped?: boolean;
@@ -149,6 +171,7 @@ export interface VisualObservation {
     rooftopDeck?: boolean;
   };
   massing?: VisualMassingObservation;
+  facadeComposition?: VisualFacadeComposition;
   facades: VisualFacadeObservation[];
   site: {
     stairs?: boolean;
@@ -194,6 +217,12 @@ export interface SemanticFacade {
   doors: SemanticOpening[];
 }
 
+export interface SemanticFacadeComposition {
+  components: VisualFacadeComponent[];
+  confidence: number;
+  sourceImageIds: string[];
+}
+
 export interface SemanticMassing {
   storiesVisible?: number;
   stepped: boolean;
@@ -215,6 +244,7 @@ export interface SemanticSiteModel {
   geometry: SiteGeometry;
   storiesApprox?: FusedValue<number>;
   massing?: SemanticMassing;
+  facadeComposition?: SemanticFacadeComposition;
   roof: FusedValue<{
     type: RoofType;
     color?: string;

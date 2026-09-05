@@ -1,5 +1,8 @@
 import type {
   RoofType,
+  FacadeComponentKind,
+  VisualFacadeComponent,
+  VisualFacadeComposition,
   VisualFacadeObservation,
   VisualMassingObservation,
   VisualMassingVolume,
@@ -10,6 +13,7 @@ import type {
 
 const ROOF_TYPES = new Set<RoofType>(["flat", "gable", "hip", "shed", "mansard", "unknown"]);
 const WALL_NAMES = new Set<WallName>(["front", "rear", "left", "right", "unknown"]);
+const FACADE_COMPONENT_KINDS = new Set<FacadeComponentKind>(["volume", "tower", "balcony", "chimney", "other"]);
 
 export interface OllamaVisionOptions {
   baseUrl?: string;
@@ -66,6 +70,42 @@ function massingVolume(value: unknown): VisualMassingVolume | undefined {
   };
 }
 
+function facadeComponent(value: unknown): VisualFacadeComponent | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const record = value as Record<string, unknown>;
+  const rawKind = typeof record.kind === "string" ? record.kind.toLowerCase() : "other";
+  const kind: FacadeComponentKind = FACADE_COMPONENT_KINDS.has(rawKind as FacadeComponentKind) ? rawKind as FacadeComponentKind : "other";
+  const rawSetback = typeof record.setback === "string" ? record.setback.toLowerCase() : "unknown";
+  const setback = rawSetback === "none" || rawSetback === "slight" || rawSetback === "moderate" || rawSetback === "deep" ? rawSetback : "unknown";
+  const rawRoof = typeof record.roofType === "string" ? record.roofType.toLowerCase() : "unknown";
+  const roofType = ROOF_TYPES.has(rawRoof as RoofType) ? rawRoof as RoofType : undefined;
+  const bottom = clamp01(record.bottom, 0);
+  const top = Math.max(bottom + 0.08, clamp01(record.top, 1));
+  return {
+    kind,
+    x: clamp01(record.x, 0.5),
+    width: Math.max(0.08, clamp01(record.width, 0.4)),
+    bottom,
+    top: Math.min(1, top),
+    depthFraction: Number.isFinite(Number(record.depthFraction)) ? Math.max(0.2, Math.min(1, Number(record.depthFraction))) : undefined,
+    setback,
+    roofType,
+    color: typeof record.color === "string" ? record.color : undefined,
+    material: typeof record.material === "string" ? record.material : undefined,
+    confidence: clamp01(record.confidence, 0.6),
+  };
+}
+
+function facadeComposition(value: unknown): VisualFacadeComposition | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const record = value as Record<string, unknown>;
+  const components = Array.isArray(record.components)
+    ? record.components.map(facadeComponent).filter((item): item is VisualFacadeComponent => Boolean(item))
+    : [];
+  if (!components.length) return undefined;
+  return { components, confidence: clamp01(record.confidence, 0.6) };
+}
+
 function massing(value: unknown): VisualMassingObservation | undefined {
   if (!value || typeof value !== "object") return undefined;
   const record = value as Record<string, unknown>;
@@ -115,6 +155,7 @@ export function normalizeVisualObservation(sourceImageId: string, value: unknown
       rooftopDeck: typeof rawRoof.rooftopDeck === "boolean" ? rawRoof.rooftopDeck : undefined,
     },
     massing: massing(record.massing),
+    facadeComposition: facadeComposition(record.facadeComposition),
     facades: Array.isArray(record.facades) ? record.facades.map(facade).filter((item): item is VisualFacadeObservation => Boolean(item)) : [],
     site: {
       stairs: typeof rawSite.stairs === "boolean" ? rawSite.stairs : undefined,
@@ -144,6 +185,8 @@ function prompt(options: OllamaVisionOptions) {
     "For rooftopDeck specifically, report true only when a rooftop deck/guard/terrace is directly visible, false only when the roof is sufficiently visible to rule one out, otherwise null.",
     "Enumerate EVERY distinct visible window and door separately. Do not collapse a row of openings into one representative opening and do not report only the most obvious opening.",
     "MASSING IS REQUIRED when the target is visible: describe each visible street-facing floor/volume separately instead of treating the measured footprint as one full-height extrusion.",
+    "FACADE COMPOSITION IS REQUIRED when the target is visible: identify distinct architectural pieces across the street-facing elevation, such as separate wings, a projecting tower, balcony, chimney, or materially distinct volume. Do not collapse materially or geometrically distinct pieces into one box.",
+    "For facadeComposition components, x is the component center from 0 left to 1 right in the target-facing image, width is its facade-width fraction, bottom/top are vertical fractions of the complete visible target building from 0 bottom to 1 highest roofline, and depthFraction is its estimated fraction of the measured footprint depth. Use only geometry clearly visible in this image.",
     "For massing.volumes, widthFraction and depthFraction are fractions of the measured footprint envelope, horizontalCenter is 0 left to 1 right as seen from the target-facing camera, and setback describes how far that level sits behind the street-facing plane.",
     "Set massing.stepped=true when floors/volumes visibly terrace, step back, cantilever, or have different street-facing planes. Do not infer hidden rear geometry.",
     "Scan each visible target facade left-to-right and bottom-to-top before finalizing the windows and doors arrays. Include partially visible openings when their position is clear, with lower confidence.",
@@ -156,6 +199,8 @@ function prompt(options: OllamaVisionOptions) {
     "storiesApprox: integer when inferable",
     "roof: {type, color?, material?, rooftopDeck?: boolean|null}",
     "massing: {storiesVisible?: integer, stepped?: boolean, confidence: number 0..1, volumes: array}",
+    "facadeComposition: {confidence: number 0..1, components: array}",
+    "Each facadeComposition component: {kind: volume|tower|balcony|chimney|other, x: number 0..1, width: number 0..1, bottom: number 0..1, top: number 0..1, depthFraction?: number 0.2..1, setback: none|slight|moderate|deep|unknown, roofType?: flat|gable|hip|shed|unknown, color?: string, material?: string, confidence: number 0..1}",
     "Each massing volume: {level: integer starting at 0, widthFraction: number 0.25..1, depthFraction?: number 0.3..1, horizontalCenter: number 0..1, setback: none|slight|moderate|deep|unknown, color?: string, material?: string, confidence: number 0..1}",
     "facades: array of {wall, confidence, colors: string[], materials: string[], windows: opening[], doors: opening[]}",
     "Each opening: {x: number 0..1, y: number 0..1, width: number 0..1, height: number 0..1, confidence: number 0..1, color?: string, material?: string, shape?: rect|arched|round|other}",

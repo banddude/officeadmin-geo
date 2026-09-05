@@ -26,4 +26,27 @@ describe("Ollama visual observation normalization", () => {
     expect(observation.massing?.volumes).toHaveLength(3);
     expect(observation.massing?.volumes[2]?.setback).toBe("moderate");
   });
+  it("normalizes distinct facade components", () => {
+    const observation = normalizeVisualObservation("frame-current", {
+      visible: true,
+      confidence: 0.93,
+      roof: { type: "flat" },
+      facadeComposition: {
+        confidence: 0.9,
+        components: [
+          { kind: "volume", x: 0.2, width: 0.36, bottom: 0, top: 0.72, depthFraction: 0.7, setback: "slight", color: "wood", confidence: 0.9 },
+          { kind: "tower", x: 0.52, width: 0.18, bottom: 0, top: 1, depthFraction: 0.62, setback: "none", color: "gray", material: "concrete", confidence: 0.95 },
+          { kind: "balcony", x: 0.76, width: 0.32, bottom: 0.56, top: 0.64, depthFraction: 0.35, setback: "none", confidence: 0.8 },
+        ],
+      },
+      facades: [],
+      site: {},
+    });
+
+    expect(observation.facadeComposition?.components).toHaveLength(3);
+    expect(observation.facadeComposition?.components[1]?.kind).toBe("tower");
+    expect(observation.facadeComposition?.components[1]?.top).toBe(1);
+    expect(observation.facadeComposition?.components[2]?.kind).toBe("balcony");
+  });
+
 });
