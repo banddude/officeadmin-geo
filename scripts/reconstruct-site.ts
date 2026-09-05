@@ -1,6 +1,6 @@
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { basename, dirname, join } from "node:path";
+import { dirname, join } from "node:path";
 import { assessFacadeComposition, bearingDegrees, extentPolygon, fuseSiteModel, polygonCentroid, rankStreetImages, selectDistinctStreetImages, type BuildingFeature, type Coordinate, type StreetImageCandidate, type VisualFacadeComponent, type VisualObservation } from "../packages/site-twin-core/src/index.ts";
 import { getLandCoverSamples, getLosAngelesSiteGeometry } from "../packages/provider-lacounty/src/index.ts";
 import { findKartaViewImages } from "../packages/provider-kartaview/src/index.ts";
@@ -112,28 +112,43 @@ function componentSetback(projection: "projects" | "flush" | "setback") {
   return "slight" as const;
 }
 
+function mergeTargetArchitecture(contextObservation: VisualObservation, targetObservation: VisualObservation): VisualObservation {
+  return {
+    ...contextObservation,
+    visible: targetObservation.visible || contextObservation.visible,
+    confidence: Math.max(contextObservation.confidence, targetObservation.confidence),
+    storiesApprox: targetObservation.storiesApprox ?? contextObservation.storiesApprox,
+    roof: targetObservation.roof ?? contextObservation.roof,
+    massing: targetObservation.massing ?? contextObservation.massing,
+    facadeComposition: targetObservation.facadeComposition ?? contextObservation.facadeComposition,
+    facades: targetObservation.facades.length ? targetObservation.facades : contextObservation.facades,
+    site: contextObservation.site,
+    notes: [...new Set([...(contextObservation.notes ?? []), ...(targetObservation.notes ?? [])])],
+  };
+}
+
+function mergeTargetArchitecture(fullFrame: VisualObservation, targetCrop: VisualObservation): VisualObservation {
+  return {
+    ...fullFrame,
+    visible: fullFrame.visible || targetCrop.visible,
+    confidence: Math.max(fullFrame.confidence, targetCrop.confidence),
+    storiesApprox: targetCrop.storiesApprox ?? fullFrame.storiesApprox,
+    roof: targetCrop.roof ?? fullFrame.roof,
+    massing: targetCrop.massing ?? fullFrame.massing,
+    facadeComposition: targetCrop.facadeComposition ?? fullFrame.facadeComposition,
+    facades: targetCrop.facades.length ? targetCrop.facades : fullFrame.facades,
+    // Site context belongs to the uncropped street frame. A tight building crop is
+    // intentionally not allowed to erase retaining walls, stairs, curb, or vegetation.
+    site: fullFrame.site,
+    notes: [...new Set([...(fullFrame.notes ?? []), ...(targetCrop.notes ?? [])])],
+  };
+}
+
 async function refinePrimaryFacade(
-  image: StreetImageCandidate,
-  centeredBytes: Buffer,
-  building: BuildingFeature,
+  houseBytes: Buffer,
   modelName: string,
-  targetDescription?: string,
+  localizationConfidence = 1,
 ) {
-  const centeredBase64 = centeredBytes.toString("base64");
-  const localized = await locateTargetHouseWithOllama(centeredBase64, {
-    model: modelName,
-    context: {
-      targetBearingDeg: image.bearingToTargetDeg,
-      expectedBuildingHeightM: building.heightM,
-      targetDescription,
-    },
-  });
-  if (!localized.visible || localized.confidence < 0.45) {
-    console.warn(`  target-house localization rejected: visible=${localized.visible} confidence=${localized.confidence.toFixed(2)}`);
-    return undefined;
-  }
-  console.log(`  localized house bbox x=${localized.x.toFixed(2)} y=${localized.y.toFixed(2)} w=${localized.width.toFixed(2)} h=${localized.height.toFixed(2)} confidence=${localized.confidence.toFixed(2)}`);
-  const houseBytes = await cropImageRegion(centeredBytes, localized, { paddingFraction: 0.035 });
   const bands = await analyzeFacadeBandsWithOllama(houseBytes.toString("base64"), { model: modelName });
   if (bands.length < 2) return undefined;
 
@@ -170,7 +185,7 @@ async function refinePrimaryFacade(
       hasDoor: region.hasDoor,
       deckLocation: region.deckLocation,
       railColor: region.railColor,
-      confidence: Math.min(0.98, (band.confidence + region.confidence + localized.confidence) / 3),
+      confidence: Math.min(0.98, (band.confidence + region.confidence + localizationConfidence) / 3),
     });
     console.log(`  ${position} facade: ${region.kind} ${region.wallColor ?? "unknown"}/${region.wallMaterial ?? "unknown"} height=${relativeHeight} windows=${region.windowCount ?? "?"} deck=${region.deckLocation ?? "unknown"}`);
     cursor += band.widthFraction;
@@ -178,7 +193,7 @@ async function refinePrimaryFacade(
   const confidence = components.reduce((sum, component) => sum + component.confidence, 0) / components.length;
   const composition = { components, confidence };
   const quality = assessFacadeComposition(composition);
-  console.log(`  facade quality: coverage=${(quality.horizontalCoverage * 100).toFixed(0)}% span=${quality.leftEdge.toFixed(2)}..${quality.rightEdge.toFixed(2)} roof=${quality.maxTop.toFixed(2)} ${quality.acceptable ? "PASS" : `REJECT (${quality.reasons.join("; ")})`}`);
+  console.log(`  facade quality: coverage=${(quality.horizontalCoverage * 100).toFixed(0)}% span=${quality.leftEdge.toFixed(2)}..${quality.rightEdge.toFixed(2)} roof=${quality.maxTop.toFixed(2)} score=${quality.structuralScore.toFixed(3)} ${quality.acceptable ? "PASS" : `REJECT (${quality.reasons.join("; ")})`}`);
   return { composition, quality };
 }
 
@@ -303,7 +318,7 @@ async function main() {
           const { bytes } = await downloadImage(image, workDir, centeredFov);
           console.log(`Analyzing ${image.provider}:${image.id} with ${options.model}${centeredFov ? ` fov=${centeredFov.toFixed(1)}deg` : ""}...`);
           const targetDescription = image.provider === "google-streetview-research"
-            ? `Target address is ${options.address}. This image was programmatically cropped to face the target parcel, so the target should be near the center of frame. Do not describe a different building if the target is occluded.`
+            ? `Target address is ${options.address}. This image was programmatically cropped to face the target parcel, so the target should be near the center of frame. Do not describe a different building if the target is occluded.${isPrimaryResearchView ? " For facadeComposition, cover the complete visible target-house width and keep primary masses separate where facade plane, height, or dominant wall material clearly changes." : ""}`
             : `Target address is ${options.address}. The target is the property near the target coordinate, not merely any nearby house.`;
           let observation = await analyzeImageWithOllama(image.id, bytes.toString("base64"), {
             model: options.model,
@@ -326,28 +341,30 @@ async function main() {
               localizedTargets.push({ imageId: image.id, region });
               console.log(`  target bbox: x=${region.x.toFixed(3)} y=${region.y.toFixed(3)} w=${region.width.toFixed(3)} h=${region.height.toFixed(3)} confidence=${region.confidence.toFixed(2)} visible=${region.visible}`);
               if (region.visible && region.confidence >= 0.45) {
-                const targetBytes = await cropImageRegion(bytes, region, { paddingFraction: 0.1 });
+                const targetBytes = await cropImageRegion(bytes, region, { paddingFraction: 0.06 });
                 const targetObservation = await analyzeImageWithOllama(image.id, targetBytes.toString("base64"), {
                   model: options.model,
                   context: {
                     expectedBuildingHeightM: primary.heightM,
-                    targetDescription: `This image is already cropped tightly around the target building at ${options.address}. Analyze only this building. Edge vegetation may remain from occlusion, but it is not architecture.`,
+                    targetDescription: `This image is already cropped tightly around the target building at ${options.address}. Analyze only this building. Reconstruct the complete visible facade from left edge to right edge. Keep large architectural masses separate where plane, height, or dominant material clearly changes. Edge vegetation may remain from occlusion, but it is not architecture.`,
                   },
                 });
                 observation = mergeTargetArchitecture(observation, targetObservation);
                 if (targetObservation.visible && targetObservation.confidence >= 0.45) {
-                  let refined = await refinePrimaryFacade(targetBytes, options.model);
-                  if (refined?.quality.acceptable) {
+                  const targetQuality = assessFacadeComposition(targetObservation.facadeComposition);
+                  const refined = await refinePrimaryFacade(targetBytes, options.model, region.confidence);
+                  const refinedWins = refined?.quality.acceptable
+                    && (!targetQuality.acceptable || refined.quality.structuralScore > targetQuality.structuralScore);
+                  if (refinedWins && refined) {
                     observation.facadeComposition = refined.composition;
-                  } else if (refined) {
-                    const fallbackQuality = assessFacadeComposition(targetObservation.facadeComposition);
-                    if (fallbackQuality.acceptable) {
-                      observation.facadeComposition = targetObservation.facadeComposition;
-                      console.warn(`  focused band composition rejected; using complete target-crop composition instead`);
-                    } else {
-                      observation.facadeComposition = undefined;
-                      console.warn(`  refusing incomplete facade composition: ${refined.quality.reasons.join("; ")}`);
-                    }
+                    console.log(`  selected focused facade score=${refined.quality.structuralScore.toFixed(3)} over target-crop=${targetQuality.structuralScore.toFixed(3)}`);
+                  } else if (targetQuality.acceptable) {
+                    observation.facadeComposition = targetObservation.facadeComposition;
+                    console.log(`  selected target-crop facade score=${targetQuality.structuralScore.toFixed(3)} over focused=${refined?.quality.structuralScore.toFixed(3) ?? "n/a"}`);
+                  } else {
+                    observation.facadeComposition = undefined;
+                    const reasons = refined?.quality.reasons.length ? refined.quality.reasons : targetQuality.reasons;
+                    console.warn(`  refusing incomplete facade composition: ${reasons.join("; ") || "no acceptable target-facade parse"}`);
                   }
                 }
               }
