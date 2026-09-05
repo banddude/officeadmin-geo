@@ -58,8 +58,8 @@ describe("facade composition quality", () => {
     const coarse = assessFacadeComposition({
       confidence: 0.9,
       components: [
-        { kind: "tower", x: 0.25, width: 0.5, bottom: 0.04, top: 1, color: "gray", material: "concrete", confidence: 0.9 },
-        { kind: "volume", x: 0.75, width: 0.5, bottom: 0.04, top: 0.82, color: "beige", material: "stucco", confidence: 0.9 },
+        { kind: "tower", x: 0.2, width: 0.4, bottom: 0.04, top: 1, color: "gray", material: "concrete", confidence: 0.9 },
+        { kind: "volume", x: 0.7, width: 0.6, bottom: 0.04, top: 0.82, color: "beige", material: "stucco", confidence: 0.9 },
       ],
     });
     const detailed = assessFacadeComposition({
