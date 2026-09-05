@@ -221,7 +221,9 @@ function defaultCameraTarget(model: SemanticSiteModel): [number, number, number]
     const storyHeight = Math.max(2.7, Math.min(3.1, height / levels));
     const visibleHeight = Math.min(height, storyHeight * levels);
     const topY = buildingTopY(building, model);
-    return [x, topY - visibleHeight * 0.46, z];
+    // Aim below the architectural midpoint so a steep-hillside street and
+    // retaining foreground remain in frame instead of filling the shot with sky.
+    return [x, topY - visibleHeight * 0.74, z];
   }
   return [x, baseY + Math.min(4.8, height * 0.48), z];
 }
@@ -256,10 +258,14 @@ function defaultCameraPosition(model: SemanticSiteModel, view: "facade" | "overv
   const dz = sourceZ - target[2];
   const distance = Math.hypot(dx, dz);
   if (distance < 1) return [target[0] + 22, target[1] + 6, target[2] + 22];
-  const horizontalDistance = Math.max(37, Math.min(44, distance * 1.55));
+  const horizontalDistance = Math.max(40, Math.min(46, distance * 2.05));
+  const streetY = terrainHeightAtLocal(model, sourceX, sourceZ);
+  // A low, slightly elevated game-camera makes the site read from the street.
+  // Keep enough height for the hillside overview while never floating above the roof.
+  const cameraY = Math.max(streetY + 4.6, target[1] - 5.2);
   return [
     target[0] + (dx / distance) * horizontalDistance,
-    target[1] + 7.8,
+    cameraY,
     target[2] + (dz / distance) * horizontalDistance,
   ];
 }
@@ -324,11 +330,11 @@ function ContextBuilding({ building, model }: { building: BuildingFeature; model
   return (
     <group>
       <mesh geometry={plinthGeometry} castShadow receiveShadow>
-        <meshStandardMaterial color="#8e9088" roughness={0.98} side={THREE.DoubleSide} />
+        <meshStandardMaterial color="#9b9c94" roughness={0.98} side={THREE.DoubleSide} />
       </mesh>
       <mesh position={[0, visibleBaseY, 0]} castShadow receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
         <extrudeGeometry args={[shape, { depth: visibleHeight, bevelEnabled: true, bevelSize: 0.035, bevelThickness: 0.035, bevelSegments: 1 }]} />
-        <meshStandardMaterial color={palette.wall} roughness={0.88} />
+        <meshStandardMaterial color={palette.wall} roughness={0.94} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, topY + 0.04, 0]} receiveShadow>
         <shapeGeometry args={[shape]} />
@@ -904,33 +910,67 @@ function LowPolyTree({ x, y, z, scale, tone }: { x: number; y: number; z: number
   );
 }
 
+function LowPolyShrub({ x, y, z, scale, tone }: { x: number; y: number; z: number; scale: number; tone: number }) {
+  const colors = ["#557c46", "#6f9254", "#86a667", "#496e43"];
+  const color = colors[tone % colors.length]!;
+  return (
+    <group position={[x, y + 0.22, z]} scale={scale} rotation={[0, ((tone * 31) % 360) * Math.PI / 180, 0]}>
+      <mesh castShadow receiveShadow scale={[1.25, 0.72, 1]}>
+        <dodecahedronGeometry args={[0.62, 0]} />
+        <meshStandardMaterial color={color} roughness={1} flatShading />
+      </mesh>
+      {tone % 3 === 0 ? (
+        <mesh position={[0.52, 0.08, -0.16]} castShadow scale={[0.72, 0.55, 0.68]}>
+          <dodecahedronGeometry args={[0.48, 0]} />
+          <meshStandardMaterial color={COLORS.treeLight} roughness={1} flatShading />
+        </mesh>
+      ) : null}
+    </group>
+  );
+}
+
 function VegetationLayer({ model }: { model: SemanticSiteModel }) {
-  const clusters = new Map<string, { x: number; z: number; count: number }>();
+  const treeClusters = new Map<string, { x: number; z: number; count: number }>();
+  const shrubClusters = new Map<string, { x: number; z: number; count: number; tall: boolean }>();
   for (const sample of model.geometry.groundCover) {
-    if (sample.className !== "tree_canopy") continue;
     const [x, z] = localMeters([sample.coordinate.longitude, sample.coordinate.latitude], model.center);
-    const cellSize = 7.5;
-    const key = `${Math.round(x / cellSize)}|${Math.round(z / cellSize)}`;
-    const existing = clusters.get(key);
-    if (existing) {
-      existing.x += x;
-      existing.z += z;
-      existing.count += 1;
-    } else clusters.set(key, { x, z, count: 1 });
+    if (sample.className === "tree_canopy") {
+      const cellSize = 7.5;
+      const key = `${Math.round(x / cellSize)}|${Math.round(z / cellSize)}`;
+      const existing = treeClusters.get(key);
+      if (existing) { existing.x += x; existing.z += z; existing.count += 1; }
+      else treeClusters.set(key, { x, z, count: 1 });
+    } else if (sample.className === "grass_shrubs" || sample.className === "tall_shrubs") {
+      const cellSize = sample.className === "tall_shrubs" ? 4.8 : 5.8;
+      const key = `${Math.round(x / cellSize)}|${Math.round(z / cellSize)}|${sample.className}`;
+      const existing = shrubClusters.get(key);
+      if (existing) { existing.x += x; existing.z += z; existing.count += 1; }
+      else shrubClusters.set(key, { x, z, count: 1, tall: sample.className === "tall_shrubs" });
+    }
   }
   const target = primaryBuilding(model);
   const targetCenter = target ? polygonCentroid(target.polygon) : model.center;
   const [targetX, targetZ] = localMeters([targetCenter.longitude, targetCenter.latitude], model.center);
-  const nearby = [...clusters.values()]
+  const nearbyTrees = [...treeClusters.values()]
     .map((cluster) => ({ ...cluster, x: cluster.x / cluster.count, z: cluster.z / cluster.count }))
     .sort((a, b) => Math.hypot(a.x - targetX, a.z - targetZ) - Math.hypot(b.x - targetX, b.z - targetZ))
-    .slice(0, 42);
+    .slice(0, 38);
+  const nearbyShrubs = [...shrubClusters.values()]
+    .map((cluster) => ({ ...cluster, x: cluster.x / cluster.count, z: cluster.z / cluster.count }))
+    .filter((cluster) => Math.hypot(cluster.x - targetX, cluster.z - targetZ) < 48)
+    .sort((a, b) => Math.hypot(a.x - targetX, a.z - targetZ) - Math.hypot(b.x - targetX, b.z - targetZ))
+    .slice(0, 34);
   return (
     <group>
-      {nearby.map((cluster, index) => {
+      {nearbyTrees.map((cluster, index) => {
         const y = terrainHeightAtLocal(model, cluster.x, cluster.z);
-        const scale = 0.78 + ((index * 37) % 23) / 50;
-        return <LowPolyTree key={`${cluster.x.toFixed(1)}-${cluster.z.toFixed(1)}`} x={cluster.x} y={y} z={cluster.z} scale={scale} tone={index} />;
+        const scale = 0.74 + ((index * 37) % 23) / 52;
+        return <LowPolyTree key={`tree-${cluster.x.toFixed(1)}-${cluster.z.toFixed(1)}`} x={cluster.x} y={y} z={cluster.z} scale={scale} tone={index} />;
+      })}
+      {nearbyShrubs.map((cluster, index) => {
+        const y = terrainHeightAtLocal(model, cluster.x, cluster.z);
+        const scale = (cluster.tall ? 1.15 : 0.78) + ((index * 19) % 11) / 35;
+        return <LowPolyShrub key={`shrub-${cluster.x.toFixed(1)}-${cluster.z.toFixed(1)}`} x={cluster.x} y={y} z={cluster.z} scale={scale} tone={index} />;
       })}
     </group>
   );
@@ -1013,9 +1053,9 @@ function SceneContents({ model, debug }: { model: SemanticSiteModel; debug: bool
       <color attach="background" args={["#b9d8ea"]} />
       <fog attach="fog" args={["#c7ddea", 125, 245]} />
       <Sky sunPosition={[18, 16, -9]} turbidity={2.3} rayleigh={0.72} mieCoefficient={0.003} mieDirectionalG={0.76} />
-      <hemisphereLight args={["#d9efff", "#8e775e", 0.82]} />
-      <ambientLight intensity={0.18} />
-      <directionalLight color="#fff0d2" position={[28, 38, -18]} intensity={3.25} castShadow
+      <hemisphereLight args={["#d9efff", "#967f66", 0.98]} />
+      <ambientLight intensity={0.24} />
+      <directionalLight color="#fff0d2" position={[28, 38, -18]} intensity={2.85} castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
         shadow-camera-left={-80}
@@ -1025,7 +1065,7 @@ function SceneContents({ model, debug }: { model: SemanticSiteModel; debug: bool
         shadow-bias={-0.00018}
         shadow-radius={3}
       />
-      <directionalLight color="#b9d9f2" position={[-24, 18, 28]} intensity={0.42} />
+      <directionalLight color="#b9d9f2" position={[-24, 18, 28]} intensity={0.56} />
       <ParcelGround model={model} debug={debug} />
       <StreetContext model={model} />
       <LocalStreetApron model={model} />
@@ -1049,7 +1089,7 @@ export function SiteTwinScene({ model, debug = false, className, view = "facade"
       <Canvas
         key={view}
         shadows
-        camera={{ position: cameraPosition, fov: view === "facade" ? 42 : 46, near: 0.1, far: 500 }}
+        camera={{ position: cameraPosition, fov: view === "facade" ? 48 : 46, near: 0.1, far: 500 }}
         dpr={[1, 1.75]}
         gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.08 }}
         onCreated={({ gl }) => { gl.outputColorSpace = THREE.SRGBColorSpace; }}
