@@ -10,7 +10,8 @@ function feet(meters?: number) {
 export function App() {
   const [model, setModel] = useState<SemanticSiteModel | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [debug, setDebug] = useState(true);
+  const [debug, setDebug] = useState(false);
+  const [showData, setShowData] = useState(false);
   const [view, setView] = useState<"facade" | "overview">("facade");
 
   useEffect(() => {
@@ -55,8 +56,9 @@ export function App() {
           <div className="view-controls">
             <button className={view === "facade" ? "toggle active" : "toggle"} onClick={() => setView("facade")}>House</button>
             <button className={view === "overview" ? "toggle active" : "toggle"} onClick={() => setView("overview")}>Hill</button>
+            <button className={showData ? "toggle active" : "toggle"} onClick={() => setShowData((value) => !value)}>Data</button>
             <button className={debug ? "toggle active" : "toggle"} onClick={() => setDebug((value) => !value)}>
-              {debug ? "Debug on" : "Debug off"}
+              {debug ? "Debug on" : "Debug"}
             </button>
           </div>
         </header>
@@ -64,7 +66,7 @@ export function App() {
         <div className="hint">Drag to orbit. Scroll to zoom.</div>
       </section>
 
-      <aside className="inspector">
+      {showData ? <aside className="inspector">
         <div className="inspector-top">
           <p className="eyebrow">RECONSTRUCTION</p>
           <h2>{model.address}</h2>
@@ -124,7 +126,7 @@ export function App() {
             {model.warnings.map((warning) => <p key={warning}>{warning}</p>)}
           </section>
         ) : null}
-      </aside>
+      </aside> : null}
     </main>
   );
 }
