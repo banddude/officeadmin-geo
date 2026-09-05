@@ -208,6 +208,13 @@ function defaultCameraTarget(model: SemanticSiteModel): [number, number, number]
   const [x, z] = localMeters([centroid.longitude, centroid.latitude], model.center);
   const baseY = buildingBaseY(building, model);
   const height = renderedBuildingHeightM(building, (model.storiesApprox?.value ?? 2) * 3.1);
+  if (model.massing?.storiesVisible) {
+    const levels = Math.max(1, model.massing.storiesVisible);
+    const storyHeight = Math.max(2.7, Math.min(3.1, height / levels));
+    const visibleHeight = Math.min(height, storyHeight * levels);
+    const topY = buildingTopY(building, model);
+    return [x, topY - visibleHeight * 0.46, z];
+  }
   return [x, baseY + Math.min(4.8, height * 0.48), z];
 }
 
@@ -241,10 +248,10 @@ function defaultCameraPosition(model: SemanticSiteModel, view: "facade" | "overv
   const dz = sourceZ - target[2];
   const distance = Math.hypot(dx, dz);
   if (distance < 1) return [target[0] + 22, target[1] + 6, target[2] + 22];
-  const horizontalDistance = Math.max(29, Math.min(36, distance * 1.15));
+  const horizontalDistance = Math.max(37, Math.min(44, distance * 1.55));
   return [
     target[0] + (dx / distance) * horizontalDistance,
-    target[1] + 7.4,
+    target[1] + 7.8,
     target[2] + (dz / distance) * horizontalDistance,
   ];
 }
@@ -256,11 +263,11 @@ function buildingTopY(building: BuildingFeature, model: SemanticSiteModel) {
   return buildingBaseY(building, model) + renderedBuildingHeightM(building, 6.2);
 }
 
-function terrainConformingWallGeometry(building: BuildingFeature, model: SemanticSiteModel) {
+function terrainConformingWallGeometry(building: BuildingFeature, model: SemanticSiteModel, topOverrideY?: number) {
   const ring = building.polygon.length > 1 && building.polygon[0]?.[0] === building.polygon.at(-1)?.[0] && building.polygon[0]?.[1] === building.polygon.at(-1)?.[1]
     ? building.polygon.slice(0, -1)
     : building.polygon;
-  const topY = buildingTopY(building, model);
+  const topY = topOverrideY ?? buildingTopY(building, model);
   const vertices: number[] = [];
   const indices: number[] = [];
   ring.forEach((aPosition, index) => {
@@ -367,10 +374,14 @@ function StylizedMassingBuilding({ building, model }: { building: BuildingFeatur
   const axes = targetMassingAxes(building, model);
   const totalHeight = renderedBuildingHeightM(building, (model.storiesApprox?.value ?? 2) * 3.1);
   const levels = Math.max(massing.storiesVisible ?? 0, ...massing.volumes.map((volume) => volume.level + 1), 1);
-  const floorHeight = totalHeight / levels;
-  const baseY = buildingBaseY(building, model);
+  const storyHeight = Math.max(2.7, Math.min(3.1, totalHeight / levels));
+  const visibleHeight = Math.min(totalHeight, storyHeight * levels);
+  const topY = buildingTopY(building, model);
+  const visibleBaseY = topY - visibleHeight;
   const front = model.facades.find((facade) => facade.wall === "front");
+  const fusedWallColor = mapColor(front?.colors.value ?? ["white"], COLORS.warmWhite);
   const volumes = massing.volumes;
+  const plinthGeometry = terrainConformingWallGeometry(building, model, visibleBaseY);
 
   const volumeLayout = volumes.map((volume) => {
     const width = Math.max(4.2, axes.width * Math.max(0.42, Math.min(1, volume.widthFraction)));
@@ -383,7 +394,7 @@ function StylizedMassingBuilding({ building, model }: { building: BuildingFeatur
       ...volume, width, depth, frontN, centerN, centerT,
       x: axes.cx + axes.tx * centerT + axes.nx * centerN,
       z: axes.cz + axes.tz * centerT + axes.nz * centerN,
-      y: baseY + floorHeight * (volume.level + 0.5),
+      y: visibleBaseY + storyHeight * (volume.level + 0.5),
     };
   }).sort((a, b) => a.level - b.level);
 
@@ -404,16 +415,19 @@ function StylizedMassingBuilding({ building, model }: { building: BuildingFeatur
 
   return (
     <group>
+      <mesh geometry={plinthGeometry} castShadow receiveShadow>
+        <meshStandardMaterial color="#999b94" roughness={0.94} side={THREE.DoubleSide} />
+      </mesh>
       {volumeLayout.map((volume, index) => {
-        const wallColor = mapColor([volume.color ?? "white", volume.material ?? "stucco"], COLORS.warmWhite);
+        const wallColor = fusedWallColor;
         return (
           <group key={`massing-${volume.level}`}>
             <mesh position={[volume.x, volume.y, volume.z]} rotation={[0, axes.rotationY, 0]} castShadow receiveShadow>
-              <boxGeometry args={[volume.width, floorHeight - 0.08, volume.depth]} />
+              <boxGeometry args={[volume.width, storyHeight - 0.08, volume.depth]} />
               <meshStandardMaterial color={wallColor} roughness={0.82} metalness={0.01} />
             </mesh>
             {index > 0 ? (
-              <mesh position={[volume.x + axes.nx * 0.12, baseY + floorHeight * volume.level + 0.035, volume.z + axes.nz * 0.12]} rotation={[0, axes.rotationY, 0]} castShadow receiveShadow>
+              <mesh position={[volume.x + axes.nx * 0.12, visibleBaseY + storyHeight * volume.level + 0.035, volume.z + axes.nz * 0.12]} rotation={[0, axes.rotationY, 0]} castShadow receiveShadow>
                 <boxGeometry args={[volume.width + 0.35, 0.07, volume.depth + 0.25]} />
                 <meshStandardMaterial color={COLORS.concrete} roughness={0.88} />
               </mesh>
@@ -426,8 +440,8 @@ function StylizedMassingBuilding({ building, model }: { building: BuildingFeatur
         const layout = layoutForY(window.y);
         const point = pointOnFront(window.x, layout);
         const width = Math.max(0.85, axes.width * Math.min(0.32, window.width));
-        const height = Math.max(0.85, totalHeight * Math.min(0.28, window.height));
-        const y = baseY + Math.max(height / 2 + 0.32, window.y * totalHeight);
+        const height = Math.max(0.85, visibleHeight * Math.min(0.28, window.height));
+        const y = visibleBaseY + Math.max(height / 2 + 0.32, window.y * visibleHeight);
         return (
           <group key={`massing-window-${index}`} position={[point.x, y, point.z]} rotation={[0, axes.rotationY, 0]}>
             <mesh><planeGeometry args={[width + 0.16, height + 0.16]} /><meshStandardMaterial color="#263239" roughness={0.42} side={THREE.DoubleSide} /></mesh>
@@ -443,7 +457,7 @@ function StylizedMassingBuilding({ building, model }: { building: BuildingFeatur
         const width = Math.max(0.95, axes.width * Math.min(0.18, door.width));
         const height = Math.max(2.05, Math.min(2.65, totalHeight * door.height));
         return (
-          <group key={`massing-door-${index}`} position={[point.x, baseY + height / 2 + 0.08, point.z]} rotation={[0, axes.rotationY, 0]}>
+          <group key={`massing-door-${index}`} position={[point.x, visibleBaseY + height / 2 + 0.08, point.z]} rotation={[0, axes.rotationY, 0]}>
             <mesh><planeGeometry args={[width + 0.14, height + 0.14]} /><meshStandardMaterial color="#313b3e" roughness={0.5} side={THREE.DoubleSide} /></mesh>
             <mesh position={[0, 0, 0.012]}><planeGeometry args={[width, height]} /><meshStandardMaterial color={COLORS.wood} roughness={0.68} side={THREE.DoubleSide} /></mesh>
           </group>
@@ -453,7 +467,7 @@ function StylizedMassingBuilding({ building, model }: { building: BuildingFeatur
       {(() => {
         const top = volumeLayout.at(-1)!;
         return (
-          <mesh position={[top.x, baseY + totalHeight + 0.16, top.z]} rotation={[0, axes.rotationY, 0]} castShadow receiveShadow>
+          <mesh position={[top.x, topY + 0.16, top.z]} rotation={[0, axes.rotationY, 0]} castShadow receiveShadow>
             <boxGeometry args={[top.width + 0.12, 0.32, top.depth + 0.12]} />
             <meshStandardMaterial color={COLORS.roof} roughness={0.84} />
           </mesh>
@@ -810,14 +824,19 @@ function VegetationLayer({ model }: { model: SemanticSiteModel }) {
       existing.count += 1;
     } else clusters.set(key, { x, z, count: 1 });
   }
+  const target = primaryBuilding(model);
+  const targetCenter = target ? polygonCentroid(target.polygon) : model.center;
+  const [targetX, targetZ] = localMeters([targetCenter.longitude, targetCenter.latitude], model.center);
+  const nearby = [...clusters.values()]
+    .map((cluster) => ({ ...cluster, x: cluster.x / cluster.count, z: cluster.z / cluster.count }))
+    .sort((a, b) => Math.hypot(a.x - targetX, a.z - targetZ) - Math.hypot(b.x - targetX, b.z - targetZ))
+    .slice(0, 42);
   return (
     <group>
-      {[...clusters.values()].slice(0, 34).map((cluster, index) => {
-        const x = cluster.x / cluster.count;
-        const z = cluster.z / cluster.count;
-        const y = terrainHeightAtLocal(model, x, z);
+      {nearby.map((cluster, index) => {
+        const y = terrainHeightAtLocal(model, cluster.x, cluster.z);
         const scale = 0.78 + ((index * 37) % 23) / 50;
-        return <LowPolyTree key={`${x.toFixed(1)}-${z.toFixed(1)}`} x={x} y={y} z={z} scale={scale} tone={index} />;
+        return <LowPolyTree key={`${cluster.x.toFixed(1)}-${cluster.z.toFixed(1)}`} x={cluster.x} y={y} z={cluster.z} scale={scale} tone={index} />;
       })}
     </group>
   );
@@ -900,11 +919,11 @@ function SceneContents({ model, debug }: { model: SemanticSiteModel; debug: bool
       <color attach="background" args={["#dce7e7"]} />
       <fog attach="fog" args={["#dce7e7", 95, 190]} />
       <Sky sunPosition={[7, 12, 5]} turbidity={4.5} rayleigh={1.5} mieCoefficient={0.004} mieDirectionalG={0.78} />
-      <hemisphereLight args={["#f4fbff", "#9a997d", 1.45]} />
-      <ambientLight intensity={0.42} />
+      <hemisphereLight args={["#f4fbff", "#9a997d", 1.05]} />
+      <ambientLight intensity={0.3} />
       <directionalLight
         position={[30, 42, 18]}
-        intensity={3.1}
+        intensity={2.35}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -938,7 +957,7 @@ export function SiteTwinScene({ model, debug = false, className, view = "facade"
         shadows
         camera={{ position: cameraPosition, fov: view === "facade" ? 42 : 46, near: 0.1, far: 500 }}
         dpr={[1, 1.75]}
-        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.08 }}
+        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.0 }}
         onCreated={({ gl }) => { gl.outputColorSpace = THREE.SRGBColorSpace; }}
       >
         <SceneContents model={model} debug={debug} />
