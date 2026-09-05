@@ -216,14 +216,17 @@ function defaultCameraTarget(model: SemanticSiteModel): [number, number, number]
   const [x, z] = localMeters([centroid.longitude, centroid.latitude], model.center);
   const baseY = buildingBaseY(building, model);
   const height = renderedBuildingHeightM(building, (model.storiesApprox?.value ?? 2) * 3.1);
-  if (model.massing?.storiesVisible) {
-    const levels = Math.max(1, model.massing.storiesVisible);
-    const storyHeight = Math.max(2.7, Math.min(3.1, height / levels));
-    const visibleHeight = Math.min(height, storyHeight * levels);
+  const alignment = model.facadeAlignment;
+  const source = alignment
+    ? model.imagery.find((image) => image.id === alignment.sourceImageId)
+    : model.imagery[0];
+  if (model.massing?.storiesVisible && source) {
+    const [sourceX, sourceZ] = localMeters([source.longitude, source.latitude], model.center);
+    const streetY = terrainHeightAtLocal(model, sourceX, sourceZ);
     const topY = buildingTopY(building, model);
-    // Aim below the architectural midpoint so a steep-hillside street and
-    // retaining foreground remain in frame instead of filling the shot with sky.
-    return [x, topY - visibleHeight * 0.74, z];
+    // Street-derived framing keeps asphalt and the hillside base visible while
+    // still fitting the roof in a wide architectural composition.
+    return [x, Math.min(topY - 2.4, streetY + 5.2), z];
   }
   return [x, baseY + Math.min(4.8, height * 0.48), z];
 }
@@ -258,11 +261,12 @@ function defaultCameraPosition(model: SemanticSiteModel, view: "facade" | "overv
   const dz = sourceZ - target[2];
   const distance = Math.hypot(dx, dz);
   if (distance < 1) return [target[0] + 22, target[1] + 6, target[2] + 22];
-  const horizontalDistance = Math.max(36, Math.min(42, distance * 1.9));
+  const horizontalDistance = Math.max(27, Math.min(31, distance * 1.45));
   const streetY = terrainHeightAtLocal(model, sourceX, sourceZ);
-  // A low, slightly elevated game-camera makes the site read from the street.
-  // Keep enough height for the hillside overview while never floating above the roof.
-  const cameraY = Math.max(streetY + 4.6, target[1] - 5.2);
+  // Stay close to the measured Street View position. The extra setback gives the
+  // renderer breathing room while keeping the street, retaining wall, and facade
+  // in one grounded composition instead of a floating aerial view.
+  const cameraY = streetY + 2.05;
   return [
     target[0] + (dx / distance) * horizontalDistance,
     cameraY,
@@ -353,23 +357,25 @@ function ContextBuilding({ building, model, subdued = false }: { building: Build
   if ((building.roofElevationM ?? 0) <= 0 && (building.heightM ?? 0) <= 0) return null;
   const { shape } = shapeFromPolygon(building.polygon, model.center);
   const topY = buildingTopY(building, model);
-  const measuredHeight = renderedBuildingHeightM(building, 6.0);
-  const visibleHeight = Math.max(4.4, Math.min(subdued ? 5.5 : 7.2, building.levels ? building.levels * 2.75 : Math.min(measuredHeight, subdued ? 5.2 : 6.4)));
+  const measuredHeight = renderedBuildingHeightM(building, 5.6);
+  const visibleHeight = Math.max(3.8, Math.min(subdued ? 4.6 : 6.2, building.levels ? building.levels * 2.65 : Math.min(measuredHeight, subdued ? 4.4 : 5.8)));
   const visibleBaseY = topY - visibleHeight;
-  const plinthGeometry = cappedTerrainWallGeometry(building, model, visibleBaseY, subdued ? 1.15 : 1.55);
+  const plinthGeometry = cappedTerrainWallGeometry(building, model, visibleBaseY, subdued ? 0.9 : 1.25);
   const palette = buildingPalette(building.id);
+  const wallColor = subdued ? "#dddcd5" : palette.wall;
+  const roofColor = subdued ? "#b7b9b3" : palette.roof;
   return (
     <group>
       <mesh geometry={plinthGeometry} receiveShadow>
-        <meshStandardMaterial color="#aaa99f" roughness={1} side={THREE.DoubleSide} transparent={subdued} opacity={subdued ? 0.72 : 1} />
+        <meshStandardMaterial color={subdued ? "#c2c0b8" : "#aaa99f"} roughness={1} side={THREE.DoubleSide} />
       </mesh>
       <mesh position={[0, visibleBaseY, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
-        <extrudeGeometry args={[shape, { depth: visibleHeight, bevelEnabled: true, bevelSize: 0.025, bevelThickness: 0.025, bevelSegments: 1 }]} />
-        <meshStandardMaterial color={palette.wall} roughness={0.96} transparent={subdued} opacity={subdued ? 0.68 : 1} />
+        <extrudeGeometry args={[shape, { depth: visibleHeight, bevelEnabled: true, bevelSize: 0.02, bevelThickness: 0.02, bevelSegments: 1 }]} />
+        <meshStandardMaterial color={wallColor} roughness={0.98} />
       </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, topY + 0.035, 0]} receiveShadow>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, topY + 0.03, 0]} receiveShadow>
         <shapeGeometry args={[shape]} />
-        <meshStandardMaterial color={palette.roof} roughness={0.94} side={THREE.DoubleSide} transparent={subdued} opacity={subdued ? 0.72 : 1} />
+        <meshStandardMaterial color={roofColor} roughness={0.96} side={THREE.DoubleSide} />
       </mesh>
     </group>
   );
@@ -387,14 +393,23 @@ function targetMassingAxes(building: BuildingFeature, model: SemanticSiteModel) 
   const [ax, az] = localMeters(a, model.center);
   const [bx, bz] = localMeters(b, model.center);
   const edgeLength = Math.max(0.001, Math.hypot(bx - ax, bz - az));
-  const tx = (bx - ax) / edgeLength;
-  const tz = (bz - az) / edgeLength;
+  let tx = (bx - ax) / edgeLength;
+  let tz = (bz - az) / edgeLength;
 
-  let nx = -tz;
-  let nz = tx;
   const source = model.facadeAlignment
     ? model.imagery.find((image) => image.id === model.facadeAlignment?.sourceImageId)
     : model.imagery[0];
+  if (source) {
+    const [cameraX, cameraZ] = localMeters([source.longitude, source.latitude], model.center);
+    const forwardX = cx - cameraX;
+    const forwardZ = cz - cameraZ;
+    const imageRightX = -forwardZ;
+    const imageRightZ = forwardX;
+    if (tx * imageRightX + tz * imageRightZ < 0) { tx *= -1; tz *= -1; }
+  }
+
+  let nx = -tz;
+  let nz = tx;
   if (source) {
     const [cameraX, cameraZ] = localMeters([source.longitude, source.latitude], model.center);
     if ((cameraX - cx) * nx + (cameraZ - cz) * nz < 0) { nx *= -1; nz *= -1; }
@@ -420,39 +435,431 @@ function setbackMeters(value: string | undefined, level: number) {
   return level === 0 ? 0 : level * 0.18;
 }
 
-function TerracedFoundation({ building, model, axes, visibleBaseY }: {
+function HillsidePodium({
+  model,
+  axes,
+  layout,
+  topY,
+}: {
+  model: SemanticSiteModel;
+  axes: ReturnType<typeof targetMassingAxes>;
+  layout: { width: number; depth: number; centerT: number; centerN: number; frontN: number };
+  topY: number;
+}) {
+  const faceN = layout.frontN + 0.08;
+  const faceX = axes.cx + axes.tx * layout.centerT + axes.nx * faceN;
+  const faceZ = axes.cz + axes.tz * layout.centerT + axes.nz * faceN;
+  const groundY = terrainHeightAtLocal(model, faceX, faceZ);
+  const exposedHeight = Math.max(0.4, topY - groundY);
+  const tierCount = exposedHeight > 3.2 ? 3 : 2;
+  const tierDrop = exposedHeight / tierCount;
+  const terraceRun = Math.max(1.8, Math.min(2.55, layout.depth * 0.32));
+  const baseWidth = Math.max(5.4, layout.width * 1.02);
+
+  return (
+    <group>
+      {Array.from({ length: tierCount }).map((_, index) => {
+        const upperY = topY - tierDrop * index;
+        const lowerY = topY - tierDrop * (index + 1);
+        const n = faceN + terraceRun * index;
+        const width = baseWidth + index * 0.62;
+        const x = axes.cx + axes.tx * layout.centerT + axes.nx * n;
+        const z = axes.cz + axes.tz * layout.centerT + axes.nz * n;
+        const sideY = (upperY + lowerY) / 2;
+        const shelfN = n + terraceRun * 0.54;
+        const shelfX = axes.cx + axes.tx * layout.centerT + axes.nx * shelfN;
+        const shelfZ = axes.cz + axes.tz * layout.centerT + axes.nz * shelfN;
+        return (
+          <group key={`podium-tier-${index}`}>
+            <mesh position={[x, sideY, z]} rotation={[0, axes.rotationY, 0]} receiveShadow castShadow>
+              <boxGeometry args={[width, tierDrop, 0.2]} />
+              <meshStandardMaterial color={index === 0 ? "#aca89f" : index === 1 ? "#b8b3a9" : "#c0bbb0"} roughness={1} />
+            </mesh>
+            <mesh
+              position={[shelfX, lowerY + 0.055, shelfZ]}
+              rotation={[0, axes.rotationY, 0]}
+              receiveShadow
+            >
+              <boxGeometry args={[Math.max(5.0, width - 0.24), 0.11, terraceRun * 0.9]} />
+              <meshStandardMaterial color={index % 2 === 0 ? "#76945d" : "#86a46a"} roughness={1} />
+            </mesh>
+            {index === 0 ? [-1, 1].map((side) => {
+              const t = layout.centerT + side * width / 2;
+              const returnN = n + Math.min(2.1, terraceRun * 0.92) / 2;
+              const sideX = axes.cx + axes.tx * t + axes.nx * returnN;
+              const sideZ = axes.cz + axes.tz * t + axes.nz * returnN;
+              return (
+                <mesh
+                  key={`podium-upper-return-${side}`}
+                  position={[sideX, sideY, sideZ]}
+                  rotation={[0, axes.rotationY + Math.PI / 2, 0]}
+                  receiveShadow
+                  castShadow
+                >
+                  <boxGeometry args={[Math.min(2.1, terraceRun * 0.92), tierDrop, 0.18]} />
+                  <meshStandardMaterial color="#aaa69d" roughness={1} />
+                </mesh>
+              );
+            }) : null}
+            {[-0.3, 0.28].map((offset, shrubIndex) => {
+              const shrubT = layout.centerT + width * offset;
+              const shrubN = shelfN + (shrubIndex ? 0.18 : -0.14);
+              const shrubX = axes.cx + axes.tx * shrubT + axes.nx * shrubN;
+              const shrubZ = axes.cz + axes.tz * shrubT + axes.nz * shrubN;
+              return (
+                <LowPolyShrub
+                  key={`podium-shrub-${index}-${shrubIndex}`}
+                  x={shrubX}
+                  y={lowerY + 0.12}
+                  z={shrubZ}
+                  scale={0.52 + index * 0.06 + shrubIndex * 0.05}
+                  tone={index * 3 + shrubIndex}
+                />
+              );
+            })}
+          </group>
+        );
+      })}
+      <mesh
+        position={[faceX, topY + 0.035, faceZ]}
+        rotation={[0, axes.rotationY, 0]}
+        receiveShadow
+      >
+        <boxGeometry args={[baseWidth + 0.2, 0.08, 0.5]} />
+        <meshStandardMaterial color="#c3bdb1" roughness={0.95} />
+      </mesh>
+    </group>
+  );
+}
+
+function componentSetbackMeters(value: string | undefined) {
+  if (value === "deep") return 1.7;
+  if (value === "moderate") return 1.05;
+  if (value === "slight") return 0.5;
+  return 0;
+}
+
+function facadeComponentColor(color?: string, material?: string) {
+  return mapColor([color ?? "", material ?? ""].filter(Boolean), COLORS.warmWhite);
+}
+
+function BalconyRail({ width, depth }: { width: number; depth: number }) {
+  const railHeight = 0.92;
+  const posts = Math.max(3, Math.round(width / 1.2));
+  return (
+    <group>
+      <mesh position={[0, 0, 0]} castShadow receiveShadow>
+        <boxGeometry args={[width, 0.12, depth]} />
+        <meshStandardMaterial color="#8d735b" roughness={0.86} />
+      </mesh>
+      <mesh position={[0, railHeight, depth / 2 - 0.035]} castShadow>
+        <boxGeometry args={[width, 0.055, 0.055]} />
+        <meshStandardMaterial color="#242b2d" roughness={0.62} metalness={0.18} />
+      </mesh>
+      {Array.from({ length: posts + 1 }).map((_, index) => {
+        const x = -width / 2 + width * (index / posts);
+        return (
+          <mesh key={`rail-post-${index}`} position={[x, railHeight / 2, depth / 2 - 0.035]} castShadow>
+            <boxGeometry args={[0.045, railHeight, 0.045]} />
+            <meshStandardMaterial color="#242b2d" roughness={0.62} metalness={0.18} />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
+function EvidenceSiteFront({
+  building,
+  model,
+  axes,
+  houseBaseY,
+}: {
   building: BuildingFeature;
   model: SemanticSiteModel;
   axes: ReturnType<typeof targetMassingAxes>;
-  visibleBaseY: number;
+  houseBaseY: number;
 }) {
-  const stem = cappedTerrainWallGeometry(building, model, visibleBaseY, 2.0);
-  const terraceCount = model.site.retainingWalls.value ? 3 : 2;
-  const walls = Array.from({ length: terraceCount }, (_, index) => {
-    const n = axes.maxN + 0.7 + index * 1.7;
-    const x = axes.cx + axes.nx * n;
-    const z = axes.cz + axes.nz * n;
-    const ground = terrainHeightAtLocal(model, x, z);
-    const wallHeight = 0.78 + index * 0.18;
-    return { x, z, y: ground + wallHeight / 2 + 0.04, wallHeight, width: Math.max(5.5, axes.width * (0.82 - index * 0.07)) };
+  if (!model.site.retainingWalls.value && !model.site.stairs.value) return null;
+  const parcel = model.geometry.parcel?.polygon ?? building.polygon;
+  const projectedParcel = parcel.map((position) => {
+    const [x, z] = localMeters(position, model.center);
+    const dx = x - axes.cx;
+    const dz = z - axes.cz;
+    return { t: dx * axes.tx + dz * axes.tz, n: dx * axes.nx + dz * axes.nz };
   });
+  const parcelMinT = Math.min(...projectedParcel.map((point) => point.t));
+  const parcelMaxT = Math.max(...projectedParcel.map((point) => point.t));
+  const parcelMaxN = Math.max(...projectedParcel.map((point) => point.n));
+  const wallMinT = Math.max(parcelMinT, axes.minT - 1.4);
+  const wallMaxT = Math.min(parcelMaxT, axes.maxT + 2.2);
+  const wallWidth = Math.max(6, wallMaxT - wallMinT);
+  const wallT = (wallMinT + wallMaxT) / 2;
+  const wallN = Math.max(axes.maxN + 0.8, parcelMaxN - 0.2);
+  const wallX = axes.cx + axes.tx * wallT + axes.nx * wallN;
+  const wallZ = axes.cz + axes.tz * wallT + axes.nz * wallN;
+  const wallGroundY = terrainHeightAtLocal(model, wallX, wallZ);
+  const wallTopY = Math.min(houseBaseY - 0.35, wallGroundY + 2.15);
+  const wallHeight = Math.max(0.75, wallTopY - wallGroundY);
+  const frontFacade = model.facades.find((facade) => facade.wall === "front");
+  const door = [...(frontFacade?.doors ?? [])].sort((a, b) => b.confidence - a.confidence)[0];
+  const stairT = axes.minT + (door?.x ?? 0.62) * axes.width;
+  const stairStartN = wallN - 0.25;
+  const stairEndN = axes.maxN + 0.35;
+  const stairLength = Math.max(1.4, stairStartN - stairEndN);
+  const stepCount = 9;
+  const stepWidth = 1.15;
+
   return (
     <group>
-      <mesh geometry={stem} receiveShadow castShadow>
-        <meshStandardMaterial color="#a9a69d" roughness={0.98} side={THREE.DoubleSide} />
-      </mesh>
-      {walls.map((wall, index) => (
-        <group key={`terrace-${index}`}>
-          <mesh position={[wall.x, wall.y, wall.z]} rotation={[0, axes.rotationY, 0]} receiveShadow castShadow>
-            <boxGeometry args={[wall.width, wall.wallHeight, 0.28]} />
-            <meshStandardMaterial color={index === 0 ? "#aaa69b" : "#b6b1a5"} roughness={1} />
+      {model.site.retainingWalls.value ? (
+        <group>
+          <mesh position={[wallX, wallGroundY + wallHeight / 2, wallZ]} rotation={[0, axes.rotationY, 0]} castShadow receiveShadow>
+            <boxGeometry args={[wallWidth, wallHeight, 0.28]} />
+            <meshStandardMaterial color="#aaa59b" roughness={0.98} />
           </mesh>
-          <mesh position={[wall.x + axes.nx * 0.46, wall.y + wall.wallHeight * 0.42, wall.z + axes.nz * 0.46]} rotation={[0, axes.rotationY, 0]} receiveShadow>
-            <boxGeometry args={[wall.width * 0.88, 0.08, 0.72]} />
-            <meshStandardMaterial color={index % 2 ? "#78975d" : "#6f8f59"} roughness={1} />
+          <mesh position={[wallX, wallTopY + 0.055, wallZ]} rotation={[0, axes.rotationY, 0]} receiveShadow>
+            <boxGeometry args={[wallWidth + 0.08, 0.11, 0.38]} />
+            <meshStandardMaterial color="#c1bbb0" roughness={0.96} />
           </mesh>
         </group>
+      ) : null}
+      {model.site.stairs.value ? Array.from({ length: stepCount }).map((_, index) => {
+        const fraction = index / Math.max(1, stepCount - 1);
+        const n = stairStartN + (stairEndN - stairStartN) * fraction;
+        const x = axes.cx + axes.tx * stairT + axes.nx * n;
+        const z = axes.cz + axes.tz * stairT + axes.nz * n;
+        const y = terrainHeightAtLocal(model, x, z) + 0.09 + index * 0.035;
+        return (
+          <group key={`site-step-${index}`}>
+            <mesh position={[x, y, z]} rotation={[0, axes.rotationY, 0]} castShadow receiveShadow>
+              <boxGeometry args={[stepWidth, 0.16, stairLength / stepCount + 0.08]} />
+              <meshStandardMaterial color="#b8b3a8" roughness={0.98} />
+            </mesh>
+            <mesh position={[x + axes.tx * stepWidth * 0.52, y + 0.58, z]} castShadow>
+              <cylinderGeometry args={[0.025, 0.025, 1.16, 8]} />
+              <meshStandardMaterial color="#252c2e" roughness={0.65} metalness={0.16} />
+            </mesh>
+          </group>
+        );
+      }) : null}
+    </group>
+  );
+}
+
+function EvidenceWindow({ width, height }: { width: number; height: number }) {
+  return (
+    <group>
+      <mesh castShadow><boxGeometry args={[width + 0.1, height + 0.1, 0.07]} /><meshStandardMaterial color="#222b2e" roughness={0.46} /></mesh>
+      <mesh position={[0, 0, 0.043]}><planeGeometry args={[width, height]} /><meshPhysicalMaterial color={COLORS.glass} roughness={0.08} metalness={0.04} clearcoat={0.75} side={THREE.DoubleSide} /></mesh>
+    </group>
+  );
+}
+
+function ComponentFacadeEvidence({ component, axes }: { component: {
+  width: number;
+  height: number;
+  bottomY: number;
+  topY: number;
+  frontN: number;
+  centerT: number;
+  kind: string;
+  windowCount?: number;
+  windowOrientation?: "vertical" | "horizontal" | "mixed" | "unknown";
+  glazing?: "low" | "medium" | "high" | "unknown";
+  hasDoor?: boolean;
+  deckLocation?: "mid" | "roof" | "unknown";
+  railColor?: string;
+  accentColor?: string;
+  accentMaterial?: string;
+}; axes: ReturnType<typeof targetMassingAxes> }) {
+  const frontX = axes.cx + axes.tx * component.centerT + axes.nx * (component.frontN + 0.075);
+  const frontZ = axes.cz + axes.tz * component.centerT + axes.nz * (component.frontN + 0.075);
+  const count = Math.max(0, Math.min(8, component.windowCount ?? (component.glazing === "high" ? 3 : 0)));
+  const windows: Array<{ x: number; y: number; width: number; height: number }> = [];
+  if (count > 0) {
+    if (component.kind === "tower" && component.windowOrientation === "vertical") {
+      const windowWidth = Math.max(0.42, component.width * 0.24);
+      const windowHeight = Math.max(0.72, component.height * Math.min(0.23, 0.72 / count));
+      const usable = component.height * 0.72;
+      for (let index = 0; index < count; index += 1) {
+        windows.push({
+          x: 0,
+          y: component.height * 0.16 + usable * ((index + 0.5) / count),
+          width: windowWidth,
+          height: windowHeight,
+        });
+      }
+    } else if (component.glazing === "high") {
+      const panelCount = Math.max(2, Math.min(4, count));
+      const gap = 0.12;
+      const totalWidth = component.width * 0.78;
+      const panelWidth = Math.max(0.5, (totalWidth - gap * (panelCount - 1)) / panelCount);
+      for (let index = 0; index < panelCount; index += 1) {
+        windows.push({
+          x: -totalWidth / 2 + panelWidth / 2 + index * (panelWidth + gap),
+          y: component.height * 0.61,
+          width: panelWidth,
+          height: Math.max(1.1, component.height * 0.32),
+        });
+      }
+    } else {
+      const shapeHorizontal = component.windowOrientation === "horizontal";
+      const windowWidth = Math.max(0.55, component.width * (shapeHorizontal ? 0.3 : 0.18));
+      const windowHeight = Math.max(0.55, component.height * (shapeHorizontal ? 0.1 : 0.2));
+      const spacing = component.width / Math.max(2, count + 1);
+      for (let index = 0; index < count; index += 1) {
+        windows.push({
+          x: (index - (count - 1) / 2) * spacing,
+          y: component.height * 0.68,
+          width: windowWidth,
+          height: windowHeight,
+        });
+      }
+    }
+  }
+  const accent = mapColor([component.accentColor ?? "", component.accentMaterial ?? ""], COLORS.wood);
+  const rail = mapColor([component.railColor ?? "dark metal"], COLORS.charcoal);
+  return (
+    <group position={[frontX, component.bottomY, frontZ]} rotation={[0, axes.rotationY, 0]}>
+      {windows.map((window, index) => (
+        <group key={`evidence-window-${index}`} position={[window.x, window.y, 0]}>
+          <EvidenceWindow width={window.width} height={window.height} />
+        </group>
       ))}
+      {component.hasDoor ? (
+        <group position={[-component.width * 0.23, Math.min(1.15, component.height * 0.2), 0.01]}>
+          <mesh castShadow><boxGeometry args={[1.12, 2.3, 0.08]} /><meshStandardMaterial color="#263033" roughness={0.52} /></mesh>
+          <mesh position={[0, 0, 0.05]}><planeGeometry args={[1.0, 2.18]} /><meshStandardMaterial color={COLORS.wood} roughness={0.76} side={THREE.DoubleSide} /></mesh>
+        </group>
+      ) : null}
+      {component.accentMaterial?.toLowerCase().includes("wood") ? (
+        <mesh position={[0, component.height * 0.88, 0.035]} castShadow>
+          <boxGeometry args={[component.width * 0.92, Math.max(0.16, component.height * 0.055), 0.12]} />
+          <meshStandardMaterial color={accent} roughness={0.78} />
+        </mesh>
+      ) : null}
+      {component.deckLocation === "mid" ? (
+        <group position={[0, component.height * 0.55, 0.7]}>
+          <BalconyRail width={component.width * 0.94} depth={1.35} />
+        </group>
+      ) : null}
+      {component.deckLocation === "roof" ? (
+        <group position={[0, component.height + 0.02, 0.5]}>
+          <mesh position={[0, 0.78, 0]} castShadow><boxGeometry args={[component.width * 0.94, 0.045, 0.045]} /><meshStandardMaterial color={rail} roughness={0.55} metalness={0.2} /></mesh>
+          {Array.from({ length: Math.max(3, Math.round(component.width / 1.4)) + 1 }).map((_, index, list) => {
+            const x = -component.width * 0.47 + component.width * 0.94 * (index / Math.max(1, list.length - 1));
+            return <mesh key={`roof-rail-${index}`} position={[x, 0.39, 0]} castShadow><boxGeometry args={[0.04, 0.78, 0.04]} /><meshStandardMaterial color={rail} roughness={0.55} metalness={0.2} /></mesh>;
+          })}
+        </group>
+      ) : null}
+    </group>
+  );
+}
+
+function ComposedFacadeBuilding({ building, model }: { building: BuildingFeature; model: SemanticSiteModel }) {
+  const composition = model.facadeComposition;
+  if (!composition?.components.length) return null;
+  const axes = targetMassingAxes(building, model);
+  const totalHeight = renderedBuildingHeightM(building, 8.8);
+  const topY = buildingTopY(building, model);
+  const baseY = topY - totalHeight;
+  const front = model.facades.find((facade) => facade.wall === "front");
+
+  const components = composition.components
+    .filter((component) => component.confidence >= 0.35 && component.top > component.bottom)
+    .map((component) => {
+      const width = Math.max(0.75, axes.width * Math.min(1, component.width));
+      const depth = Math.max(1.1, axes.depth * Math.max(0.22, Math.min(1, component.depthFraction ?? 0.62)));
+      const centerT = Math.max(axes.minT + width / 2, Math.min(axes.maxT - width / 2, axes.minT + component.x * axes.width));
+      const frontN = axes.maxN - componentSetbackMeters(component.setback);
+      const centerN = frontN - depth / 2;
+      const bottomY = baseY + component.bottom * totalHeight;
+      const componentTopY = baseY + component.top * totalHeight;
+      const height = Math.max(0.35, componentTopY - bottomY);
+      return {
+        ...component,
+        width,
+        depth,
+        centerT,
+        centerN,
+        frontN,
+        height,
+        bottomY,
+        topY: componentTopY,
+        x: axes.cx + axes.tx * centerT + axes.nx * centerN,
+        z: axes.cz + axes.tz * centerT + axes.nz * centerN,
+      };
+    });
+
+  const hasComponentOpenings = components.some((component) => component.windowCount != null || component.hasDoor != null || component.glazing && component.glazing !== "unknown");
+
+  const facadePoint = (openingX: number, openingY: number) => {
+    const t = axes.minT + openingX * axes.width;
+    const y = baseY + openingY * totalHeight;
+    const matching = components
+      .filter((component) => component.kind !== "balcony" && t >= component.centerT - component.width / 2 - 0.15 && t <= component.centerT + component.width / 2 + 0.15 && y >= component.bottomY - 0.4 && y <= component.topY + 0.4)
+      .sort((a, b) => b.confidence - a.confidence)[0];
+    const frontN = matching?.frontN ?? axes.maxN;
+    return {
+      x: axes.cx + axes.tx * t + axes.nx * (frontN + 0.065),
+      z: axes.cz + axes.tz * t + axes.nz * (frontN + 0.065),
+    };
+  };
+
+  return (
+    <group>
+      <EvidenceSiteFront building={building} model={model} axes={axes} houseBaseY={baseY} />
+      {components.map((component, index) => {
+        if (component.kind === "balcony") {
+          return (
+            <group
+              key={`facade-component-${index}`}
+              position={[component.x + axes.nx * (component.depth * 0.35), component.bottomY, component.z + axes.nz * (component.depth * 0.35)]}
+              rotation={[0, axes.rotationY, 0]}
+            >
+              <BalconyRail width={component.width} depth={Math.max(0.85, Math.min(2.4, component.depth * 0.42))} />
+            </group>
+          );
+        }
+        const wallColor = facadeComponentColor(component.color, component.material);
+        return (
+          <group key={`facade-component-${index}`}>
+            <mesh position={[component.x, component.bottomY + component.height / 2, component.z]} rotation={[0, axes.rotationY, 0]} castShadow receiveShadow>
+              <boxGeometry args={[component.width, component.height, component.depth]} />
+              <meshPhysicalMaterial color={wallColor} roughness={component.material?.toLowerCase().includes("glass") ? 0.2 : 0.78} metalness={0} clearcoat={0.03} />
+            </mesh>
+            <mesh position={[component.x, component.topY + 0.045, component.z]} rotation={[0, axes.rotationY, 0]} castShadow receiveShadow>
+              <boxGeometry args={[component.width + 0.08, 0.09, component.depth + 0.08]} />
+              <meshStandardMaterial color={component.kind === "tower" ? "#7d8585" : COLORS.roof} roughness={0.88} />
+            </mesh>
+            <ComponentFacadeEvidence component={component} axes={axes} />
+          </group>
+        );
+      })}
+      {!hasComponentOpenings ? (front?.windows ?? []).filter((window) => window.confidence >= 0.25).map((window, index) => {
+        const point = facadePoint(window.x, window.y);
+        const width = Math.max(0.48, axes.width * Math.min(0.34, window.width));
+        const height = Math.max(0.58, totalHeight * Math.min(0.38, window.height));
+        const y = baseY + Math.max(height / 2 + 0.3, window.y * totalHeight);
+        return (
+          <group key={`composed-window-${index}`} position={[point.x, y, point.z]} rotation={[0, axes.rotationY, 0]}>
+            <mesh castShadow><boxGeometry args={[width + 0.12, height + 0.12, 0.07]} /><meshStandardMaterial color="#242b2d" roughness={0.48} /></mesh>
+            <mesh position={[0, 0, 0.043]}><planeGeometry args={[width, height]} /><meshPhysicalMaterial color="#315f73" roughness={0.08} metalness={0.04} clearcoat={0.7} side={THREE.DoubleSide} /></mesh>
+          </group>
+        );
+      }) : null}
+      {!hasComponentOpenings ? (front?.doors ?? []).filter((door) => door.confidence >= 0.2).map((door, index) => {
+        const point = facadePoint(door.x, Math.max(0.05, door.y));
+        const width = Math.max(0.9, axes.width * Math.min(0.22, door.width));
+        const height = Math.max(2.05, Math.min(2.8, totalHeight * door.height));
+        return (
+          <group key={`composed-door-${index}`} position={[point.x, baseY + height / 2 + 0.06, point.z]} rotation={[0, axes.rotationY, 0]}>
+            <mesh><boxGeometry args={[width + 0.12, height + 0.12, 0.07]} /><meshStandardMaterial color="#252d2f" roughness={0.5} /></mesh>
+            <mesh position={[0, 0, 0.043]}><planeGeometry args={[width, height]} /><meshStandardMaterial color={mapColor([door.material ?? door.color ?? "wood"], COLORS.wood)} roughness={0.72} side={THREE.DoubleSide} /></mesh>
+          </group>
+        );
+      }) : null}
     </group>
   );
 }
@@ -501,9 +908,11 @@ function StylizedMassingBuilding({ building, model }: { building: BuildingFeatur
   const doors = front?.doors ?? [];
   const windows = (front?.windows ?? []).filter((window) => !doors.some((door) => Math.abs(window.x - door.x) < 0.14 && Math.abs(window.y - door.y) < 0.18));
 
+  const lowestLayout = volumeLayout[0]!;
+
   return (
     <group>
-      <TerracedFoundation building={building} model={model} axes={axes} visibleBaseY={visibleBaseY} />
+      <HillsidePodium model={model} axes={axes} layout={lowestLayout} topY={visibleBaseY} />
       {volumeLayout.map((volume, index) => {
         const wallColor = fusedWallColor;
         return (
@@ -513,10 +922,16 @@ function StylizedMassingBuilding({ building, model }: { building: BuildingFeatur
               <meshPhysicalMaterial color={wallColor} roughness={0.76} metalness={0} clearcoat={0.04} clearcoatRoughness={0.9} />
             </mesh>
             {index > 0 ? (
+              <group>
               <mesh position={[volume.x + axes.nx * 0.12, visibleBaseY + storyHeight * volume.level + 0.035, volume.z + axes.nz * 0.12]} rotation={[0, axes.rotationY, 0]} castShadow receiveShadow>
                 <boxGeometry args={[volume.width + 0.35, 0.07, volume.depth + 0.25]} />
                 <meshStandardMaterial color={COLORS.concrete} roughness={0.88} />
               </mesh>
+              <mesh position={[volume.x + axes.nx * 0.18, visibleBaseY + storyHeight * volume.level - 0.035, volume.z + axes.nz * 0.18]} rotation={[0, axes.rotationY, 0]}>
+                <boxGeometry args={[volume.width - 0.22, 0.055, Math.max(0.12, volume.depth - 0.2)]} />
+                <meshStandardMaterial color="#8d8b84" roughness={0.92} />
+              </mesh>
+              </group>
             ) : null}
           </group>
         );
@@ -544,9 +959,24 @@ function StylizedMassingBuilding({ building, model }: { building: BuildingFeatur
         const width = Math.max(0.95, axes.width * Math.min(0.18, door.width));
         const height = Math.max(2.05, Math.min(2.65, totalHeight * door.height));
         return (
-          <group key={`massing-door-${index}`} position={[point.x, visibleBaseY + height / 2 + 0.08, point.z]} rotation={[0, axes.rotationY, 0]}>
-            <mesh><planeGeometry args={[width + 0.14, height + 0.14]} /><meshStandardMaterial color="#313b3e" roughness={0.5} side={THREE.DoubleSide} /></mesh>
-            <mesh position={[0, 0, 0.012]}><planeGeometry args={[width, height]} /><meshStandardMaterial color={COLORS.wood} roughness={0.72} side={THREE.DoubleSide} /></mesh>
+          <group key={`massing-door-${index}`}>
+            <group position={[point.x, visibleBaseY + height / 2 + 0.08, point.z]} rotation={[0, axes.rotationY, 0]}>
+              <mesh castShadow><boxGeometry args={[width + 0.16, height + 0.16, 0.08]} /><meshStandardMaterial color="#313b3e" roughness={0.52} /></mesh>
+              <mesh position={[0, 0, 0.052]}><planeGeometry args={[width, height]} /><meshStandardMaterial color={COLORS.wood} roughness={0.74} side={THREE.DoubleSide} /></mesh>
+              <mesh position={[width * 0.31, -0.04, 0.066]}>
+                <circleGeometry args={[0.055, 14]} />
+                <meshStandardMaterial color="#263337" roughness={0.35} metalness={0.32} side={THREE.DoubleSide} />
+              </mesh>
+            </group>
+            <mesh
+              position={[point.x + axes.nx * 0.58, visibleBaseY + 0.08, point.z + axes.nz * 0.58]}
+              rotation={[0, axes.rotationY, 0]}
+              receiveShadow
+              castShadow
+            >
+              <boxGeometry args={[width + 0.85, 0.14, 1.05]} />
+              <meshStandardMaterial color="#b6b1a6" roughness={0.98} />
+            </mesh>
           </group>
         );
       })}
@@ -565,6 +995,7 @@ function StylizedMassingBuilding({ building, model }: { building: BuildingFeatur
 }
 
 function BuildingMass({ building, model }: { building: BuildingFeature; model: SemanticSiteModel }) {
+  if (model.facadeComposition?.components.length) return <ComposedFacadeBuilding building={building} model={model} />;
   if (model.massing?.volumes.length) return <StylizedMassingBuilding building={building} model={model} />;
   const { shape } = shapeFromPolygon(building.polygon, model.center);
   const height = renderedBuildingHeightM(building, (model.storiesApprox?.value ?? 2) * 3.1);
@@ -911,24 +1342,22 @@ function LocalStreetApron({ model }: { model: SemanticSiteModel }) {
   const toHouseZ = cz - sz;
   const normalSign = (-tz * toHouseX + tx * toHouseZ) >= 0 ? 1 : -1;
 
-  const nearestMeasuredRoad = Math.min(Number.POSITIVE_INFINITY, ...model.geometry.roads.flatMap((road) => road.points.map((point) => {
-    const [x, z] = localMeters(point, model.center);
-    return Math.hypot(x - sx, z - sz);
-  })));
-  if (nearestMeasuredRoad < 14) return null;
-
   const roadWidth = 6.0;
   const sidewalkWidth = 1.5;
   const length = 34;
   const towardHouseOffset = normalSign * (roadWidth / 2 + sidewalkWidth / 2 + 0.22);
   const curbOffset = normalSign * (roadWidth / 2 + 0.06);
-  const roadGeometry = localTerrainStripGeometry(model, sx, sz, tx, tz, roadWidth, length, 0.065);
-  const sidewalkGeometry = localTerrainStripGeometry(model, sx, sz, tx, tz, sidewalkWidth, length * 0.9, 0.13, towardHouseOffset);
-  const curbGeometry = localTerrainStripGeometry(model, sx, sz, tx, tz, 0.16, length * 0.92, 0.18, curbOffset);
+  const roadGeometry = localTerrainStripGeometry(model, sx, sz, tx, tz, roadWidth, length, 0.16);
+  const sidewalkGeometry = localTerrainStripGeometry(model, sx, sz, tx, tz, sidewalkWidth, length * 0.9, 0.21, towardHouseOffset);
+  const curbGeometry = localTerrainStripGeometry(model, sx, sz, tx, tz, 0.18, length * 0.92, 0.23, curbOffset);
+  const farEdgeGeometry = localTerrainStripGeometry(model, sx, sz, tx, tz, 0.12, length * 0.88, 0.2, -normalSign * (roadWidth / 2 - 0.12));
   return (
     <group>
       <mesh geometry={roadGeometry} receiveShadow>
-        <meshStandardMaterial color={COLORS.road} roughness={1} side={THREE.DoubleSide} />
+        <meshStandardMaterial color="#414b4e" roughness={1} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh geometry={farEdgeGeometry} receiveShadow>
+        <meshStandardMaterial color="#768080" roughness={1} side={THREE.DoubleSide} />
       </mesh>
       <mesh geometry={curbGeometry} receiveShadow>
         <meshStandardMaterial color="#aaa79c" roughness={1} side={THREE.DoubleSide} />
@@ -1111,44 +1540,16 @@ function ParcelGround({ model, debug }: { model: SemanticSiteModel; debug: boole
   );
 }
 
-function SiteDetails({ model }: { model: SemanticSiteModel }) {
-  const primary = model.geometry.buildings.find((building) => building.id === model.geometry.primaryBuildingId) ?? model.geometry.buildings[0];
-  if (!primary) return null;
-  const bounds = boundsForBuilding(primary, model.center);
-  const width = bounds.maxX - bounds.minX;
-  const centerX = (bounds.minX + bounds.maxX) / 2;
-  const frontZ = bounds.maxZ;
-  const centroid = polygonCentroid(primary.polygon);
-  const siteBaseY = terrainHeightAtPosition(model, [centroid.longitude, centroid.latitude]);
-
-  return (
-    <group position={[0, siteBaseY, 0]}>
-      {model.site.stairs.value ? Array.from({ length: 6 }).map((_, index) => (
-        <mesh key={`step-${index}`} position={[centerX + width * 0.28, 0.12 + index * 0.12, frontZ + 1.5 + index * 0.38]} castShadow receiveShadow>
-          <boxGeometry args={[1.9, 0.22, 0.7]} />
-          <meshStandardMaterial color={COLORS.concrete} roughness={0.95} />
-        </mesh>
-      )) : null}
-      {model.site.retainingWalls.value ? (
-        <mesh position={[centerX - width * 0.25, 0.7, frontZ + 2.7]} castShadow receiveShadow>
-          <boxGeometry args={[Math.max(3, width * 0.42), 1.4, 0.35]} />
-          <meshStandardMaterial color={COLORS.concrete} roughness={0.95} />
-        </mesh>
-      ) : null}
-
-    </group>
-  );
-}
 
 function SceneContents({ model, debug, view }: { model: SemanticSiteModel; debug: boolean; view: "facade" | "overview" }) {
   const orbitTarget = defaultCameraTarget(model);
   const primary = primaryBuilding(model);
   const primaryCenter = primary ? polygonCentroid(primary.polygon) : model.center;
-  const contextBuildings = model.geometry.buildings
+  const contextBuildings = view === "facade" ? [] : model.geometry.buildings
     .filter((building) => building.id !== model.geometry.primaryBuildingId)
     .map((building) => ({ building, distance: haversineMeters(polygonCentroid(building.polygon), primaryCenter) }))
     .sort((a, b) => a.distance - b.distance)
-    .slice(0, view === "facade" ? 8 : 20);
+    .slice(0, 20);
   return (
     <>
       <color attach="background" args={["#b9d8ea"]} />
@@ -1175,7 +1576,6 @@ function SceneContents({ model, debug, view }: { model: SemanticSiteModel; debug
         <ContextBuilding key={building.id} building={building} model={model} subdued={view === "facade" || distance > 35} />
       ))}
       <VegetationLayer model={model} />
-      <SiteDetails model={model} />
       {debug && model.geometry.terrain.length < 4 ? <gridHelper args={[90, 45, "#9fa8a4", "#cbd0cb"]} position={[0, -0.03, 0]} /> : null}
       <OrbitControls makeDefault target={orbitTarget} minDistance={9} maxDistance={115} maxPolarAngle={Math.PI * 0.48} enableDamping dampingFactor={0.06} />
     </>
@@ -1189,7 +1589,7 @@ export function SiteTwinScene({ model, debug = false, className, view = "facade"
       <Canvas
         key={view}
         shadows
-        camera={{ position: cameraPosition, fov: view === "facade" ? 44 : 46, near: 0.1, far: 500 }}
+        camera={{ position: cameraPosition, fov: view === "facade" ? 54 : 46, near: 0.1, far: 500 }}
         dpr={[1, 1.75]}
         gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.08 }}
         onCreated={({ gl }) => { gl.outputColorSpace = THREE.SRGBColorSpace; }}

@@ -1,11 +1,11 @@
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { basename, dirname, join } from "node:path";
-import { extentPolygon, fuseSiteModel, polygonCentroid, rankStreetImages, selectDistinctStreetImages, type Coordinate, type StreetImageCandidate, type VisualObservation } from "../packages/site-twin-core/src/index.ts";
+import { dirname, join } from "node:path";
+import { assessFacadeComposition, bearingDegrees, extentPolygon, fuseSiteModel, polygonCentroid, rankStreetImages, selectDistinctStreetImages, type BuildingFeature, type Coordinate, type StreetImageCandidate, type VisualFacadeComponent, type VisualObservation } from "../packages/site-twin-core/src/index.ts";
 import { getLandCoverSamples, getLosAngelesSiteGeometry } from "../packages/provider-lacounty/src/index.ts";
 import { findKartaViewImages } from "../packages/provider-kartaview/src/index.ts";
 import { downloadGoogleStreetViewFrame, findGoogleStreetViewImages } from "../packages/provider-google-streetview-research/src/index.ts";
-import { analyzeImageWithOllama } from "../packages/provider-ollama/src/index.ts";
+import { analyzeFacadeBandsWithOllama, analyzeFacadeRegionWithOllama, analyzeImageWithOllama, analyzeSiteContextWithOllama, cropImageRegion, locateTargetHouseWithOllama, type FacadeRegionPosition, type TargetHouseRegion } from "../packages/provider-ollama/src/index.ts";
 import { geocodeAddress, getNearbyStreetContext } from "../packages/provider-openstreetmap/src/index.ts";
 import { getElevation, sampleTerrainGrid } from "../packages/provider-usgs/src/index.ts";
 
@@ -56,9 +56,9 @@ async function targetCoordinate(options: CliOptions): Promise<Coordinate> {
   return { latitude: geocode.latitude, longitude: geocode.longitude };
 }
 
-async function downloadImage(image: StreetImageCandidate, directory: string) {
+async function downloadImage(image: StreetImageCandidate, directory: string, fovDeg?: number) {
   if (image.provider === "google-streetview-research") {
-    const bytes = await downloadGoogleStreetViewFrame(image);
+    const bytes = await downloadGoogleStreetViewFrame(image, { fovDeg });
     const filename = join(directory, `${image.provider}-${image.id}.jpg`);
     await writeFile(filename, bytes);
     return { filename, bytes };
@@ -76,6 +76,93 @@ async function downloadImage(image: StreetImageCandidate, directory: string) {
     return { filename, bytes };
   }
   throw new Error(`image download ${image.id} failed with ${lastStatus || "no usable URL"}`);
+}
+
+function signedAngularOffset(angle: number, center: number) {
+  return ((angle - center + 540) % 360) - 180;
+}
+
+function facadeAngularExtent(image: StreetImageCandidate, building: BuildingFeature) {
+  const centerHeading = image.bearingToTargetDeg ?? bearingDegrees(image, polygonCentroid(building.polygon));
+  const offsets = building.polygon
+    .map(([longitude, latitude]) => signedAngularOffset(bearingDegrees(image, { longitude, latitude }), centerHeading))
+    .filter((offset) => Math.abs(offset) < 85);
+  if (offsets.length < 2) return { centerHeading, minOffset: -18, maxOffset: 18, spanDeg: 36 };
+  const minOffset = Math.min(...offsets);
+  const maxOffset = Math.max(...offsets);
+  const spanDeg = Math.max(18, Math.min(70, maxOffset - minOffset));
+  return { centerHeading, minOffset, maxOffset, spanDeg };
+}
+
+function regionPosition(normalizedCenter: number): FacadeRegionPosition {
+  if (normalizedCenter < 0.36) return "left";
+  if (normalizedCenter > 0.64) return "right";
+  return "center";
+}
+
+function componentTop(relativeHeight: "low" | "medium" | "tall") {
+  if (relativeHeight === "low") return 0.66;
+  if (relativeHeight === "tall") return 1;
+  return 0.82;
+}
+
+function componentSetback(projection: "projects" | "flush" | "setback") {
+  if (projection === "projects") return "none" as const;
+  if (projection === "setback") return "moderate" as const;
+  return "slight" as const;
+}
+
+async function refinePrimaryFacade(
+  houseBytes: Buffer,
+  modelName: string,
+  localizationConfidence = 1,
+) {
+  const bands = await analyzeFacadeBandsWithOllama(houseBytes.toString("base64"), { model: modelName });
+  if (bands.length < 2) return undefined;
+
+  const components: VisualFacadeComponent[] = [];
+  let cursor = 0;
+  for (const band of bands) {
+    const x = cursor + band.widthFraction / 2;
+    const position = regionPosition(x);
+    const regionBytes = await cropImageRegion(houseBytes, {
+      x: cursor,
+      y: 0,
+      width: band.widthFraction,
+      height: 1,
+    }, { paddingFraction: 0.18 });
+    const region = await analyzeFacadeRegionWithOllama(position, regionBytes.toString("base64"), { model: modelName });
+    const relativeHeight = region.relativeHeight ?? band.relativeHeight;
+    const projection = region.projection ?? band.projection;
+    components.push({
+      kind: region.kind,
+      x,
+      width: band.widthFraction,
+      bottom: 0.04,
+      top: componentTop(relativeHeight),
+      depthFraction: region.kind === "tower" ? 0.62 : 0.72,
+      setback: componentSetback(projection),
+      roofType: "flat",
+      color: region.wallColor,
+      material: region.wallMaterial,
+      accentColor: region.accentColor,
+      accentMaterial: region.accentMaterial,
+      windowCount: region.windowCount,
+      windowOrientation: region.windowOrientation,
+      glazing: region.glazing,
+      hasDoor: region.hasDoor,
+      deckLocation: region.deckLocation,
+      railColor: region.railColor,
+      confidence: Math.min(0.98, (band.confidence + region.confidence + localizationConfidence) / 3),
+    });
+    console.log(`  ${position} facade: ${region.kind} ${region.wallColor ?? "unknown"}/${region.wallMaterial ?? "unknown"} height=${relativeHeight} windows=${region.windowCount ?? "?"} deck=${region.deckLocation ?? "unknown"}`);
+    cursor += band.widthFraction;
+  }
+  const confidence = components.reduce((sum, component) => sum + component.confidence, 0) / components.length;
+  const composition = { components, confidence };
+  const quality = assessFacadeComposition(composition);
+  console.log(`  facade quality: coverage=${(quality.horizontalCoverage * 100).toFixed(0)}% span=${quality.leftEdge.toFixed(2)}..${quality.rightEdge.toFixed(2)} roof=${quality.maxTop.toFixed(2)} score=${quality.structuralScore.toFixed(3)} ${quality.acceptable ? "PASS" : `REJECT (${quality.reasons.join("; ")})`}`);
+  return { composition, quality };
 }
 
 async function main() {
@@ -182,6 +269,7 @@ async function main() {
 
   const observations: VisualObservation[] = [];
   const rejected: Array<{ imageId: string; error: string }> = [];
+  const localizedTargets: Array<{ imageId: string; region: TargetHouseRegion }> = [];
   const attemptedImagery: StreetImageCandidate[] = [];
   const workDir = join(tmpdir(), `officeadmin-site-twin-${Date.now()}`);
   await mkdir(workDir, { recursive: true });
@@ -193,19 +281,69 @@ async function main() {
         if (usefulCount >= options.imageLimit) break;
         attemptedImagery.push(image);
         try {
-          const { bytes } = await downloadImage(image, workDir);
-          console.log(`Analyzing ${image.provider}:${image.id} with ${options.model}...`);
+          const isPrimaryResearchView = image.provider === "google-streetview-research" && attemptedImagery.length === 1 && Boolean(primary);
+          const centeredFov = isPrimaryResearchView && primary ? Math.max(44, Math.min(58, facadeAngularExtent(image, primary).spanDeg * 1.02)) : undefined;
+          const { bytes } = await downloadImage(image, workDir, centeredFov);
+          console.log(`Analyzing ${image.provider}:${image.id} with ${options.model}${centeredFov ? ` fov=${centeredFov.toFixed(1)}deg` : ""}...`);
           const targetDescription = image.provider === "google-streetview-research"
-            ? `Target address is ${options.address}. This image was programmatically cropped to face the target parcel, so the target should be near the center of frame. Do not describe a different building if the target is occluded.`
+            ? `Target address is ${options.address}. This image was programmatically cropped to face the target parcel, so the target should be near the center of frame. Do not describe a different building if the target is occluded.${isPrimaryResearchView ? " For facadeComposition, cover the complete visible target-house width and keep primary masses separate where facade plane, height, or dominant wall material clearly changes." : ""}`
             : `Target address is ${options.address}. The target is the property near the target coordinate, not merely any nearby house.`;
-          const observation = await analyzeImageWithOllama(image.id, bytes.toString("base64"), {
-            model: options.model,
-            context: {
-              targetBearingDeg: image.bearingToTargetDeg,
-              expectedBuildingHeightM: primary?.heightM,
-              targetDescription,
-            },
-          });
+          let observation: VisualObservation;
+          if (isPrimaryResearchView && primary) {
+            const region = await locateTargetHouseWithOllama(bytes.toString("base64"), {
+              model: options.model,
+              context: {
+                targetBearingDeg: image.bearingToTargetDeg,
+                expectedBuildingHeightM: primary.heightM,
+                targetDescription,
+              },
+            });
+            localizedTargets.push({ imageId: image.id, region });
+            console.log(`  target bbox: x=${region.x.toFixed(3)} y=${region.y.toFixed(3)} w=${region.width.toFixed(3)} h=${region.height.toFixed(3)} confidence=${region.confidence.toFixed(2)} visible=${region.visible}`);
+            if (!region.visible || region.confidence < 0.45) {
+              throw new Error(`target localization was not reliable enough (${region.confidence.toFixed(2)})`);
+            }
+
+            const targetBytes = await cropImageRegion(bytes, region, { paddingFraction: 0.06 });
+            const [targetObservation, site] = await Promise.all([
+              analyzeImageWithOllama(image.id, targetBytes.toString("base64"), {
+                model: options.model,
+                context: {
+                  expectedBuildingHeightM: primary.heightM,
+                  targetDescription: `This image is already cropped tightly around the target building at ${options.address}. Analyze only this building. Reconstruct the complete visible facade from left edge to right edge. Keep large architectural masses separate where plane, height, or dominant material clearly changes. Edge vegetation may remain from occlusion, but it is not architecture.`,
+                },
+              }),
+              analyzeSiteContextWithOllama(bytes.toString("base64"), { model: options.model }),
+            ]);
+            observation = { ...targetObservation, site };
+
+            if (targetObservation.visible && targetObservation.confidence >= 0.45) {
+              const targetQuality = assessFacadeComposition(targetObservation.facadeComposition);
+              const refined = await refinePrimaryFacade(targetBytes, options.model, region.confidence);
+              const refinedWins = refined?.quality.acceptable
+                && (!targetQuality.acceptable || refined.quality.structuralScore > targetQuality.structuralScore);
+              if (refinedWins && refined) {
+                observation.facadeComposition = refined.composition;
+                console.log(`  selected focused facade score=${refined.quality.structuralScore.toFixed(3)} over target-crop=${targetQuality.structuralScore.toFixed(3)}`);
+              } else if (targetQuality.acceptable) {
+                observation.facadeComposition = targetObservation.facadeComposition;
+                console.log(`  selected target-crop facade score=${targetQuality.structuralScore.toFixed(3)} over focused=${refined?.quality.structuralScore.toFixed(3) ?? "n/a"}`);
+              } else {
+                observation.facadeComposition = undefined;
+                const reasons = refined?.quality.reasons.length ? refined.quality.reasons : targetQuality.reasons;
+                console.warn(`  refusing incomplete facade composition: ${reasons.join("; ") || "no acceptable target-facade parse"}`);
+              }
+            }
+          } else {
+            observation = await analyzeImageWithOllama(image.id, bytes.toString("base64"), {
+              model: options.model,
+              context: {
+                targetBearingDeg: image.bearingToTargetDeg,
+                expectedBuildingHeightM: primary?.heightM,
+                targetDescription,
+              },
+            });
+          }
           observations.push(observation);
           if (observation.visible && observation.confidence >= 0.45) usefulCount += 1;
           console.log(`  visible=${observation.visible} confidence=${observation.confidence.toFixed(2)} roof=${observation.roof?.type ?? "unknown"} useful=${usefulCount}/${options.imageLimit}`);
@@ -246,6 +384,7 @@ async function main() {
       rankedImagery: candidatePool,
       attemptedImagery: imagery,
       observations,
+      localizedTargets,
       rejected,
       warnings: model.warnings,
     };
