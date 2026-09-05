@@ -1,3 +1,6 @@
+import { spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
+
 import type {
   RoofType,
   FacadeComponentKind,
@@ -25,9 +28,47 @@ export interface OllamaVisionOptions {
   };
 }
 
+export interface TargetHouseRegion {
+  visible: boolean;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  confidence: number;
+}
+
+export interface CropImageRegionOptions {
+  paddingFraction?: number;
+  pythonExecutable?: string;
+}
+
 function clamp01(value: unknown, fallback = 0.5) {
   const number = Number(value);
   return Number.isFinite(number) ? Math.max(0, Math.min(1, number)) : fallback;
+}
+
+export function normalizeTargetHouseRegion(value: unknown): TargetHouseRegion {
+  if (!value || typeof value !== "object") throw new Error("Target localization result must be an object");
+  const root = value as Record<string, unknown>;
+  const raw = root.bbox && typeof root.bbox === "object" ? root.bbox as Record<string, unknown> : root;
+  const left = clamp01(raw.left ?? raw.xMin ?? raw.x ?? 0);
+  const top = clamp01(raw.top ?? raw.yMin ?? raw.y ?? 0);
+  const rawRight = raw.right ?? raw.xMax;
+  const rawBottom = raw.bottom ?? raw.yMax;
+  const rawWidth = raw.width;
+  const rawHeight = raw.height;
+  const right = rawRight == null ? clamp01(left + Number(rawWidth ?? 0)) : clamp01(rawRight);
+  const bottom = rawBottom == null ? clamp01(top + Number(rawHeight ?? 0)) : clamp01(rawBottom);
+  const width = Math.max(0, right - left);
+  const height = Math.max(0, bottom - top);
+  return {
+    visible: root.visible !== false && width >= 0.08 && height >= 0.08,
+    x: left,
+    y: top,
+    width,
+    height,
+    confidence: clamp01(root.confidence, 0.5),
+  };
 }
 
 function stringArray(value: unknown) {
@@ -256,6 +297,63 @@ export async function analyzeImageWithOllama(
   return normalizeVisualObservation(sourceImageId, parsed);
 }
 
+export async function locateTargetHouseWithOllama(
+  imageBase64: string,
+  options: OllamaVisionOptions = {},
+): Promise<TargetHouseRegion> {
+  const context = options.context;
+  const instruction = [
+    "Locate the TARGET HOUSE in this street-level image. This is localization only, not architectural analysis.",
+    "The frame was programmatically aimed at the target parcel, so prefer the building structure near the target direction and horizontal center. Do not select a neighboring house just because it is larger or clearer.",
+    "Return ONLY one JSON object with visible, confidence, and bbox.",
+    "bbox must contain left, top, right, bottom as normalized image coordinates from 0 to 1.",
+    "The bbox must tightly enclose the visible TARGET BUILDING STRUCTURE, including attached balconies and roof/parapet, but exclude retaining walls, street, sidewalk, detached vegetation, sky, and neighboring buildings.",
+    "If vegetation partially hides the building, bound the building silhouette you can infer directly from connected visible structure. Do not expand the box to include the vegetation itself.",
+    "If the target cannot be distinguished confidently, set visible=false rather than guessing.",
+    context?.targetDescription ? `Target context: ${context.targetDescription}` : undefined,
+  ].filter((line): line is string => Boolean(line)).join("\n");
+  const parsed = await requestOllamaJson(imageBase64, instruction, options);
+  return normalizeTargetHouseRegion(parsed);
+}
+
+export async function cropImageRegion(
+  bytes: Buffer,
+  region: Pick<TargetHouseRegion, "x" | "y" | "width" | "height">,
+  options: CropImageRegionOptions = {},
+): Promise<Buffer> {
+  const script = fileURLToPath(new URL("./crop-image.py", import.meta.url));
+  const python = options.pythonExecutable ?? process.env.SITE_TWIN_PYTHON ?? "python3";
+  const args = [
+    script,
+    "--x", String(region.x),
+    "--y", String(region.y),
+    "--width", String(region.width),
+    "--height", String(region.height),
+    "--padding", String(options.paddingFraction ?? 0),
+  ];
+  return new Promise<Buffer>((resolve, reject) => {
+    const child = spawn(python, args, { stdio: ["pipe", "pipe", "pipe"] });
+    const stdout: Buffer[] = [];
+    const stderr: Buffer[] = [];
+    child.stdout.on("data", (chunk: Buffer) => stdout.push(chunk));
+    child.stderr.on("data", (chunk: Buffer) => stderr.push(chunk));
+    child.on("error", reject);
+    child.on("close", (code) => {
+      if (code !== 0) {
+        reject(new Error(`Image crop failed (${code}): ${Buffer.concat(stderr).toString("utf8").trim()}`));
+        return;
+      }
+      const output = Buffer.concat(stdout);
+      if (output.length < 500) {
+        reject(new Error(`Image crop returned only ${output.length} bytes`));
+        return;
+      }
+      resolve(output);
+    });
+    child.stdin.end(bytes);
+  });
+}
+
 export type FacadeBandHeight = "low" | "medium" | "tall";
 export type FacadeBandPlane = "projects" | "flush" | "setback";
 export type FacadeRegionPosition = "left" | "center" | "right";
@@ -338,7 +436,7 @@ export async function analyzeFacadeBandsWithOllama(
   const parsed = await requestOllamaJson(imageBase64, [
     "Look only at the target HOUSE above any retaining wall. Ignore landscaping, retaining walls, sidewalk, road, fences, and neighbors.",
     "Return ONLY JSON with key house_masses containing an array of the large PRIMARY architectural masses from image-left to image-right.",
-    "A primary mass is a large wing or vertical tower. Do not list windows, wall patches, railings, or each floor as separate masses.",
+    "A primary mass is a large wing or vertical tower. A narrow vertical section that is visibly taller and/or a different material than the wing beside it is its own tower, not part of that wing. Do not list windows, wall patches, railings, or each floor as separate masses.",
     "For each mass return label, approximate_fraction as a fraction of total visible house width, relative_height as low|medium|tall, projection as projects|flush|setback, and confidence 0..1.",
     "The fractions should collectively account for nearly all of the visible target-house width. Merge adjacent patches that belong to one architectural mass.",
   ].join("\n"), options);

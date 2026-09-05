@@ -8,6 +8,7 @@ export interface FacadeCompositionQuality {
   maxTop: number;
   primaryComponentCount: number;
   averageConfidence: number;
+  structuralScore: number;
   reasons: string[];
 }
 
@@ -52,9 +53,21 @@ export function assessFacadeComposition(composition: VisualFacadeComposition | u
   const averageConfidence = components.length
     ? components.reduce((sum, component) => sum + component.confidence, 0) / components.length
     : 0;
+  const distinctAppearance = new Set(components.map((component) => `${component.color?.trim().toLowerCase() ?? ""}|${component.material?.trim().toLowerCase() ?? ""}`)).size;
+  const edgeScore = (leftEdge <= 0.22 ? 1 : Math.max(0, 1 - (leftEdge - 0.22) * 3)) * 0.5
+    + (rightEdge >= 0.78 ? 1 : Math.max(0, 1 - (0.78 - rightEdge) * 3)) * 0.5;
+  const structuralScore = Math.max(0, Math.min(1,
+    coverage * 0.42
+    + edgeScore * 0.14
+    + Math.min(1, maxTop / 0.9) * 0.12
+    + averageConfidence * 0.12
+    + Math.min(1, components.length / 3) * 0.14
+    + Math.min(1, distinctAppearance / 3) * 0.06,
+  ));
   const reasons: string[] = [];
 
   if (components.length < 1) reasons.push("no primary facade volumes");
+  if (components.some((component) => component.kind === "tower" && component.width > 0.46)) reasons.push("tower occupies implausibly large facade width");
   if (coverage < 0.72) reasons.push(`primary facade covers only ${(coverage * 100).toFixed(0)}% of visible width`);
   if (leftEdge > 0.22) reasons.push("left side of target facade is not reconstructed");
   if (rightEdge < 0.78) reasons.push("right side of target facade is not reconstructed");
@@ -69,6 +82,7 @@ export function assessFacadeComposition(composition: VisualFacadeComposition | u
     maxTop,
     primaryComponentCount: components.length,
     averageConfidence,
+    structuralScore,
     reasons,
   };
 }

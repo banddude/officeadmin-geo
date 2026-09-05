@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeVisualObservation } from "./index";
+import { normalizeTargetHouseRegion, normalizeVisualObservation } from "./index";
 
 describe("Ollama visual observation normalization", () => {
   it("normalizes stepped massing volumes", () => {
@@ -49,6 +49,33 @@ describe("Ollama visual observation normalization", () => {
     expect(observation.facadeComposition?.components[1]?.windowCount).toBe(3);
     expect(observation.facadeComposition?.components[1]?.windowOrientation).toBe("vertical");
     expect(observation.facadeComposition?.components[2]?.kind).toBe("balcony");
+  });
+
+  it("normalizes a localized target-building box without expanding into context", () => {
+    const region = normalizeTargetHouseRegion({
+      visible: true,
+      confidence: 0.91,
+      bbox: { left: 0.22, top: 0.14, right: 0.78, bottom: 0.86 },
+    });
+
+    expect(region).toEqual({
+      visible: true,
+      confidence: 0.91,
+      x: 0.22,
+      y: 0.14,
+      width: 0.56,
+      height: 0.72,
+    });
+  });
+
+  it("fails localization closed when the returned box is implausibly tiny", () => {
+    const region = normalizeTargetHouseRegion({
+      visible: true,
+      confidence: 0.99,
+      bbox: { left: 0.5, top: 0.5, right: 0.53, bottom: 0.53 },
+    });
+
+    expect(region.visible).toBe(false);
   });
 
 });
