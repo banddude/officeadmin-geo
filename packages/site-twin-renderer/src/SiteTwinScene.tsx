@@ -647,6 +647,116 @@ function EvidenceSiteFront({
   );
 }
 
+function EvidenceWindow({ width, height }: { width: number; height: number }) {
+  return (
+    <group>
+      <mesh castShadow><boxGeometry args={[width + 0.1, height + 0.1, 0.07]} /><meshStandardMaterial color="#222b2e" roughness={0.46} /></mesh>
+      <mesh position={[0, 0, 0.043]}><planeGeometry args={[width, height]} /><meshPhysicalMaterial color={COLORS.glass} roughness={0.08} metalness={0.04} clearcoat={0.75} side={THREE.DoubleSide} /></mesh>
+    </group>
+  );
+}
+
+function ComponentFacadeEvidence({ component, axes }: { component: {
+  width: number;
+  height: number;
+  bottomY: number;
+  topY: number;
+  frontN: number;
+  centerT: number;
+  kind: string;
+  windowCount?: number;
+  windowOrientation?: "vertical" | "horizontal" | "mixed" | "unknown";
+  glazing?: "low" | "medium" | "high" | "unknown";
+  hasDoor?: boolean;
+  deckLocation?: "mid" | "roof" | "unknown";
+  railColor?: string;
+  accentColor?: string;
+  accentMaterial?: string;
+}; axes: ReturnType<typeof targetMassingAxes> }) {
+  const frontX = axes.cx + axes.tx * component.centerT + axes.nx * (component.frontN + 0.075);
+  const frontZ = axes.cz + axes.tz * component.centerT + axes.nz * (component.frontN + 0.075);
+  const count = Math.max(0, Math.min(8, component.windowCount ?? (component.glazing === "high" ? 3 : 0)));
+  const windows: Array<{ x: number; y: number; width: number; height: number }> = [];
+  if (count > 0) {
+    if (component.kind === "tower" && component.windowOrientation === "vertical") {
+      const windowWidth = Math.max(0.42, component.width * 0.24);
+      const windowHeight = Math.max(0.72, component.height * Math.min(0.23, 0.72 / count));
+      const usable = component.height * 0.72;
+      for (let index = 0; index < count; index += 1) {
+        windows.push({
+          x: 0,
+          y: component.height * 0.16 + usable * ((index + 0.5) / count),
+          width: windowWidth,
+          height: windowHeight,
+        });
+      }
+    } else if (component.glazing === "high") {
+      const panelCount = Math.max(2, Math.min(4, count));
+      const gap = 0.12;
+      const totalWidth = component.width * 0.78;
+      const panelWidth = Math.max(0.5, (totalWidth - gap * (panelCount - 1)) / panelCount);
+      for (let index = 0; index < panelCount; index += 1) {
+        windows.push({
+          x: -totalWidth / 2 + panelWidth / 2 + index * (panelWidth + gap),
+          y: component.height * 0.61,
+          width: panelWidth,
+          height: Math.max(1.1, component.height * 0.32),
+        });
+      }
+    } else {
+      const shapeHorizontal = component.windowOrientation === "horizontal";
+      const windowWidth = Math.max(0.55, component.width * (shapeHorizontal ? 0.3 : 0.18));
+      const windowHeight = Math.max(0.55, component.height * (shapeHorizontal ? 0.1 : 0.2));
+      const spacing = component.width / Math.max(2, count + 1);
+      for (let index = 0; index < count; index += 1) {
+        windows.push({
+          x: (index - (count - 1) / 2) * spacing,
+          y: component.height * 0.68,
+          width: windowWidth,
+          height: windowHeight,
+        });
+      }
+    }
+  }
+  const accent = mapColor([component.accentColor ?? "", component.accentMaterial ?? ""], COLORS.wood);
+  const rail = mapColor([component.railColor ?? "dark metal"], COLORS.charcoal);
+  return (
+    <group position={[frontX, component.bottomY, frontZ]} rotation={[0, axes.rotationY, 0]}>
+      {windows.map((window, index) => (
+        <group key={`evidence-window-${index}`} position={[window.x, window.y, 0]}>
+          <EvidenceWindow width={window.width} height={window.height} />
+        </group>
+      ))}
+      {component.hasDoor ? (
+        <group position={[-component.width * 0.23, Math.min(1.15, component.height * 0.2), 0.01]}>
+          <mesh castShadow><boxGeometry args={[1.12, 2.3, 0.08]} /><meshStandardMaterial color="#263033" roughness={0.52} /></mesh>
+          <mesh position={[0, 0, 0.05]}><planeGeometry args={[1.0, 2.18]} /><meshStandardMaterial color={COLORS.wood} roughness={0.76} side={THREE.DoubleSide} /></mesh>
+        </group>
+      ) : null}
+      {component.accentMaterial?.toLowerCase().includes("wood") ? (
+        <mesh position={[0, component.height * 0.88, 0.035]} castShadow>
+          <boxGeometry args={[component.width * 0.92, Math.max(0.16, component.height * 0.055), 0.12]} />
+          <meshStandardMaterial color={accent} roughness={0.78} />
+        </mesh>
+      ) : null}
+      {component.deckLocation === "mid" ? (
+        <group position={[0, component.height * 0.55, 0.7]}>
+          <BalconyRail width={component.width * 0.94} depth={1.35} />
+        </group>
+      ) : null}
+      {component.deckLocation === "roof" ? (
+        <group position={[0, component.height + 0.02, 0.5]}>
+          <mesh position={[0, 0.78, 0]} castShadow><boxGeometry args={[component.width * 0.94, 0.045, 0.045]} /><meshStandardMaterial color={rail} roughness={0.55} metalness={0.2} /></mesh>
+          {Array.from({ length: Math.max(3, Math.round(component.width / 1.4)) + 1 }).map((_, index, list) => {
+            const x = -component.width * 0.47 + component.width * 0.94 * (index / Math.max(1, list.length - 1));
+            return <mesh key={`roof-rail-${index}`} position={[x, 0.39, 0]} castShadow><boxGeometry args={[0.04, 0.78, 0.04]} /><meshStandardMaterial color={rail} roughness={0.55} metalness={0.2} /></mesh>;
+          })}
+        </group>
+      ) : null}
+    </group>
+  );
+}
+
 function ComposedFacadeBuilding({ building, model }: { building: BuildingFeature; model: SemanticSiteModel }) {
   const composition = model.facadeComposition;
   if (!composition?.components.length) return null;
@@ -681,6 +791,8 @@ function ComposedFacadeBuilding({ building, model }: { building: BuildingFeature
         z: axes.cz + axes.tz * centerT + axes.nz * centerN,
       };
     });
+
+  const hasComponentOpenings = components.some((component) => component.windowCount != null || component.hasDoor != null || component.glazing && component.glazing !== "unknown");
 
   const facadePoint = (openingX: number, openingY: number) => {
     const t = axes.minT + openingX * axes.width;
@@ -721,10 +833,11 @@ function ComposedFacadeBuilding({ building, model }: { building: BuildingFeature
               <boxGeometry args={[component.width + 0.08, 0.09, component.depth + 0.08]} />
               <meshStandardMaterial color={component.kind === "tower" ? "#7d8585" : COLORS.roof} roughness={0.88} />
             </mesh>
+            <ComponentFacadeEvidence component={component} axes={axes} />
           </group>
         );
       })}
-      {(front?.windows ?? []).filter((window) => window.confidence >= 0.25).map((window, index) => {
+      {!hasComponentOpenings ? (front?.windows ?? []).filter((window) => window.confidence >= 0.25).map((window, index) => {
         const point = facadePoint(window.x, window.y);
         const width = Math.max(0.48, axes.width * Math.min(0.34, window.width));
         const height = Math.max(0.58, totalHeight * Math.min(0.38, window.height));
@@ -735,8 +848,8 @@ function ComposedFacadeBuilding({ building, model }: { building: BuildingFeature
             <mesh position={[0, 0, 0.043]}><planeGeometry args={[width, height]} /><meshPhysicalMaterial color="#315f73" roughness={0.08} metalness={0.04} clearcoat={0.7} side={THREE.DoubleSide} /></mesh>
           </group>
         );
-      })}
-      {(front?.doors ?? []).filter((door) => door.confidence >= 0.2).map((door, index) => {
+      }) : null}
+      {!hasComponentOpenings ? (front?.doors ?? []).filter((door) => door.confidence >= 0.2).map((door, index) => {
         const point = facadePoint(door.x, Math.max(0.05, door.y));
         const width = Math.max(0.9, axes.width * Math.min(0.22, door.width));
         const height = Math.max(2.05, Math.min(2.8, totalHeight * door.height));
@@ -746,7 +859,7 @@ function ComposedFacadeBuilding({ building, model }: { building: BuildingFeature
             <mesh position={[0, 0, 0.043]}><planeGeometry args={[width, height]} /><meshStandardMaterial color={mapColor([door.material ?? door.color ?? "wood"], COLORS.wood)} roughness={0.72} side={THREE.DoubleSide} /></mesh>
           </group>
         );
-      })}
+      }) : null}
     </group>
   );
 }

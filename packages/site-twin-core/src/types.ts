@@ -144,6 +144,14 @@ export interface VisualFacadeComponent {
   roofType?: RoofType;
   color?: string;
   material?: string;
+  accentColor?: string;
+  accentMaterial?: string;
+  windowCount?: number;
+  windowOrientation?: "vertical" | "horizontal" | "mixed" | "unknown";
+  glazing?: "low" | "medium" | "high" | "unknown";
+  hasDoor?: boolean;
+  deckLocation?: "mid" | "roof" | "unknown";
+  railColor?: string;
   confidence: number;
 }
 

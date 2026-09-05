@@ -92,6 +92,14 @@ function facadeComponent(value: unknown): VisualFacadeComponent | undefined {
     roofType,
     color: typeof record.color === "string" ? record.color : undefined,
     material: typeof record.material === "string" ? record.material : undefined,
+    accentColor: typeof record.accentColor === "string" ? record.accentColor : undefined,
+    accentMaterial: typeof record.accentMaterial === "string" ? record.accentMaterial : undefined,
+    windowCount: Number.isFinite(Number(record.windowCount)) ? Math.max(0, Math.min(12, Math.round(Number(record.windowCount)))) : undefined,
+    windowOrientation: record.windowOrientation === "vertical" || record.windowOrientation === "horizontal" || record.windowOrientation === "mixed" ? record.windowOrientation : "unknown",
+    glazing: record.glazing === "low" || record.glazing === "medium" || record.glazing === "high" ? record.glazing : "unknown",
+    hasDoor: typeof record.hasDoor === "boolean" ? record.hasDoor : undefined,
+    deckLocation: record.deckLocation === "mid" || record.deckLocation === "roof" ? record.deckLocation : "unknown",
+    railColor: typeof record.railColor === "string" ? record.railColor : undefined,
     confidence: clamp01(record.confidence, 0.6),
   };
 }
@@ -246,4 +254,151 @@ export async function analyzeImageWithOllama(
     throw new Error(`Ollama returned invalid JSON: ${error instanceof Error ? error.message : String(error)}`);
   }
   return normalizeVisualObservation(sourceImageId, parsed);
+}
+
+export type FacadeBandHeight = "low" | "medium" | "tall";
+export type FacadeBandPlane = "projects" | "flush" | "setback";
+export type FacadeRegionPosition = "left" | "center" | "right";
+
+export interface FacadeBandObservation {
+  label: string;
+  widthFraction: number;
+  relativeHeight: FacadeBandHeight;
+  projection: FacadeBandPlane;
+  confidence: number;
+}
+
+export interface FacadeRegionObservation {
+  position: FacadeRegionPosition;
+  kind: FacadeComponentKind;
+  wallColor?: string;
+  wallMaterial?: string;
+  accentColor?: string;
+  accentMaterial?: string;
+  relativeHeight: FacadeBandHeight;
+  projection: FacadeBandPlane;
+  windowCount?: number;
+  windowOrientation?: "vertical" | "horizontal" | "mixed" | "unknown";
+  glazing?: "low" | "medium" | "high" | "unknown";
+  hasDoor?: boolean;
+  deckLocation?: "mid" | "roof" | "unknown";
+  railColor?: string;
+  confidence: number;
+}
+
+async function requestOllamaJson(imageBase64: string, instruction: string, options: OllamaVisionOptions) {
+  const baseUrl = options.baseUrl ?? "http://127.0.0.1:11434";
+  const model = options.model ?? "gemma3:4b";
+  const response = await fetch(`${baseUrl}/api/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model,
+      messages: [{ role: "user", content: instruction, images: [imageBase64] }],
+      stream: false,
+      format: "json",
+      options: { temperature: 0 },
+    }),
+  });
+  if (!response.ok) throw new Error(`Ollama vision request failed with ${response.status}`);
+  const payload = (await response.json()) as OllamaResponse;
+  const content = payload.message?.content;
+  if (!content) throw new Error("Ollama returned no message content");
+  try {
+    return JSON.parse(content) as unknown;
+  } catch (error) {
+    throw new Error(`Ollama returned invalid JSON: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+function bandHeight(value: unknown): FacadeBandHeight {
+  const normalized = typeof value === "string" ? value.toLowerCase() : "medium";
+  return normalized === "low" || normalized === "tall" ? normalized : "medium";
+}
+
+function bandPlane(value: unknown): FacadeBandPlane {
+  const normalized = typeof value === "string" ? value.toLowerCase() : "flush";
+  if (normalized.includes("project")) return "projects";
+  if (normalized.includes("set")) return "setback";
+  return "flush";
+}
+
+function recordString(record: Record<string, unknown>, ...keys: string[]) {
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return undefined;
+}
+
+export async function analyzeFacadeBandsWithOllama(
+  imageBase64: string,
+  options: OllamaVisionOptions = {},
+): Promise<FacadeBandObservation[]> {
+  const parsed = await requestOllamaJson(imageBase64, [
+    "Look only at the target HOUSE above any retaining wall. Ignore landscaping, retaining walls, sidewalk, road, fences, and neighbors.",
+    "Return ONLY JSON with key house_masses containing an array of the large PRIMARY architectural masses from image-left to image-right.",
+    "A primary mass is a large wing or vertical tower. Do not list windows, wall patches, railings, or each floor as separate masses.",
+    "For each mass return label, approximate_fraction as a fraction of total visible house width, relative_height as low|medium|tall, projection as projects|flush|setback, and confidence 0..1.",
+    "The fractions should collectively account for nearly all of the visible target-house width. Merge adjacent patches that belong to one architectural mass.",
+  ].join("\n"), options);
+  const root = parsed && typeof parsed === "object" ? parsed as Record<string, unknown> : {};
+  const raw = Array.isArray(root.house_masses) ? root.house_masses : Array.isArray(root.masses) ? root.masses : [];
+  const bands = raw.flatMap((value): FacadeBandObservation[] => {
+    if (!value || typeof value !== "object") return [];
+    const record = value as Record<string, unknown>;
+    const width = Number(record.approximate_fraction ?? record.widthFraction ?? record.width);
+    return [{
+      label: recordString(record, "label", "name") ?? "volume",
+      widthFraction: Number.isFinite(width) ? Math.max(0.08, Math.min(1, width)) : 0.33,
+      relativeHeight: bandHeight(record.relative_height ?? record.relativeHeight),
+      projection: bandPlane(record.projection ?? record.facade_plane),
+      confidence: clamp01(record.confidence, 0.72),
+    }];
+  });
+  if (bands.length < 2 || bands.length > 5) return [];
+  const sum = bands.reduce((total, band) => total + band.widthFraction, 0);
+  if (sum <= 0) return [];
+  return bands.map((band) => ({ ...band, widthFraction: band.widthFraction / sum }));
+}
+
+export async function analyzeFacadeRegionWithOllama(
+  position: FacadeRegionPosition,
+  imageBase64: string,
+  options: OllamaVisionOptions = {},
+): Promise<FacadeRegionObservation> {
+  const parsed = await requestOllamaJson(imageBase64, [
+    `This frame is aimed at the ${position.toUpperCase()} primary architectural region of the target HOUSE.`,
+    "Ignore vegetation, retaining walls, sidewalk, road, fences, and neighboring buildings.",
+    "Describe only the large house mass centered in this frame, not every small wall patch.",
+    "Return ONLY one JSON object with: kind (volume|tower|balcony|chimney|other), wallColor, wallMaterial, accentColor, accentMaterial, relativeHeight (low|medium|tall), projection (projects|flush|setback), windowCount on its STREET-FACING plane, windowOrientation (vertical|horizontal|mixed|unknown), glazing (low|medium|high|unknown), hasDoor boolean, deckLocation (mid|roof|unknown), railColor, confidence 0..1.",
+    "Use deckLocation=mid for a projecting balcony/deck partway up a facade and roof for a guardrail/terrace at the roof line. Do not call a wood soffit the dominant wall material when the main wall is stucco or concrete.",
+  ].join("\n"), options);
+  const record = parsed && typeof parsed === "object" ? parsed as Record<string, unknown> : {};
+  const rawKind = (recordString(record, "kind", "mass_type") ?? "volume").toLowerCase();
+  const kind: FacadeComponentKind = FACADE_COMPONENT_KINDS.has(rawKind as FacadeComponentKind) ? rawKind as FacadeComponentKind : rawKind.includes("tower") ? "tower" : "volume";
+  const rawOrientation = (recordString(record, "windowOrientation", "window_orientation") ?? "unknown").toLowerCase();
+  const windowOrientation = rawOrientation.includes("vertical") ? "vertical" : rawOrientation.includes("horizontal") ? "horizontal" : rawOrientation.includes("mixed") ? "mixed" : "unknown";
+  const rawGlazing = (recordString(record, "glazing", "glazingAmount", "amount_type_of_glazing") ?? "unknown").toLowerCase();
+  const glazing = rawGlazing.includes("high") || rawGlazing.includes("large") ? "high" : rawGlazing.includes("medium") ? "medium" : rawGlazing.includes("low") || rawGlazing.includes("small") ? "low" : "unknown";
+  const rawDeck = (recordString(record, "deckLocation", "deck_location") ?? "unknown").toLowerCase();
+  const deckLocation = rawDeck.includes("roof") ? "roof" : rawDeck.includes("mid") || rawDeck.includes("balcon") ? "mid" : "unknown";
+  const count = Number(record.windowCount ?? record.window_count ?? record.number_of_window_openings ?? record.visible_window_count);
+  return {
+    position,
+    kind,
+    wallColor: recordString(record, "wallColor", "wall_color", "dominant_wall_material/color", "dominant_wall_material_color"),
+    wallMaterial: recordString(record, "wallMaterial", "wall_material"),
+    accentColor: recordString(record, "accentColor", "accent_color"),
+    accentMaterial: recordString(record, "accentMaterial", "accent_material", "wood_accent/soffit_presence_and_location"),
+    relativeHeight: bandHeight(record.relativeHeight ?? record.relative_height),
+    projection: bandPlane(record.projection ?? record.facade_plane),
+    windowCount: Number.isFinite(count) ? Math.max(0, Math.min(12, Math.round(count))) : undefined,
+    windowOrientation,
+    glazing,
+    hasDoor: typeof record.hasDoor === "boolean" ? record.hasDoor : typeof record.visible_door === "boolean" ? record.visible_door : undefined,
+    deckLocation,
+    railColor: recordString(record, "railColor", "rail_color", "balcony_material_rail_color"),
+    confidence: clamp01(record.confidence, 0.76),
+  };
 }
