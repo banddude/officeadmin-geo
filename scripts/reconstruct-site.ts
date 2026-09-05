@@ -112,21 +112,6 @@ function componentSetback(projection: "projects" | "flush" | "setback") {
   return "slight" as const;
 }
 
-function mergeTargetArchitecture(contextObservation: VisualObservation, targetObservation: VisualObservation): VisualObservation {
-  return {
-    ...contextObservation,
-    visible: targetObservation.visible || contextObservation.visible,
-    confidence: Math.max(contextObservation.confidence, targetObservation.confidence),
-    storiesApprox: targetObservation.storiesApprox ?? contextObservation.storiesApprox,
-    roof: targetObservation.roof ?? contextObservation.roof,
-    massing: targetObservation.massing ?? contextObservation.massing,
-    facadeComposition: targetObservation.facadeComposition ?? contextObservation.facadeComposition,
-    facades: targetObservation.facades.length ? targetObservation.facades : contextObservation.facades,
-    site: contextObservation.site,
-    notes: [...new Set([...(contextObservation.notes ?? []), ...(targetObservation.notes ?? [])])],
-  };
-}
-
 function mergeTargetArchitecture(fullFrame: VisualObservation, targetCrop: VisualObservation): VisualObservation {
   return {
     ...fullFrame,
