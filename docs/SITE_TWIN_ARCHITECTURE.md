@@ -251,3 +251,9 @@ Site Twin is intentionally independent from the Mapbox provider package. The sel
 ### Hillside vertical placement
 
 For sloped sites, do not render LA County `HEIGHT` as literal above-ground wall height. LARIAC roof elevation is treated as the absolute top datum, while USGS elevation is sampled beneath each building. Rendered structural height is `roofElevationM - groundElevationM` when both are valid. The neighborhood terrain grid must cover every rendered building, not only the target parcel.
+
+## Geometry versus visible massing
+
+The Site Twin model deliberately separates measured geospatial geometry from AI-derived visible massing. County footprints and roof elevations are not treated as complete 3D building solids. The semantic massing layer can describe stepped levels inside that envelope without changing the measured parcel, footprint, terrain, or roof datum.
+
+This allows a hillside house to remain spatially anchored while avoiding the false assumption that every footprint edge extends vertically to the highest roof plane.

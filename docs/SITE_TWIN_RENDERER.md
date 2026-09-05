@@ -226,3 +226,22 @@ The first prototype should stay below a few thousand draw calls and should prefe
 All buildings share the same absolute terrain datum. Each rendered building uses its sampled local ground elevation for its base and County roof elevation for its top when those measurements are available. Terrain and land-cover meshes must cover the complete visible building context so neighboring structures are never positioned by extrapolating a target-parcel-only height field.
 
 Only the primary target building receives target-specific AI facade materials/openings. Neighbor buildings render neutral measured massing until they receive their own observations.
+
+## Hillside massing rule
+
+Do not render the primary building as one full-height extrusion when semantic massing is available.
+
+The renderer constructs a facade-aligned local coordinate frame from the measured footprint and target-facing imagery. Each AI massing volume is then fit inside the measured envelope. The total vertical extent still terminates at the measured absolute roof elevation, while individual visible levels may step back from the street-facing plane.
+
+This separation is important:
+
+- GIS controls where the building is and how high its roof is in world space.
+- Terrain controls where walls meet local grade.
+- Vision controls the visible arrangement of levels, setbacks, openings, colors, and materials.
+- Rendering controls stylization only.
+
+Context buildings may remain simplified terrain-conforming masses until they receive their own imagery reconstruction.
+
+## Art direction
+
+The default research view should read as a clean animated architectural model rather than a GIS debug scene. Use continuous terrain, surface-width roads and sidewalks, low-poly vegetation derived from measured canopy, warm neutral context buildings, dark framed glazing, restrained wood accents, soft atmospheric depth, and directional shadows. Debug overlays and the data inspector are off by default.
