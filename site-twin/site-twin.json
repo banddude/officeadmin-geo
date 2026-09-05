@@ -3,14 +3,14 @@
   "facadeAlignment": {
     "frontEdgeIndex": 12,
     "sourceImageId": "ZbZi32upfDcCdgarXH_tTQ",
-    "confidence": 0.9339654811330755
+    "confidence": 0.9339649431921357
   },
   "address": "2629 Corralitas Dr, Los Angeles, CA 90039",
   "center": {
     "latitude": 34.09962,
     "longitude": -118.25278
   },
-  "generatedAt": "2026-09-04T23:33:24.303Z",
+  "generatedAt": "2026-09-05T00:10:31.229Z",
   "geometry": {
     "center": {
       "latitude": 34.09962,
@@ -31829,22 +31829,55 @@
     "sourceImageIds": [
       "ZbZi32upfDcCdgarXH_tTQ",
       "nEbwXhyt7GxeKcN0YYyvyQ",
-      "vM0lvFfkARmcElUoxHItbw",
-      "McTJ15Z3rBYI31wBsO3BwQ"
+      "vM0lvFfkARmcElUoxHItbw"
+    ]
+  },
+  "massing": {
+    "storiesVisible": 2,
+    "stepped": false,
+    "volumes": [
+      {
+        "level": 0,
+        "widthFraction": 0.75,
+        "depthFraction": 0.6,
+        "horizontalCenter": 0.5,
+        "setback": "moderate",
+        "color": "gray",
+        "material": "concrete",
+        "confidence": 0.98
+      },
+      {
+        "level": 1,
+        "widthFraction": 0.75,
+        "depthFraction": 0.6,
+        "horizontalCenter": 0.5,
+        "setback": "moderate",
+        "color": "gray",
+        "material": "concrete",
+        "confidence": 0.98
+      }
+    ],
+    "confidence": 0.8878270749984442,
+    "sourceImageIds": [
+      "ZbZi32upfDcCdgarXH_tTQ"
     ]
   },
   "roof": {
     "value": {
-      "type": "flat",
-      "color": "dark gray",
-      "material": "membrane"
+      "type": "flat"
     },
-    "confidence": 1,
+    "confidence": 0.6619326789789978,
     "sourceImageIds": [
-      "ZbZi32upfDcCdgarXH_tTQ",
       "nEbwXhyt7GxeKcN0YYyvyQ",
-      "vM0lvFfkARmcElUoxHItbw",
-      "McTJ15Z3rBYI31wBsO3BwQ"
+      "vM0lvFfkARmcElUoxHItbw"
+    ],
+    "alternatives": [
+      {
+        "value": {
+          "type": "unknown"
+        },
+        "confidence": 0.3380673210210023
+      }
     ]
   },
   "facades": [
@@ -31852,53 +31885,93 @@
       "wall": "front",
       "colors": {
         "value": [
-          "white"
+          "white",
+          "gray"
         ],
-        "confidence": 0.8277646688533907,
+        "confidence": 1,
         "sourceImageIds": [
           "ZbZi32upfDcCdgarXH_tTQ",
           "nEbwXhyt7GxeKcN0YYyvyQ",
-          "vM0lvFfkARmcElUoxHItbw",
-          "McTJ15Z3rBYI31wBsO3BwQ"
+          "vM0lvFfkARmcElUoxHItbw"
         ]
       },
       "materials": {
         "value": [
-          "stucco"
+          "concrete",
+          "aluminum",
+          "glass",
+          "siding"
         ],
-        "confidence": 0.8277646688533907,
+        "confidence": 1,
         "sourceImageIds": [
           "ZbZi32upfDcCdgarXH_tTQ",
           "nEbwXhyt7GxeKcN0YYyvyQ",
-          "vM0lvFfkARmcElUoxHItbw",
-          "McTJ15Z3rBYI31wBsO3BwQ"
+          "vM0lvFfkARmcElUoxHItbw"
         ]
       },
       "windows": [
         {
-          "x": 0.17999999999999997,
-          "y": 0.6275302223684041,
-          "width": 0.2375302223684041,
-          "height": 0.23246977763159596,
-          "confidence": 0.7863764354107212,
-          "color": "dark"
+          "x": 0.25,
+          "y": 0.3,
+          "width": 0.159826749016188,
+          "height": 0.2824721069616207,
+          "confidence": 0.6543364413219588,
+          "color": "clear",
+          "material": "aluminum"
         },
         {
-          "x": 0.7151813342104246,
-          "y": 0.07999999999999999,
-          "width": 0.11999999999999998,
-          "height": 0.34,
-          "confidence": 0.7863764354107212,
-          "color": "brown"
+          "x": 0.25,
+          "y": 0.6,
+          "width": 0.15,
+          "height": 0.22522218188924087,
+          "confidence": 0.4400031086214076,
+          "color": "clear",
+          "material": "aluminum"
+        },
+        {
+          "x": 0.25,
+          "y": 0.7,
+          "width": 0.18,
+          "height": 0.4,
+          "confidence": 0.17146666616044093,
+          "color": "brown",
+          "material": "glass"
+        },
+        {
+          "x": 0.6,
+          "y": 0.3,
+          "width": 0.159826749016188,
+          "height": 0.2824721069616207,
+          "confidence": 0.6543364413219588,
+          "color": "clear",
+          "material": "aluminum"
+        },
+        {
+          "x": 0.6,
+          "y": 0.6,
+          "width": 0.15,
+          "height": 0.22522218188924087,
+          "confidence": 0.4400031086214076,
+          "color": "clear",
+          "material": "aluminum"
+        },
+        {
+          "x": 0.6,
+          "y": 0.7,
+          "width": 0.18,
+          "height": 0.4,
+          "confidence": 0.17146666616044093,
+          "color": "brown",
+          "material": "glass"
         }
       ],
       "doors": [
         {
-          "x": 0.7501208894736164,
-          "y": 0.019999999999999997,
-          "width": 0.11999999999999998,
-          "height": 0.34,
-          "confidence": 0.7863764354107212,
+          "x": 0.35,
+          "y": 0.2,
+          "width": 0.1,
+          "height": 0.8,
+          "confidence": 0.22862222154725462,
           "color": "brown",
           "material": "wood"
         }
@@ -31908,51 +31981,54 @@
       "wall": "rear",
       "colors": {
         "value": [
-          "gray"
+          "gray",
+          "light gray",
+          "white"
         ],
-        "confidence": 0.701156926092167,
+        "confidence": 1,
         "sourceImageIds": [
           "ZbZi32upfDcCdgarXH_tTQ",
-          "vM0lvFfkARmcElUoxHItbw"
+          "vM0lvFfkARmcElUoxHItbw",
+          "nEbwXhyt7GxeKcN0YYyvyQ"
         ]
       },
       "materials": {
         "value": [
           "concrete",
-          "stucco"
+          "siding",
+          "brick"
         ],
-        "confidence": 0.701156926092167,
+        "confidence": 1,
         "sourceImageIds": [
           "ZbZi32upfDcCdgarXH_tTQ",
+          "nEbwXhyt7GxeKcN0YYyvyQ",
           "vM0lvFfkARmcElUoxHItbw"
         ]
       },
       "windows": [],
-      "doors": []
+      "doors": [
+        {
+          "x": 0.5,
+          "y": 0.1,
+          "width": 0.2,
+          "height": 0.8,
+          "confidence": 0.1775654149996888,
+          "color": "brown",
+          "material": "wood"
+        }
+      ]
     },
     {
       "wall": "left",
       "colors": {
-        "value": [
-          "gray",
-          "white"
-        ],
-        "confidence": 0.6135123103306461,
-        "sourceImageIds": [
-          "ZbZi32upfDcCdgarXH_tTQ",
-          "vM0lvFfkARmcElUoxHItbw"
-        ]
+        "value": [],
+        "confidence": 0,
+        "sourceImageIds": []
       },
       "materials": {
-        "value": [
-          "concrete",
-          "stucco"
-        ],
-        "confidence": 0.6135123103306461,
-        "sourceImageIds": [
-          "ZbZi32upfDcCdgarXH_tTQ",
-          "vM0lvFfkARmcElUoxHItbw"
-        ]
+        "value": [],
+        "confidence": 0,
+        "sourceImageIds": []
       },
       "windows": [],
       "doors": []
@@ -31960,26 +32036,14 @@
     {
       "wall": "right",
       "colors": {
-        "value": [
-          "gray",
-          "white"
-        ],
-        "confidence": 0.6135123103306461,
-        "sourceImageIds": [
-          "ZbZi32upfDcCdgarXH_tTQ",
-          "vM0lvFfkARmcElUoxHItbw"
-        ]
+        "value": [],
+        "confidence": 0,
+        "sourceImageIds": []
       },
       "materials": {
-        "value": [
-          "concrete",
-          "stucco"
-        ],
-        "confidence": 0.6135123103306461,
-        "sourceImageIds": [
-          "ZbZi32upfDcCdgarXH_tTQ",
-          "vM0lvFfkARmcElUoxHItbw"
-        ]
+        "value": [],
+        "confidence": 0,
+        "sourceImageIds": []
       },
       "windows": [],
       "doors": []
@@ -31987,34 +32051,30 @@
   ],
   "site": {
     "stairs": {
-      "value": true,
+      "value": false,
       "confidence": 1,
-      "sourceImageIds": [
-        "ZbZi32upfDcCdgarXH_tTQ",
-        "nEbwXhyt7GxeKcN0YYyvyQ",
-        "vM0lvFfkARmcElUoxHItbw",
-        "McTJ15Z3rBYI31wBsO3BwQ"
-      ]
+      "sourceImageIds": []
     },
     "retainingWalls": {
-      "value": false,
-      "confidence": 0,
-      "sourceImageIds": []
-    },
-    "driveway": {
-      "value": false,
-      "confidence": 0,
-      "sourceImageIds": []
-    },
-    "grass": {
       "value": true,
       "confidence": 1,
       "sourceImageIds": [
         "ZbZi32upfDcCdgarXH_tTQ",
         "nEbwXhyt7GxeKcN0YYyvyQ",
-        "vM0lvFfkARmcElUoxHItbw",
-        "McTJ15Z3rBYI31wBsO3BwQ"
+        "vM0lvFfkARmcElUoxHItbw"
       ]
+    },
+    "driveway": {
+      "value": true,
+      "confidence": 0.6631361547359124,
+      "sourceImageIds": [
+        "vM0lvFfkARmcElUoxHItbw"
+      ]
+    },
+    "grass": {
+      "value": false,
+      "confidence": 1,
+      "sourceImageIds": []
     },
     "sidewalk": {
       "value": true,
@@ -32022,8 +32082,7 @@
       "sourceImageIds": [
         "ZbZi32upfDcCdgarXH_tTQ",
         "nEbwXhyt7GxeKcN0YYyvyQ",
-        "vM0lvFfkARmcElUoxHItbw",
-        "McTJ15Z3rBYI31wBsO3BwQ"
+        "vM0lvFfkARmcElUoxHItbw"
       ]
     },
     "curb": {
@@ -32032,8 +32091,7 @@
       "sourceImageIds": [
         "ZbZi32upfDcCdgarXH_tTQ",
         "nEbwXhyt7GxeKcN0YYyvyQ",
-        "vM0lvFfkARmcElUoxHItbw",
-        "McTJ15Z3rBYI31wBsO3BwQ"
+        "vM0lvFfkARmcElUoxHItbw"
       ]
     },
     "trees": {
@@ -32042,14 +32100,15 @@
       "sourceImageIds": [
         "ZbZi32upfDcCdgarXH_tTQ",
         "nEbwXhyt7GxeKcN0YYyvyQ",
-        "vM0lvFfkARmcElUoxHItbw",
-        "McTJ15Z3rBYI31wBsO3BwQ"
+        "vM0lvFfkARmcElUoxHItbw"
       ]
     },
     "fence": {
-      "value": false,
-      "confidence": 0,
-      "sourceImageIds": []
+      "value": true,
+      "confidence": 0.6713672754184028,
+      "sourceImageIds": [
+        "ZbZi32upfDcCdgarXH_tTQ"
+      ]
     }
   },
   "imagery": [
@@ -32073,7 +32132,7 @@
       "distanceToTargetM": 20.034797729766538,
       "bearingToTargetDeg": 269.6923818714949,
       "headingErrorDeg": 0,
-      "score": 0.9339654811330755,
+      "score": 0.9339649431921357,
       "scoreReasons": [
         "distance:20.0m",
         "heading-error:0.0deg",
@@ -32132,155 +32191,133 @@
         "heading-error:0.0deg"
       ],
       "headingDeg": 215.00510173593327
-    },
-    {
-      "id": "o2Wjj74LRbH-fG5IWsCX-w",
-      "provider": "google-streetview-research",
-      "latitude": 34.09957821776173,
-      "longitude": -118.2531625351468,
-      "imageUrl": "google-streetview-research://o2Wjj74LRbH-fG5IWsCX-w",
-      "provenance": {
-        "provider": "google-streetview-research",
-        "featureId": "o2Wjj74LRbH-fG5IWsCX-w",
-        "details": {
-          "panoramaHeadingDeg": 21.73652076721191,
-          "pitchDeg": 87.33965301513672,
-          "rollDeg": 0.9307949542999268
-        }
-      },
-      "distanceToTargetM": 35.52765222440528,
-      "bearingToTargetDeg": 82.48575688225321,
-      "headingErrorDeg": 0,
-      "score": 0.9080251129980352,
-      "scoreReasons": [
-        "distance:35.5m",
-        "heading-error:0.0deg"
-      ],
-      "headingDeg": 82.48575688225321
-    },
-    {
-      "id": "McTJ15Z3rBYI31wBsO3BwQ",
-      "provider": "google-streetview-research",
-      "latitude": 34.09929886196537,
-      "longitude": -118.2526499437002,
-      "imageUrl": "google-streetview-research://McTJ15Z3rBYI31wBsO3BwQ",
-      "provenance": {
-        "provider": "google-streetview-research",
-        "featureId": "McTJ15Z3rBYI31wBsO3BwQ",
-        "details": {
-          "panoramaHeadingDeg": 209.8921051025391,
-          "pitchDeg": 86.7916259765625,
-          "rollDeg": 357.3748779296875
-        }
-      },
-      "distanceToTargetM": 37.66344679126113,
-      "bearingToTargetDeg": 341.4609164306635,
-      "headingErrorDeg": 0,
-      "score": 0.9061028978878651,
-      "scoreReasons": [
-        "distance:37.7m",
-        "heading-error:0.0deg"
-      ],
-      "headingDeg": 341.4609164306635
     }
   ],
   "observations": [
     {
       "sourceImageId": "ZbZi32upfDcCdgarXH_tTQ",
       "visible": true,
-      "confidence": 0.95,
+      "confidence": 0.97,
       "storiesApprox": 2,
       "roof": {
-        "type": "flat",
-        "color": "dark gray",
-        "material": "membrane"
+        "type": "unknown"
+      },
+      "massing": {
+        "storiesVisible": 2,
+        "stepped": false,
+        "volumes": [
+          {
+            "level": 0,
+            "widthFraction": 0.75,
+            "depthFraction": 0.6,
+            "horizontalCenter": 0.5,
+            "setback": "moderate",
+            "color": "gray",
+            "material": "concrete",
+            "confidence": 0.98
+          },
+          {
+            "level": 1,
+            "widthFraction": 0.75,
+            "depthFraction": 0.6,
+            "horizontalCenter": 0.5,
+            "setback": "moderate",
+            "color": "gray",
+            "material": "concrete",
+            "confidence": 0.98
+          }
+        ],
+        "confidence": 0.98
       },
       "facades": [
         {
           "wall": "front",
-          "confidence": 0.95,
+          "confidence": 0.98,
           "colors": [
+            "gray",
             "white"
           ],
           "materials": [
-            "stucco"
+            "concrete",
+            "aluminum"
           ],
           "windows": [
             {
-              "x": 0.18,
-              "y": 0.63,
-              "width": 0.24,
-              "height": 0.23,
-              "confidence": 0.95,
-              "color": "dark",
+              "x": 0.25,
+              "y": 0.3,
+              "width": 0.15,
+              "height": 0.25,
+              "confidence": 0.75,
+              "color": "clear",
+              "material": "aluminum",
               "shape": "rect"
             },
             {
-              "x": 0.73,
-              "y": 0.08,
-              "width": 0.12,
-              "height": 0.34,
-              "confidence": 0.95,
-              "color": "brown",
+              "x": 0.6,
+              "y": 0.3,
+              "width": 0.15,
+              "height": 0.25,
+              "confidence": 0.75,
+              "color": "clear",
+              "material": "aluminum",
+              "shape": "rect"
+            },
+            {
+              "x": 0.25,
+              "y": 0.6,
+              "width": 0.15,
+              "height": 0.25,
+              "confidence": 0.75,
+              "color": "clear",
+              "material": "aluminum",
+              "shape": "rect"
+            },
+            {
+              "x": 0.6,
+              "y": 0.6,
+              "width": 0.15,
+              "height": 0.25,
+              "confidence": 0.75,
+              "color": "clear",
+              "material": "aluminum",
               "shape": "rect"
             }
           ],
+          "doors": []
+        },
+        {
+          "wall": "rear",
+          "confidence": 0.98,
+          "colors": [
+            "gray"
+          ],
+          "materials": [
+            "concrete"
+          ],
+          "windows": [],
           "doors": [
             {
-              "x": 0.76,
-              "y": 0.02,
-              "width": 0.12,
-              "height": 0.34,
-              "confidence": 0.95,
+              "x": 0.5,
+              "y": 0.1,
+              "width": 0.2,
+              "height": 0.8,
+              "confidence": 0.6,
               "color": "brown",
               "material": "wood",
               "shape": "rect"
             }
           ]
-        },
-        {
-          "wall": "rear",
-          "confidence": 0.8,
-          "colors": [
-            "gray"
-          ],
-          "materials": [
-            "concrete"
-          ],
-          "windows": [],
-          "doors": []
-        },
-        {
-          "wall": "left",
-          "confidence": 0.7,
-          "colors": [
-            "gray"
-          ],
-          "materials": [
-            "concrete"
-          ],
-          "windows": [],
-          "doors": []
-        },
-        {
-          "wall": "right",
-          "confidence": 0.7,
-          "colors": [
-            "gray"
-          ],
-          "materials": [
-            "concrete"
-          ],
-          "windows": [],
-          "doors": []
         }
       ],
       "site": {
-        "stairs": true,
-        "grass": true,
+        "stairs": false,
+        "retainingWalls": true,
+        "driveway": false,
+        "grass": false,
         "sidewalk": true,
         "curb": true,
         "trees": true,
+        "fence": true,
         "dominantHardscape": "concrete"
       },
       "notes": []
@@ -32288,63 +32325,116 @@
     {
       "sourceImageId": "nEbwXhyt7GxeKcN0YYyvyQ",
       "visible": true,
-      "confidence": 0.95,
+      "confidence": 0.97,
       "storiesApprox": 2,
       "roof": {
-        "type": "flat",
-        "color": "dark gray",
-        "material": "membrane"
+        "type": "flat"
+      },
+      "massing": {
+        "storiesVisible": 2,
+        "stepped": false,
+        "volumes": [
+          {
+            "level": 0,
+            "widthFraction": 0.75,
+            "depthFraction": 0.3,
+            "horizontalCenter": 0.5,
+            "setback": "moderate",
+            "color": "light gray",
+            "material": "concrete",
+            "confidence": 0.98
+          },
+          {
+            "level": 1,
+            "widthFraction": 0.75,
+            "depthFraction": 0.3,
+            "horizontalCenter": 0.5,
+            "setback": "moderate",
+            "color": "light gray",
+            "material": "concrete",
+            "confidence": 0.98
+          }
+        ],
+        "confidence": 0.98
       },
       "facades": [
         {
           "wall": "front",
-          "confidence": 0.95,
+          "confidence": 0.98,
           "colors": [
-            "white"
+            "white",
+            "light gray"
           ],
           "materials": [
-            "stucco"
+            "concrete",
+            "glass"
           ],
           "windows": [
             {
-              "x": 0.18,
-              "y": 0.63,
-              "width": 0.24,
-              "height": 0.23,
-              "confidence": 0.95,
-              "color": "dark",
+              "x": 0.25,
+              "y": 0.3,
+              "width": 0.15,
+              "height": 0.2,
+              "confidence": 0.75,
+              "color": "dark gray",
+              "material": "glass",
               "shape": "rect"
             },
             {
-              "x": 0.73,
-              "y": 0.08,
-              "width": 0.12,
-              "height": 0.34,
-              "confidence": 0.95,
-              "color": "light gray",
+              "x": 0.6,
+              "y": 0.3,
+              "width": 0.15,
+              "height": 0.2,
+              "confidence": 0.75,
+              "color": "dark gray",
+              "material": "glass",
+              "shape": "rect"
+            },
+            {
+              "x": 0.25,
+              "y": 0.6,
+              "width": 0.15,
+              "height": 0.2,
+              "confidence": 0.75,
+              "color": "dark gray",
+              "material": "glass",
+              "shape": "rect"
+            },
+            {
+              "x": 0.6,
+              "y": 0.6,
+              "width": 0.15,
+              "height": 0.2,
+              "confidence": 0.75,
+              "color": "dark gray",
+              "material": "glass",
               "shape": "rect"
             }
           ],
-          "doors": [
-            {
-              "x": 0.76,
-              "y": 0.02,
-              "width": 0.12,
-              "height": 0.34,
-              "confidence": 0.95,
-              "color": "brown",
-              "material": "wood",
-              "shape": "rect"
-            }
-          ]
+          "doors": []
+        },
+        {
+          "wall": "rear",
+          "confidence": 0.98,
+          "colors": [
+            "light gray"
+          ],
+          "materials": [
+            "concrete"
+          ],
+          "windows": [],
+          "doors": []
         }
       ],
       "site": {
-        "stairs": true,
-        "grass": true,
+        "stairs": false,
+        "retainingWalls": true,
+        "driveway": false,
+        "grass": false,
         "sidewalk": true,
         "curb": true,
         "trees": true,
+        "fence": false,
         "dominantHardscape": "concrete"
       },
       "notes": []
@@ -32352,50 +32442,89 @@
     {
       "sourceImageId": "vM0lvFfkARmcElUoxHItbw",
       "visible": true,
-      "confidence": 0.95,
+      "confidence": 0.97,
       "storiesApprox": 2,
       "roof": {
-        "type": "flat",
-        "color": "dark gray",
-        "material": "membrane"
+        "type": "flat"
+      },
+      "massing": {
+        "storiesVisible": 2,
+        "stepped": false,
+        "volumes": [
+          {
+            "level": 0,
+            "widthFraction": 0.75,
+            "depthFraction": 0.6,
+            "horizontalCenter": 0.5,
+            "setback": "moderate",
+            "color": "white",
+            "material": "siding",
+            "confidence": 0.98
+          }
+        ],
+        "confidence": 0.98
       },
       "facades": [
         {
           "wall": "front",
-          "confidence": 0.95,
+          "confidence": 0.97,
           "colors": [
-            "white"
+            "white",
+            "gray"
           ],
           "materials": [
-            "stucco"
+            "siding",
+            "brick"
           ],
           "windows": [
             {
-              "x": 0.18,
-              "y": 0.63,
-              "width": 0.24,
-              "height": 0.23,
-              "confidence": 0.95,
-              "color": "dark",
+              "x": 0.25,
+              "y": 0.3,
+              "width": 0.18,
+              "height": 0.4,
+              "confidence": 0.75,
+              "color": "brown",
+              "material": "glass",
               "shape": "rect"
             },
             {
-              "x": 0.73,
-              "y": 0.08,
-              "width": 0.12,
-              "height": 0.34,
-              "confidence": 0.95,
+              "x": 0.6,
+              "y": 0.3,
+              "width": 0.18,
+              "height": 0.4,
+              "confidence": 0.75,
               "color": "brown",
+              "material": "glass",
+              "shape": "rect"
+            },
+            {
+              "x": 0.25,
+              "y": 0.7,
+              "width": 0.18,
+              "height": 0.4,
+              "confidence": 0.6,
+              "color": "brown",
+              "material": "glass",
+              "shape": "rect"
+            },
+            {
+              "x": 0.6,
+              "y": 0.7,
+              "width": 0.18,
+              "height": 0.4,
+              "confidence": 0.6,
+              "color": "brown",
+              "material": "glass",
               "shape": "rect"
             }
           ],
           "doors": [
             {
-              "x": 0.76,
-              "y": 0.02,
-              "width": 0.12,
-              "height": 0.34,
-              "confidence": 0.95,
+              "x": 0.35,
+              "y": 0.2,
+              "width": 0.1,
+              "height": 0.8,
+              "confidence": 0.8,
               "color": "brown",
               "material": "wood",
               "shape": "rect"
@@ -32404,122 +32533,32 @@
         },
         {
           "wall": "rear",
-          "confidence": 0.8,
+          "confidence": 0.97,
           "colors": [
+            "white",
             "gray"
           ],
           "materials": [
-            "stucco"
-          ],
-          "windows": [],
-          "doors": []
-        },
-        {
-          "wall": "left",
-          "confidence": 0.7,
-          "colors": [
-            "white"
-          ],
-          "materials": [
-            "stucco"
-          ],
-          "windows": [],
-          "doors": []
-        },
-        {
-          "wall": "right",
-          "confidence": 0.7,
-          "colors": [
-            "white"
-          ],
-          "materials": [
-            "stucco"
+            "siding",
+            "brick"
           ],
           "windows": [],
           "doors": []
         }
       ],
       "site": {
-        "stairs": true,
-        "grass": true,
+        "stairs": false,
+        "retainingWalls": true,
+        "driveway": true,
+        "grass": false,
         "sidewalk": true,
         "curb": true,
         "trees": true,
+        "fence": false,
         "dominantHardscape": "concrete"
       },
       "notes": []
-    },
-    {
-      "sourceImageId": "McTJ15Z3rBYI31wBsO3BwQ",
-      "visible": true,
-      "confidence": 0.95,
-      "storiesApprox": 2,
-      "roof": {
-        "type": "flat",
-        "color": "dark gray",
-        "material": "membrane"
-      },
-      "facades": [
-        {
-          "wall": "front",
-          "confidence": 0.95,
-          "colors": [
-            "white",
-            "dark",
-            "brown"
-          ],
-          "materials": [
-            "stucco",
-            "wood"
-          ],
-          "windows": [
-            {
-              "x": 0.18,
-              "y": 0.62,
-              "width": 0.23,
-              "height": 0.24,
-              "confidence": 0.95,
-              "color": "dark",
-              "shape": "rect"
-            },
-            {
-              "x": 0.67,
-              "y": 0.08,
-              "width": 0.12,
-              "height": 0.34,
-              "confidence": 0.95,
-              "color": "brown",
-              "shape": "rect"
-            }
-          ],
-          "doors": [
-            {
-              "x": 0.72,
-              "y": 0.02,
-              "width": 0.12,
-              "height": 0.34,
-              "confidence": 0.95,
-              "color": "brown",
-              "material": "wood",
-              "shape": "rect"
-            }
-          ]
-        }
-      ],
-      "site": {
-        "stairs": true,
-        "grass": true,
-        "sidewalk": true,
-        "curb": true,
-        "trees": true,
-        "dominantHardscape": "concrete"
-      },
-      "notes": [
-        "The building is a single-family residence with a garage."
-      ]
     }
   ],
-  "warnings": [
-    "1 imagery observations failed or were rejected."
-  ]
+  "warnings": []
 }
