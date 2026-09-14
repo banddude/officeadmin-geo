@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "style": "clean low-poly Los Angeles architectural game",
+  "coordinateSystem": "GLTF Y-up export from Blender Z-up",
+  "units": "meters",
+  "assets": [
+    {
+      "id": "la-live-oak",
+      "file": "la-live-oak.glb",
+      "category": "vegetation",
+      "approxHeightM": 4.6
+    },
+    {
+      "id": "washingtonia-palm",
+      "file": "washingtonia-palm.glb",
+      "category": "vegetation",
+      "approxHeightM": 6.0
+    },
+    {
+      "id": "jacaranda",
+      "file": "jacaranda.glb",
+      "category": "vegetation",
+      "approxHeightM": 4.4
+    },
+    {
+      "id": "bougainvillea-shrub",
+      "file": "bougainvillea-shrub.glb",
+      "category": "vegetation",
+      "approxHeightM": 1.3
+    },
+    {
+      "id": "hillside-retaining-wall",
+      "file": "hillside-retaining-wall.glb",
+      "category": "site",
+      "approxWidthM": 3.1
+    },
+    {
+      "id": "hillside-steps",
+      "file": "hillside-steps.glb",
+      "category": "site",
+      "approxWidthM": 1.8
+    },
+    {
+      "id": "utility-pole",
+      "file": "utility-pole.glb",
+      "category": "street",
+      "approxHeightM": 7.0
+    },
+    {
+      "id": "parked-sedan",
+      "file": "parked-sedan.glb",
+      "category": "vehicle",
+      "approxLengthM": 4.2
+    },
+    {
+      "id": "contractor-pickup",
+      "file": "contractor-pickup.glb",
+      "category": "vehicle",
+      "approxLengthM": 4.8
+    },
+    {
+      "id": "fire-hydrant",
+      "file": "fire-hydrant.glb",
+      "category": "street",
+      "approxHeightM": 1.0
+    }
+  ]
+}
