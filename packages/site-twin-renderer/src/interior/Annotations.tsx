@@ -22,7 +22,7 @@ const LABEL_STYLE: CSSProperties = { pointerEvents: "none", whiteSpace: "nowrap"
 
 function Label({ position, text, tone = "room" }: { position: [number, number, number]; text: string; tone?: "room" | "dim" | "reg" | "site" }) {
   return (
-    <Html position={position} center style={LABEL_STYLE} zIndexRange={[30, 0]}>
+    <Html position={position} center style={LABEL_STYLE} zIndexRange={[5, 0]}>
       <span className={`oabm-label oabm-label-${tone}`}>{text}</span>
     </Html>
   );

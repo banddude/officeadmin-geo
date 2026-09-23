@@ -10,6 +10,6 @@ scanned-wall	select=wall:l1-partition-scanned	element panel: recorded 0.001 m vs
 thickness-off	select=wall:l1-partition-scanned&minDrawn=0	same wall at the recorded 1 mm: effectively invisible, panel says so
 conduit-closeup	select=route:c1-r1&focus=1	zoomed onto a conduit run: dashed cage and wires appear, panel shows exact lengths
 panel	select=equipment:panel-p1&focus=1	the panel: observed + user records, shown as specified by a person
-search	search=receptacle	search results ranked by name
+search	search=receptacle	search results ranked by name	input[placeholder^="Search:"]
 unregistered	registration=none	no registration: the interior is NOT placed on the site, and the panel says why
 generic	generic=1	no identifying text anywhere in the frame

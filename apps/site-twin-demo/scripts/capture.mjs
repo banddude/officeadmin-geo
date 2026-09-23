@@ -11,7 +11,7 @@
  * never after a guessed delay. Each shot writes a PNG, the page's visible text
  * (so claims about what the page SAYS can be grepped) and its console errors.
  *
- * Shots file: TSV lines "name<TAB>query<TAB>what it should show"; # comments.
+ * Shots file: TSV lines "name<TAB>query<TAB>what it should show<TAB>optional scroll selector"; # comments.
  */
 import { spawn } from "node:child_process";
 import { createServer } from "node:http";
@@ -116,8 +116,8 @@ async function main() {
   if (!existsSync(join(DIST, "index.html"))) throw new Error(`no build at ${DIST}; run vite build first`);
   mkdirSync(OUT, { recursive: true });
   const shots = readFileSync(SHOTS, "utf8").split("\n").filter((l) => l.trim() && !l.startsWith("#")).map((l) => {
-    const [name, query = "", shows = ""] = l.split("\t");
-    return { name: name.trim(), query: query.trim(), shows: shows.trim() };
+    const [name, query = "", shows = "", scrollSelector = ""] = l.split("\t");
+    return { name: name.trim(), query: query.trim(), shows: shows.trim(), scrollSelector: scrollSelector.trim() };
   });
   const only = arg("--only", "");
   const selected = only ? shots.filter((s) => only.split(",").includes(s.name)) : shots;
@@ -157,6 +157,10 @@ async function main() {
       const url = `http://127.0.0.1:${HTTP_PORT}/index.html${shot.query ? `?${shot.query}` : ""}`;
       await cdp.send("Page.navigate", { url }, sessionId);
       const state = await waitReady(cdp, sessionId);
+      if (shot.scrollSelector) {
+        await evaluate(cdp, sessionId, `document.querySelector(${JSON.stringify(shot.scrollSelector)})?.scrollIntoView({block:'start'})`);
+        await evaluate(cdp, sessionId, "new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(1))))", true);
+      }
       const png = await cdp.send("Page.captureScreenshot", { format: "png" }, sessionId);
       writeFileSync(join(OUT, `${shot.name}.png`), Buffer.from(png.data, "base64"));
       const text = await evaluate(cdp, sessionId, "document.body.innerText");

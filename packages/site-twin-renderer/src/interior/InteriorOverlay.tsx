@@ -115,7 +115,7 @@ function LeftPanel({ controller, scene, panelRef }: { controller: InteriorContro
         {mode === "cutaway"
           ? "The stylised exterior is cut away above the cut plane so the interior shows in its true colours. The interior itself is never cut."
           : mode === "precise"
-            ? "Exact canonical geometry, orthographic, with mounting heights and conduit lengths. The stylised shell is hidden; the GIS footprint is outlined."
+            ? "Exact canonical geometry, orthographic, with mounting heights and conduit lengths. The stylised site is hidden; the GIS footprint is outlined."
             : "Only the stylised exterior is drawn."}
       </p>
       <Legend scene={scene} />
