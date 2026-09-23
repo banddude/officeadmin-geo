@@ -22,9 +22,9 @@
  * rather than threading a prop through that file this walks the scene each
  * frame and sets `clippingPlanes` on built-in mesh materials:
  *   cutaway  -> the primary building group only (found by name)
- *   precise  -> the primary building's STYLISED shell is hidden outright, and
- *               every other site object is clipped at the same plane, so no
- *               terrain, tree or neighbour can cover the exact interior
+ *   precise  -> exterior meshes are hidden. Clipping them at the cut plane
+ *               left trees in front of the elevation and its dimension labels.
+ *               The precise view draws its own grid and GIS footprint outline.
  *   off      -> nothing is clipped; everything is restored
  * It is idempotent per frame and restores every material on unmount.
  */
@@ -62,6 +62,7 @@ export function ShellCut({ mode, cutWorldY }: { mode: InteriorMode; cutWorldY: n
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
   const planes = useMemo(() => [new THREE.Plane(new THREE.Vector3(0, -1, 0), 0)], []);
+  const hidden = useMemo(() => new Map<THREE.Mesh, boolean>(), []);
 
   useFrame(() => {
     planes[0]!.constant = cutWorldY;
@@ -69,7 +70,14 @@ export function ShellCut({ mode, cutWorldY }: { mode: InteriorMode; cutWorldY: n
     const primary = scene.getObjectByName(PRIMARY_BUILDING_GROUP_NAME);
     if (primary) primary.visible = mode !== "precise";
     walk(scene, false, (mesh, inPrimary) => {
-      const want = (mode === "cutaway" && inPrimary) || (mode === "precise" && !inPrimary) ? planes : null;
+      if (mode === "precise" && !inPrimary) {
+        if (!hidden.has(mesh)) hidden.set(mesh, mesh.visible);
+        mesh.visible = false;
+      } else if (hidden.has(mesh)) {
+        mesh.visible = hidden.get(mesh)!;
+        hidden.delete(mesh);
+      }
+      const want = mode === "cutaway" && inPrimary ? planes : null;
       setClip(mesh.material, want);
     });
   });
@@ -78,7 +86,9 @@ export function ShellCut({ mode, cutWorldY }: { mode: InteriorMode; cutWorldY: n
     const primary = scene.getObjectByName(PRIMARY_BUILDING_GROUP_NAME);
     if (primary) primary.visible = true;
     walk(scene, false, (mesh) => setClip(mesh.material, null));
-  }, [scene]);
+    for (const [mesh, wasVisible] of hidden) mesh.visible = wasVisible;
+    hidden.clear();
+  }, [scene, hidden]);
 
   return null;
 }

@@ -59,8 +59,9 @@ class CDP {
     ws.addEventListener("message", (event) => {
       const msg = JSON.parse(event.data);
       if (msg.id && this.pending.has(msg.id)) {
-        const { resolve: ok, reject } = this.pending.get(msg.id);
+        const { resolve: ok, reject, timer } = this.pending.get(msg.id);
         this.pending.delete(msg.id);
+        clearTimeout(timer);
         msg.error ? reject(new Error(JSON.stringify(msg.error))) : ok(msg.result);
       } else if (msg.method) {
         this.listeners.forEach((fn) => fn(msg));
@@ -71,8 +72,8 @@ class CDP {
     const id = this.next++;
     this.ws.send(JSON.stringify({ id, method, params, ...(sessionId ? { sessionId } : {}) }));
     return new Promise((ok, reject) => {
-      this.pending.set(id, { resolve: ok, reject });
-      setTimeout(() => { if (this.pending.delete(id)) reject(new Error(`${method} timed out`)); }, 90000);
+      const timer = setTimeout(() => { if (this.pending.delete(id)) reject(new Error(`${method} timed out`)); }, 90000);
+      this.pending.set(id, { resolve: ok, reject, timer });
     });
   }
 }
@@ -134,8 +135,9 @@ async function main() {
   };
   process.on("exit", cleanup);
   const manifest = [];
+  let cdp;
   try {
-    const cdp = await connect();
+    cdp = await connect();
     const { targetId } = await cdp.send("Target.createTarget", { url: "about:blank" });
     const { sessionId } = await cdp.send("Target.attachToTarget", { targetId, flatten: true });
     await cdp.send("Page.enable", {}, sessionId);
@@ -164,6 +166,7 @@ async function main() {
     }
   } finally {
     writeFileSync(join(OUT, "manifest.json"), JSON.stringify({ webglNote: "see stdout", width: WIDTH, height: HEIGHT, shots: manifest }, null, 2));
+    cdp?.ws.close();
     cleanup();
   }
   if (manifest.some((m) => !m.ready)) process.exitCode = 2;
