@@ -1,14 +1,18 @@
+import type { ReactNode } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Line, OrbitControls, Sky } from "@react-three/drei";
 import * as THREE from "three";
 import type { BuildingFeature, GroundCoverClass, Position, SemanticFacade, SemanticSiteModel } from "@officeadmin-geo/site-twin-core";
 import { haversineMeters, localMeters, polygonCentroid, renderedBuildingHeightM } from "@officeadmin-geo/site-twin-core";
+import { PRIMARY_BUILDING_GROUP_NAME } from "./interior/names";
 
 export interface SiteTwinSceneProps {
   model: SemanticSiteModel;
   debug?: boolean;
   className?: string;
   view?: "facade" | "overview";
+  /** Extra scene content mounted inside the Canvas (the interior layer). */
+  children?: ReactNode;
 }
 
 const COLORS = {
@@ -1571,7 +1575,7 @@ function SceneContents({ model, debug, view }: { model: SemanticSiteModel; debug
       <ParcelGround model={model} debug={debug} />
       <StreetContext model={model} />
       <LocalStreetApron model={model} />
-      {primary ? <BuildingMass building={primary} model={model} /> : null}
+      {primary ? <group name={PRIMARY_BUILDING_GROUP_NAME}><BuildingMass building={primary} model={model} /></group> : null}
       {contextBuildings.map(({ building, distance }) => (
         <ContextBuilding key={building.id} building={building} model={model} subdued={view === "facade" || distance > 35} />
       ))}
@@ -1582,7 +1586,7 @@ function SceneContents({ model, debug, view }: { model: SemanticSiteModel; debug
   );
 }
 
-export function SiteTwinScene({ model, debug = false, className, view = "facade" }: SiteTwinSceneProps) {
+export function SiteTwinScene({ model, debug = false, className, view = "facade", children }: SiteTwinSceneProps) {
   const cameraPosition = defaultCameraPosition(model, view);
   return (
     <div className={className} style={{ width: "100%", height: "100%" }}>
@@ -1595,6 +1599,7 @@ export function SiteTwinScene({ model, debug = false, className, view = "facade"
         onCreated={({ gl }) => { gl.outputColorSpace = THREE.SRGBColorSpace; }}
       >
         <SceneContents model={model} debug={debug} view={view} />
+        {children}
       </Canvas>
     </div>
   );

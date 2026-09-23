@@ -1,0 +1,34 @@
+{
+  "anchor": {
+    "latitude": 34.099610107,
+    "longitude": -118.252839733
+  },
+  "attributes": {
+    "synthetic": true
+  },
+  "confidence": 1,
+  "elevation_m": 164.1,
+  "id": "registration:synthetic-demo",
+  "interior": {
+    "frame_id": "synthetic-interior-frame",
+    "model_id": "synthetic:site-twin-demo-interior-v1"
+  },
+  "name": "Synthetic interior placed by hand in the demo footprint",
+  "notes": "Chosen by hand for the demo: origin 5.5 m west and 1.1 m south of the site model centre, +X rotated -30 deg from east, Level 1 floor at 164.1 m. The interior is made up; only its placement on the public demo site is chosen.",
+  "provenance": [
+    {
+      "attributes": {
+        "synthetic": true
+      },
+      "confidence": 1,
+      "derivation": "user",
+      "method": "placed by hand for the public demo so the made-up interior sits inside the demo footprint",
+      "page": null,
+      "source_element_id": null,
+      "source_id": "synthetic:demo-registration-001",
+      "source_kind": "manual-registration"
+    }
+  ],
+  "registration_version": "1",
+  "rotation_rad": -0.5235987755982988
+}

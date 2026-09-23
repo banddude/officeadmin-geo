@@ -1,0 +1,15 @@
+# name	query	what it should show
+default		cutaway of Level 1 inside the demo exterior, all three classes visible, conduit dashed
+exterior-only	interior=off	the untouched stylised exterior (interior off)
+cutaway-highcut	cut=6	cut plane 6 m above Level 1: the stylised shell is visibly sliced, proving the clip
+level2	level=level:l2	Level 2 only, riser shown only with Level 1 (its level comes from its start port)
+precise-plan	interior=precise&pview=plan	orthographic plan of Level 1, AFF labels, GIS footprint, grid
+precise-plan-c1	interior=precise&pview=plan&circuit=circuit:c1	circuit 1 traced in plan with segment lengths; the rest dimmed, never recoloured
+precise-front	interior=precise&pview=front&level=all	true elevation of both levels with mounting heights
+scanned-wall	select=wall:l1-partition-scanned	element panel: recorded 0.001 m vs drawn 0.1143 m, two disagreeing sources
+thickness-off	select=wall:l1-partition-scanned&minDrawn=0	same wall at the recorded 1 mm: effectively invisible, panel says so
+conduit-closeup	select=route:c1-r1&focus=1	zoomed onto a conduit run: dashed cage and wires appear, panel shows exact lengths
+panel	select=equipment:panel-p1&focus=1	the panel: observed + user records, shown as specified by a person
+search	search=receptacle	search results ranked by name
+unregistered	registration=none	no registration: the interior is NOT placed on the site, and the panel says why
+generic	generic=1	no identifying text anywhere in the frame

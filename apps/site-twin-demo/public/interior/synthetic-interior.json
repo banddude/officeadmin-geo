@@ -1,0 +1,2788 @@
+{
+  "attributes": {
+    "designed_sample": true,
+    "notice": "SYNTHETIC SAMPLE INTERIOR - made-up rooms, devices and wiring for the public Site Twin demo. It is not the interior of the building shown, or of any real building.",
+    "synthetic": true
+  },
+  "ceilings": [
+    {
+      "attributes": {},
+      "confidence": 1,
+      "footprint": {
+        "kind": "polygon3d",
+        "points": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 3
+          },
+          {
+            "x": 8,
+            "y": 0,
+            "z": 3
+          },
+          {
+            "x": 8,
+            "y": 7,
+            "z": 3
+          },
+          {
+            "x": 0,
+            "y": 7,
+            "z": 3
+          }
+        ]
+      },
+      "id": "ceiling:l1",
+      "level_id": "level:l1",
+      "name": "Sample Level 1 ceiling",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): ceiling plane assumed at the top of the walls; thickness unknown",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "thickness_m": null
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "footprint": {
+        "kind": "polygon3d",
+        "points": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 6.2
+          },
+          {
+            "x": 8,
+            "y": 0,
+            "z": 6.2
+          },
+          {
+            "x": 8,
+            "y": 7,
+            "z": 6.2
+          },
+          {
+            "x": 0,
+            "y": 7,
+            "z": 6.2
+          }
+        ]
+      },
+      "id": "ceiling:l2",
+      "level_id": "level:l2",
+      "name": "Sample Level 2 ceiling",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): ceiling plane assumed at the top of the walls; thickness unknown",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "thickness_m": null
+    }
+  ],
+  "circuits": [
+    {
+      "attributes": {},
+      "circuit_number": "1",
+      "confidence": 1,
+      "id": "circuit:c1",
+      "load_port_ids": [
+        "port:r1-in",
+        "port:r2-in"
+      ],
+      "load_va": null,
+      "name": "Sample circuit 1 (receptacles)",
+      "phase": "1ph",
+      "poles": 1,
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 1,
+          "derivation": "user",
+          "method": "placed by a person in a synthetic design session (made up): circuit assignment chosen by a person",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-design-session-001",
+          "source_kind": "synthetic-design"
+        }
+      ],
+      "route_ids": [
+        "route:c1-home",
+        "route:c1-r1",
+        "route:c1-r2"
+      ],
+      "source_port_id": "port:p1-c1",
+      "voltage_v": 120
+    },
+    {
+      "attributes": {},
+      "circuit_number": "2",
+      "confidence": 1,
+      "id": "circuit:c2",
+      "load_port_ids": [
+        "port:l1-in"
+      ],
+      "load_va": null,
+      "name": "Sample circuit 2 (lighting)",
+      "phase": "1ph",
+      "poles": 1,
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): circuit grouping worked out by the tool",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "route_ids": [
+        "route:c2"
+      ],
+      "source_port_id": "port:p1-c2",
+      "voltage_v": 120
+    },
+    {
+      "attributes": {},
+      "circuit_number": "3",
+      "confidence": 1,
+      "id": "circuit:c3",
+      "load_port_ids": [
+        "port:r4-in"
+      ],
+      "load_va": null,
+      "name": "Sample circuit 3 (upstairs)",
+      "phase": "1ph",
+      "poles": 1,
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 1,
+          "derivation": "user",
+          "method": "placed by a person in a synthetic design session (made up): circuit assignment chosen by a person",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-design-session-001",
+          "source_kind": "synthetic-design"
+        }
+      ],
+      "route_ids": [
+        "route:c3-riser"
+      ],
+      "source_port_id": "port:p1-c3",
+      "voltage_v": 120
+    }
+  ],
+  "conductors": [
+    {
+      "attributes": {},
+      "circuit_id": "circuit:c1",
+      "confidence": 1,
+      "count": 1,
+      "id": "conductor:c1-line",
+      "insulation": "THHN",
+      "material": "copper",
+      "name": null,
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): conductor derived from the circuit and its conduit",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "role": "line",
+      "route_ids": [
+        "route:c1-home",
+        "route:c1-r1",
+        "route:c1-r2"
+      ],
+      "size": "12 AWG"
+    },
+    {
+      "attributes": {},
+      "circuit_id": "circuit:c1",
+      "confidence": 1,
+      "count": 1,
+      "id": "conductor:c1-neutral",
+      "insulation": "THHN",
+      "material": "copper",
+      "name": null,
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): conductor derived from the circuit and its conduit",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "role": "neutral",
+      "route_ids": [
+        "route:c1-home",
+        "route:c1-r1",
+        "route:c1-r2"
+      ],
+      "size": "12 AWG"
+    },
+    {
+      "attributes": {},
+      "circuit_id": "circuit:c1",
+      "confidence": 1,
+      "count": 1,
+      "id": "conductor:c1-ground",
+      "insulation": "bare",
+      "material": "copper",
+      "name": null,
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): conductor derived from the circuit and its conduit",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "role": "ground",
+      "route_ids": [
+        "route:c1-home",
+        "route:c1-r1",
+        "route:c1-r2"
+      ],
+      "size": "12 AWG"
+    },
+    {
+      "attributes": {},
+      "circuit_id": "circuit:c2",
+      "confidence": 1,
+      "count": 1,
+      "id": "conductor:c2-line",
+      "insulation": "THHN",
+      "material": "copper",
+      "name": null,
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): conductor derived from the circuit and its conduit",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "role": "line",
+      "route_ids": [
+        "route:c2"
+      ],
+      "size": "12 AWG"
+    },
+    {
+      "attributes": {},
+      "circuit_id": "circuit:c2",
+      "confidence": 1,
+      "count": 1,
+      "id": "conductor:c2-neutral",
+      "insulation": "THHN",
+      "material": "copper",
+      "name": null,
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): conductor derived from the circuit and its conduit",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "role": "neutral",
+      "route_ids": [
+        "route:c2"
+      ],
+      "size": "12 AWG"
+    },
+    {
+      "attributes": {},
+      "circuit_id": "circuit:c2",
+      "confidence": 1,
+      "count": 1,
+      "id": "conductor:c2-ground",
+      "insulation": "bare",
+      "material": "copper",
+      "name": null,
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): conductor derived from the circuit and its conduit",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "role": "ground",
+      "route_ids": [
+        "route:c2"
+      ],
+      "size": "12 AWG"
+    },
+    {
+      "attributes": {},
+      "circuit_id": "circuit:c3",
+      "confidence": 1,
+      "count": 1,
+      "id": "conductor:c3-line",
+      "insulation": "THHN",
+      "material": "copper",
+      "name": null,
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): conductor derived from the circuit and its conduit",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "role": "line",
+      "route_ids": [
+        "route:c3-riser"
+      ],
+      "size": "12 AWG"
+    },
+    {
+      "attributes": {},
+      "circuit_id": "circuit:c3",
+      "confidence": 1,
+      "count": 1,
+      "id": "conductor:c3-neutral",
+      "insulation": "THHN",
+      "material": "copper",
+      "name": null,
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): conductor derived from the circuit and its conduit",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "role": "neutral",
+      "route_ids": [
+        "route:c3-riser"
+      ],
+      "size": "12 AWG"
+    },
+    {
+      "attributes": {},
+      "circuit_id": "circuit:c3",
+      "confidence": 1,
+      "count": 1,
+      "id": "conductor:c3-ground",
+      "insulation": "bare",
+      "material": "copper",
+      "name": null,
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): conductor derived from the circuit and its conduit",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "role": "ground",
+      "route_ids": [
+        "route:c3-riser"
+      ],
+      "size": "12 AWG"
+    }
+  ],
+  "coordinate_system": {
+    "angle_unit": "rad",
+    "crs": null,
+    "frame_id": "synthetic-interior-frame",
+    "handedness": "right",
+    "length_unit": "m",
+    "origin_in_crs": null,
+    "true_north_radians": null,
+    "up_axis": "+Z"
+  },
+  "electrical_devices": [
+    {
+      "attributes": {},
+      "confidence": 1,
+      "device_type": "receptacle",
+      "host_id": "wall:l1-south",
+      "id": "device:r1",
+      "level_id": "level:l1",
+      "name": "Sample receptacle R1",
+      "pose": {
+        "position": {
+          "x": 2.5,
+          "y": 0.1,
+          "z": 0.45
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): receptacle on the south wall",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        }
+      ],
+      "rated_voltage_v": 120,
+      "size": {
+        "x": 0.08,
+        "y": 0.05,
+        "z": 0.12
+      },
+      "space_id": "space:room-a",
+      "system": "120V"
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "device_type": "receptacle",
+      "host_id": "wall:l1-north",
+      "id": "device:r2",
+      "level_id": "level:l1",
+      "name": "Sample receptacle R2",
+      "pose": {
+        "position": {
+          "x": 4,
+          "y": 6.9,
+          "z": 0.45
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 1,
+          "derivation": "user",
+          "method": "placed by a person in a synthetic design session (made up): receptacle placed in the design",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-design-session-001",
+          "source_kind": "synthetic-design"
+        }
+      ],
+      "rated_voltage_v": 120,
+      "size": {
+        "x": 0.08,
+        "y": 0.05,
+        "z": 0.12
+      },
+      "space_id": "space:utility",
+      "system": "120V"
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "device_type": "receptacle",
+      "host_id": "wall:l1-east",
+      "id": "device:r3",
+      "level_id": "level:l1",
+      "name": "Sample receptacle R3 (proposed)",
+      "pose": {
+        "position": {
+          "x": 7.9,
+          "y": 2,
+          "z": 0.45
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): receptacle proposed from a spacing rule; nobody placed it",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "rated_voltage_v": 120,
+      "size": {
+        "x": 0.05,
+        "y": 0.08,
+        "z": 0.12
+      },
+      "space_id": "space:room-b",
+      "system": "120V"
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "device_type": "switch",
+      "host_id": "wall:l1-partition-designed",
+      "id": "device:s1",
+      "level_id": "level:l1",
+      "name": "Sample switch S1",
+      "pose": {
+        "position": {
+          "x": 2.5,
+          "y": 3.94,
+          "z": 1.2
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): switch beside the utility door",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        }
+      ],
+      "rated_voltage_v": 120,
+      "size": {
+        "x": 0.08,
+        "y": 0.05,
+        "z": 0.12
+      },
+      "space_id": "space:room-a",
+      "system": "120V"
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "device_type": "luminaire",
+      "host_id": null,
+      "id": "device:l1",
+      "level_id": "level:l1",
+      "name": "Sample light L1",
+      "pose": {
+        "position": {
+          "x": 1.5,
+          "y": 2,
+          "z": 2.95
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 1,
+          "derivation": "user",
+          "method": "placed by a person in a synthetic design session (made up): ceiling light placed in the design",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-design-session-001",
+          "source_kind": "synthetic-design"
+        }
+      ],
+      "rated_voltage_v": 120,
+      "size": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.1
+      },
+      "space_id": "space:room-a",
+      "system": "120V"
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "device_type": "junction_box",
+      "host_id": null,
+      "id": "device:j1",
+      "level_id": "level:l1",
+      "name": "Sample junction box J1",
+      "pose": {
+        "position": {
+          "x": 2.5,
+          "y": 5.3,
+          "z": 2.9
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): junction box seen above the utility ceiling; size not recorded",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        }
+      ],
+      "rated_voltage_v": 120,
+      "size": null,
+      "space_id": "space:utility",
+      "system": "120V"
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "device_type": "receptacle",
+      "host_id": "wall:l2-west",
+      "id": "device:r4",
+      "level_id": "level:l2",
+      "name": "Sample receptacle R4",
+      "pose": {
+        "position": {
+          "x": 0.1,
+          "y": 5,
+          "z": 3.65
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): receptacle on the upstairs west wall",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        }
+      ],
+      "rated_voltage_v": 120,
+      "size": {
+        "x": 0.05,
+        "y": 0.08,
+        "z": 0.12
+      },
+      "space_id": "space:room-d",
+      "system": "120V"
+    }
+  ],
+  "electrical_equipment": [
+    {
+      "attributes": {},
+      "confidence": 1,
+      "equipment_type": "panelboard",
+      "host_id": "wall:l1-west",
+      "id": "equipment:panel-p1",
+      "level_id": "level:l1",
+      "name": "SAMPLE PANEL P1",
+      "pose": {
+        "position": {
+          "x": 0.1,
+          "y": 5.5,
+          "z": 1.5
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): panel location and enclosure size",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        },
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 1,
+          "derivation": "user",
+          "method": "placed by a person in a synthetic design session (made up): panel label confirmed by a person",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-design-session-001",
+          "source_kind": "synthetic-design"
+        }
+      ],
+      "rated_voltage_v": 240,
+      "size": {
+        "x": 0.1,
+        "y": 0.6,
+        "z": 0.8
+      },
+      "space_id": "space:utility",
+      "system": "120/240V-1ph"
+    }
+  ],
+  "levels": [
+    {
+      "attributes": {},
+      "confidence": 1,
+      "elevation_m": 0,
+      "height_m": 3,
+      "id": "level:l1",
+      "name": "Sample Level 1",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 1,
+          "derivation": "user",
+          "method": "placed by a person in a synthetic design session (made up): level datum set by hand",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-design-session-001",
+          "source_kind": "synthetic-design"
+        }
+      ]
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "elevation_m": 3.2,
+      "height_m": 3,
+      "id": "level:l2",
+      "name": "Sample Level 2",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 1,
+          "derivation": "user",
+          "method": "placed by a person in a synthetic design session (made up): level datum set by hand",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-design-session-001",
+          "source_kind": "synthetic-design"
+        }
+      ]
+    }
+  ],
+  "model_id": "synthetic:site-twin-demo-interior-v1",
+  "name": "SYNTHETIC SAMPLE INTERIOR (made up)",
+  "obstacles": [
+    {
+      "attributes": {},
+      "clearance_m": 0.05,
+      "confidence": 1,
+      "geometry": {
+        "kind": "box3d",
+        "pose": {
+          "position": {
+            "x": 6.5,
+            "y": 5.5,
+            "z": 2.7
+          },
+          "rotation": {
+            "w": 1,
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "size": {
+          "x": 2,
+          "y": 0.4,
+          "z": 0.3
+        }
+      },
+      "id": "obstacle:duct",
+      "level_id": "level:l1",
+      "name": "Sample duct",
+      "obstacle_type": "duct",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): duct under the utility ceiling",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        }
+      ]
+    }
+  ],
+  "openings": [
+    {
+      "attributes": {},
+      "confidence": 1,
+      "host_id": "wall:l1-south",
+      "id": "opening:l1-window-a",
+      "name": "Sample window A",
+      "opening_type": "window",
+      "pose": {
+        "position": {
+          "x": 3.5,
+          "y": 0,
+          "z": 1.5
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): window in the south wall",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        }
+      ],
+      "size": {
+        "x": 1.2,
+        "y": 0.2,
+        "z": 1.2
+      }
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "host_id": "wall:l1-south",
+      "id": "opening:l1-window-b",
+      "name": "Sample window B",
+      "opening_type": "window",
+      "pose": {
+        "position": {
+          "x": 6.5,
+          "y": 0,
+          "z": 1.5
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 1,
+          "derivation": "user",
+          "method": "placed by a person in a synthetic design session (made up): window added in the design",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-design-session-001",
+          "source_kind": "synthetic-design"
+        }
+      ],
+      "size": {
+        "x": 1,
+        "y": 0.2,
+        "z": 1.2
+      }
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "host_id": "wall:l1-partition-designed",
+      "id": "opening:l1-door-utility",
+      "name": "Sample door to utility room",
+      "opening_type": "door",
+      "pose": {
+        "position": {
+          "x": 1.5,
+          "y": 4,
+          "z": 1.05
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): door in the designed partition",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        }
+      ],
+      "size": {
+        "x": 0.9,
+        "y": 0.1143,
+        "z": 2.1
+      }
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "host_id": "wall:l1-partition-scanned",
+      "id": "opening:l1-door-ab",
+      "name": "Sample doorway A-B",
+      "opening_type": "door",
+      "pose": {
+        "position": {
+          "x": 5,
+          "y": 2,
+          "z": 1.05
+        },
+        "rotation": {
+          "w": 0.7071067811865476,
+          "x": 0,
+          "y": 0,
+          "z": 0.7071067811865476
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): doorway inferred because rooms A and B are otherwise unconnected",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "size": {
+        "x": 0.8,
+        "y": 0.1,
+        "z": 2.1
+      }
+    }
+  ],
+  "ports": [
+    {
+      "attributes": {},
+      "confidence": 1,
+      "connected_port_ids": [],
+      "direction": {
+        "x": 0,
+        "y": 0,
+        "z": 1
+      },
+      "domain": "power",
+      "id": "port:p1-c1",
+      "name": null,
+      "nominal_diameter_m": 0.02,
+      "owner_id": "equipment:panel-p1",
+      "pose": {
+        "position": {
+          "x": 0.1,
+          "y": 5.3,
+          "z": 1.9
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): connection point synthesized so the circuit has an endpoint",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "role": "source"
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "connected_port_ids": [],
+      "direction": {
+        "x": 0,
+        "y": 0,
+        "z": 1
+      },
+      "domain": "power",
+      "id": "port:p1-c2",
+      "name": null,
+      "nominal_diameter_m": 0.02,
+      "owner_id": "equipment:panel-p1",
+      "pose": {
+        "position": {
+          "x": 0.1,
+          "y": 5.5,
+          "z": 1.9
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): connection point synthesized so the circuit has an endpoint",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "role": "source"
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "connected_port_ids": [],
+      "direction": {
+        "x": 0,
+        "y": 0,
+        "z": 1
+      },
+      "domain": "power",
+      "id": "port:p1-c3",
+      "name": null,
+      "nominal_diameter_m": 0.02,
+      "owner_id": "equipment:panel-p1",
+      "pose": {
+        "position": {
+          "x": 0.1,
+          "y": 5.7,
+          "z": 1.9
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): connection point synthesized so the circuit has an endpoint",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "role": "source"
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "connected_port_ids": [],
+      "direction": {
+        "x": -1,
+        "y": 0,
+        "z": 0
+      },
+      "domain": "power",
+      "id": "port:j1-in",
+      "name": null,
+      "nominal_diameter_m": 0.02,
+      "owner_id": "device:j1",
+      "pose": {
+        "position": {
+          "x": 2.5,
+          "y": 5.3,
+          "z": 2.9
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): connection point synthesized so the circuit has an endpoint",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "role": "load"
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "connected_port_ids": [],
+      "direction": {
+        "x": 0,
+        "y": -1,
+        "z": 0
+      },
+      "domain": "power",
+      "id": "port:j1-out-r1",
+      "name": null,
+      "nominal_diameter_m": 0.02,
+      "owner_id": "device:j1",
+      "pose": {
+        "position": {
+          "x": 2.5,
+          "y": 5.3,
+          "z": 2.9
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): connection point synthesized so the circuit has an endpoint",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "role": "source"
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "connected_port_ids": [],
+      "direction": {
+        "x": 1,
+        "y": 0,
+        "z": 0
+      },
+      "domain": "power",
+      "id": "port:j1-out-r2",
+      "name": null,
+      "nominal_diameter_m": 0.02,
+      "owner_id": "device:j1",
+      "pose": {
+        "position": {
+          "x": 2.5,
+          "y": 5.3,
+          "z": 2.9
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): connection point synthesized so the circuit has an endpoint",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "role": "source"
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "connected_port_ids": [],
+      "direction": {
+        "x": 0,
+        "y": 0,
+        "z": 1
+      },
+      "domain": "power",
+      "id": "port:r1-in",
+      "name": null,
+      "nominal_diameter_m": 0.02,
+      "owner_id": "device:r1",
+      "pose": {
+        "position": {
+          "x": 2.5,
+          "y": 0.1,
+          "z": 0.51
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): connection point synthesized so the circuit has an endpoint",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "role": "load"
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "connected_port_ids": [],
+      "direction": {
+        "x": 0,
+        "y": 0,
+        "z": 1
+      },
+      "domain": "power",
+      "id": "port:r2-in",
+      "name": null,
+      "nominal_diameter_m": 0.02,
+      "owner_id": "device:r2",
+      "pose": {
+        "position": {
+          "x": 4,
+          "y": 6.9,
+          "z": 0.51
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): connection point synthesized so the circuit has an endpoint",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "role": "load"
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "connected_port_ids": [],
+      "direction": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "domain": "power",
+      "id": "port:l1-in",
+      "name": null,
+      "nominal_diameter_m": 0.02,
+      "owner_id": "device:l1",
+      "pose": {
+        "position": {
+          "x": 1.5,
+          "y": 2,
+          "z": 2.95
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): connection point synthesized so the circuit has an endpoint",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "role": "load"
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "connected_port_ids": [],
+      "direction": {
+        "x": 0,
+        "y": 0,
+        "z": -1
+      },
+      "domain": "power",
+      "id": "port:r4-in",
+      "name": null,
+      "nominal_diameter_m": 0.02,
+      "owner_id": "device:r4",
+      "pose": {
+        "position": {
+          "x": 0.1,
+          "y": 5,
+          "z": 3.71
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): connection point synthesized so the circuit has an endpoint",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "role": "load"
+    }
+  ],
+  "provenance": [
+    {
+      "attributes": {
+        "synthetic": true
+      },
+      "confidence": 1,
+      "derivation": "user",
+      "method": "hand-written synthetic sample for the public Site Twin demo; describes no real building",
+      "page": null,
+      "source_element_id": null,
+      "source_id": "synthetic:sample-design-session-001",
+      "source_kind": "synthetic-design"
+    }
+  ],
+  "route_constraints": [],
+  "route_fittings": [
+    {
+      "angle_radians": 1.5707963267948966,
+      "attributes": {},
+      "confidence": 1,
+      "fitting_type": "elbow-90",
+      "id": "fitting:c1-home-1",
+      "name": null,
+      "nominal_diameter_m": 0.02,
+      "pose": {
+        "position": {
+          "x": 0.1,
+          "y": 5.3,
+          "z": 2.9
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): elbow selected by the router",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "route_id": "route:c1-home"
+    },
+    {
+      "angle_radians": 1.5707963267948966,
+      "attributes": {},
+      "confidence": 1,
+      "fitting_type": "elbow-90",
+      "id": "fitting:c1-r1-1",
+      "name": null,
+      "nominal_diameter_m": 0.02,
+      "pose": {
+        "position": {
+          "x": 2.5,
+          "y": 0.1,
+          "z": 2.9
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): elbow selected by the router",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "route_id": "route:c1-r1"
+    },
+    {
+      "angle_radians": 1.5707963267948966,
+      "attributes": {},
+      "confidence": 1,
+      "fitting_type": "elbow-90",
+      "id": "fitting:c1-r2-1",
+      "name": null,
+      "nominal_diameter_m": 0.02,
+      "pose": {
+        "position": {
+          "x": 4,
+          "y": 5.3,
+          "z": 2.9
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): elbow selected by the router",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "route_id": "route:c1-r2"
+    },
+    {
+      "angle_radians": 1.5707963267948966,
+      "attributes": {},
+      "confidence": 1,
+      "fitting_type": "elbow-90",
+      "id": "fitting:c1-r2-2",
+      "name": null,
+      "nominal_diameter_m": 0.02,
+      "pose": {
+        "position": {
+          "x": 4,
+          "y": 6.9,
+          "z": 2.9
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): elbow selected by the router",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "route_id": "route:c1-r2"
+    },
+    {
+      "angle_radians": 1.5707963267948966,
+      "attributes": {},
+      "confidence": 1,
+      "fitting_type": "elbow-90",
+      "id": "fitting:c2-1",
+      "name": null,
+      "nominal_diameter_m": 0.02,
+      "pose": {
+        "position": {
+          "x": 0.1,
+          "y": 5.5,
+          "z": 2.95
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): elbow selected by the router",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "route_id": "route:c2"
+    },
+    {
+      "angle_radians": 1.5707963267948966,
+      "attributes": {},
+      "confidence": 1,
+      "fitting_type": "elbow-90",
+      "id": "fitting:c2-2",
+      "name": null,
+      "nominal_diameter_m": 0.02,
+      "pose": {
+        "position": {
+          "x": 1.5,
+          "y": 5.5,
+          "z": 2.95
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): elbow selected by the router",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "route_id": "route:c2"
+    },
+    {
+      "angle_radians": 1.5707963267948966,
+      "attributes": {},
+      "confidence": 1,
+      "fitting_type": "elbow-90",
+      "id": "fitting:c3-1",
+      "name": null,
+      "nominal_diameter_m": 0.02,
+      "pose": {
+        "position": {
+          "x": 0.1,
+          "y": 5.7,
+          "z": 3.4
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): elbow selected by the router",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "route_id": "route:c3-riser"
+    },
+    {
+      "angle_radians": 1.5707963267948966,
+      "attributes": {},
+      "confidence": 1,
+      "fitting_type": "elbow-90",
+      "id": "fitting:c3-2",
+      "name": null,
+      "nominal_diameter_m": 0.02,
+      "pose": {
+        "position": {
+          "x": 0.1,
+          "y": 5,
+          "z": 3.4
+        },
+        "rotation": {
+          "w": 1,
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): elbow selected by the router",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "route_id": "route:c3-riser"
+    }
+  ],
+  "routes": [
+    {
+      "attributes": {},
+      "centerline": {
+        "kind": "polyline3d",
+        "points": [
+          {
+            "x": 0.1,
+            "y": 5.3,
+            "z": 1.9
+          },
+          {
+            "x": 0.1,
+            "y": 5.3,
+            "z": 2.9
+          },
+          {
+            "x": 2.5,
+            "y": 5.3,
+            "z": 2.9
+          }
+        ]
+      },
+      "confidence": 1,
+      "end_port_id": "port:j1-in",
+      "fitting_ids": [
+        "fitting:c1-home-1"
+      ],
+      "id": "route:c1-home",
+      "name": "Sample conduit C1 home run",
+      "nominal_diameter_m": 0.02,
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): conduit path proposed by the router",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "route_type": "emt",
+      "start_port_id": "port:p1-c1"
+    },
+    {
+      "attributes": {},
+      "centerline": {
+        "kind": "polyline3d",
+        "points": [
+          {
+            "x": 2.5,
+            "y": 5.3,
+            "z": 2.9
+          },
+          {
+            "x": 2.5,
+            "y": 0.1,
+            "z": 2.9
+          },
+          {
+            "x": 2.5,
+            "y": 0.1,
+            "z": 0.51
+          }
+        ]
+      },
+      "confidence": 1,
+      "end_port_id": "port:r1-in",
+      "fitting_ids": [
+        "fitting:c1-r1-1"
+      ],
+      "id": "route:c1-r1",
+      "name": "Sample conduit C1 to R1",
+      "nominal_diameter_m": 0.02,
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): conduit path proposed by the router",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "route_type": "emt",
+      "start_port_id": "port:j1-out-r1"
+    },
+    {
+      "attributes": {},
+      "centerline": {
+        "kind": "polyline3d",
+        "points": [
+          {
+            "x": 2.5,
+            "y": 5.3,
+            "z": 2.9
+          },
+          {
+            "x": 4,
+            "y": 5.3,
+            "z": 2.9
+          },
+          {
+            "x": 4,
+            "y": 6.9,
+            "z": 2.9
+          },
+          {
+            "x": 4,
+            "y": 6.9,
+            "z": 0.51
+          }
+        ]
+      },
+      "confidence": 1,
+      "end_port_id": "port:r2-in",
+      "fitting_ids": [
+        "fitting:c1-r2-1",
+        "fitting:c1-r2-2"
+      ],
+      "id": "route:c1-r2",
+      "name": "Sample conduit C1 to R2",
+      "nominal_diameter_m": 0.02,
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): conduit path proposed by the router",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "route_type": "emt",
+      "start_port_id": "port:j1-out-r2"
+    },
+    {
+      "attributes": {},
+      "centerline": {
+        "kind": "polyline3d",
+        "points": [
+          {
+            "x": 0.1,
+            "y": 5.5,
+            "z": 1.9
+          },
+          {
+            "x": 0.1,
+            "y": 5.5,
+            "z": 2.95
+          },
+          {
+            "x": 1.5,
+            "y": 5.5,
+            "z": 2.95
+          },
+          {
+            "x": 1.5,
+            "y": 2,
+            "z": 2.95
+          }
+        ]
+      },
+      "confidence": 1,
+      "end_port_id": "port:l1-in",
+      "fitting_ids": [
+        "fitting:c2-1",
+        "fitting:c2-2"
+      ],
+      "id": "route:c2",
+      "name": "Sample conduit C2 to L1",
+      "nominal_diameter_m": 0.02,
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): conduit path proposed by the router",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "route_type": "emt",
+      "start_port_id": "port:p1-c2"
+    },
+    {
+      "attributes": {},
+      "centerline": {
+        "kind": "polyline3d",
+        "points": [
+          {
+            "x": 0.1,
+            "y": 5.7,
+            "z": 1.9
+          },
+          {
+            "x": 0.1,
+            "y": 5.7,
+            "z": 3.4
+          },
+          {
+            "x": 0.1,
+            "y": 5,
+            "z": 3.4
+          },
+          {
+            "x": 0.1,
+            "y": 5,
+            "z": 3.71
+          }
+        ]
+      },
+      "confidence": 1,
+      "end_port_id": "port:r4-in",
+      "fitting_ids": [
+        "fitting:c3-1",
+        "fitting:c3-2"
+      ],
+      "id": "route:c3-riser",
+      "name": "Sample riser C3 to R4",
+      "nominal_diameter_m": 0.02,
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.6,
+          "derivation": "inferred",
+          "method": "worked out by the tool (synthetic): conduit path proposed by the router",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "route_type": "emt",
+      "start_port_id": "port:p1-c3"
+    }
+  ],
+  "schema_version": "1.0.0",
+  "slabs": [
+    {
+      "attributes": {},
+      "confidence": 1,
+      "footprint": {
+        "kind": "polygon3d",
+        "points": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          {
+            "x": 8,
+            "y": 0,
+            "z": 0
+          },
+          {
+            "x": 8,
+            "y": 7,
+            "z": 0
+          },
+          {
+            "x": 0,
+            "y": 7,
+            "z": 0
+          }
+        ]
+      },
+      "id": "slab:l1",
+      "level_id": "level:l1",
+      "name": "Sample Level 1 floor",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): floor outline",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        }
+      ],
+      "thickness_m": 0.2
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "footprint": {
+        "kind": "polygon3d",
+        "points": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 3.2
+          },
+          {
+            "x": 8,
+            "y": 0,
+            "z": 3.2
+          },
+          {
+            "x": 8,
+            "y": 7,
+            "z": 3.2
+          },
+          {
+            "x": 0,
+            "y": 7,
+            "z": 3.2
+          }
+        ]
+      },
+      "id": "slab:l2",
+      "level_id": "level:l2",
+      "name": "Sample Level 2 floor",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): floor outline",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        }
+      ],
+      "thickness_m": 0.2
+    }
+  ],
+  "spaces": [
+    {
+      "attributes": {},
+      "confidence": 1,
+      "footprint": {
+        "kind": "polygon3d",
+        "points": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          {
+            "x": 5,
+            "y": 0,
+            "z": 0
+          },
+          {
+            "x": 5,
+            "y": 4,
+            "z": 0
+          },
+          {
+            "x": 0,
+            "y": 4,
+            "z": 0
+          }
+        ]
+      },
+      "height_m": 3,
+      "id": "space:room-a",
+      "level_id": "level:l1",
+      "name": "Sample Room A",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): room outline",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        }
+      ],
+      "usage": "living"
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "footprint": {
+        "kind": "polygon3d",
+        "points": [
+          {
+            "x": 5,
+            "y": 0,
+            "z": 0
+          },
+          {
+            "x": 8,
+            "y": 0,
+            "z": 0
+          },
+          {
+            "x": 8,
+            "y": 4,
+            "z": 0
+          },
+          {
+            "x": 5,
+            "y": 4,
+            "z": 0
+          }
+        ]
+      },
+      "height_m": 3,
+      "id": "space:room-b",
+      "level_id": "level:l1",
+      "name": "Sample Room B",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): room outline",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        }
+      ],
+      "usage": "bedroom"
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "footprint": {
+        "kind": "polygon3d",
+        "points": [
+          {
+            "x": 0,
+            "y": 4,
+            "z": 0
+          },
+          {
+            "x": 8,
+            "y": 4,
+            "z": 0
+          },
+          {
+            "x": 8,
+            "y": 7,
+            "z": 0
+          },
+          {
+            "x": 0,
+            "y": 7,
+            "z": 0
+          }
+        ]
+      },
+      "height_m": 3,
+      "id": "space:utility",
+      "level_id": "level:l1",
+      "name": "Sample Utility Room",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 1,
+          "derivation": "user",
+          "method": "placed by a person in a synthetic design session (made up): room drawn by hand",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-design-session-001",
+          "source_kind": "synthetic-design"
+        }
+      ],
+      "usage": "utility"
+    },
+    {
+      "attributes": {},
+      "confidence": 1,
+      "footprint": {
+        "kind": "polygon3d",
+        "points": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 3.2
+          },
+          {
+            "x": 8,
+            "y": 0,
+            "z": 3.2
+          },
+          {
+            "x": 8,
+            "y": 7,
+            "z": 3.2
+          },
+          {
+            "x": 0,
+            "y": 7,
+            "z": 3.2
+          }
+        ]
+      },
+      "height_m": 3,
+      "id": "space:room-d",
+      "level_id": "level:l2",
+      "name": "Sample Room D",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 1,
+          "derivation": "user",
+          "method": "placed by a person in a synthetic design session (made up): room drawn by hand",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-design-session-001",
+          "source_kind": "synthetic-design"
+        }
+      ],
+      "usage": "office"
+    }
+  ],
+  "walls": [
+    {
+      "attributes": {},
+      "centerline": {
+        "kind": "polyline3d",
+        "points": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          {
+            "x": 8,
+            "y": 0,
+            "z": 0
+          }
+        ]
+      },
+      "confidence": 1,
+      "height_m": 3,
+      "id": "wall:l1-south",
+      "level_id": "level:l1",
+      "name": "Sample L1 south wall",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): exterior wall line, height and thickness",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        }
+      ],
+      "thickness_m": 0.2
+    },
+    {
+      "attributes": {},
+      "centerline": {
+        "kind": "polyline3d",
+        "points": [
+          {
+            "x": 8,
+            "y": 0,
+            "z": 0
+          },
+          {
+            "x": 8,
+            "y": 7,
+            "z": 0
+          }
+        ]
+      },
+      "confidence": 1,
+      "height_m": 3,
+      "id": "wall:l1-east",
+      "level_id": "level:l1",
+      "name": "Sample L1 east wall",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): exterior wall line, height and thickness",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        }
+      ],
+      "thickness_m": 0.2
+    },
+    {
+      "attributes": {},
+      "centerline": {
+        "kind": "polyline3d",
+        "points": [
+          {
+            "x": 8,
+            "y": 7,
+            "z": 0
+          },
+          {
+            "x": 0,
+            "y": 7,
+            "z": 0
+          }
+        ]
+      },
+      "confidence": 1,
+      "height_m": 3,
+      "id": "wall:l1-north",
+      "level_id": "level:l1",
+      "name": "Sample L1 north wall",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): exterior wall line, height and thickness",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        }
+      ],
+      "thickness_m": 0.2
+    },
+    {
+      "attributes": {},
+      "centerline": {
+        "kind": "polyline3d",
+        "points": [
+          {
+            "x": 0,
+            "y": 7,
+            "z": 0
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        ]
+      },
+      "confidence": 1,
+      "height_m": 3,
+      "id": "wall:l1-west",
+      "level_id": "level:l1",
+      "name": "Sample L1 west wall",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): exterior wall line, height and thickness",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        }
+      ],
+      "thickness_m": 0.2
+    },
+    {
+      "attributes": {},
+      "centerline": {
+        "kind": "polyline3d",
+        "points": [
+          {
+            "x": 5,
+            "y": 0,
+            "z": 0
+          },
+          {
+            "x": 5,
+            "y": 4,
+            "z": 0
+          }
+        ]
+      },
+      "confidence": 1,
+      "height_m": 3,
+      "id": "wall:l1-partition-scanned",
+      "level_id": "level:l1",
+      "name": "Sample scanned partition",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): partition position and height from a synthetic room scan",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        },
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.2,
+          "derivation": "inferred",
+          "method": "thickness not captured by the synthetic scan; the importer records 0.001 m rather than invent one",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-tool-run-001",
+          "source_kind": "synthetic-tool"
+        }
+      ],
+      "thickness_m": 0.001
+    },
+    {
+      "attributes": {},
+      "centerline": {
+        "kind": "polyline3d",
+        "points": [
+          {
+            "x": 0,
+            "y": 4,
+            "z": 0
+          },
+          {
+            "x": 8,
+            "y": 4,
+            "z": 0
+          }
+        ]
+      },
+      "confidence": 1,
+      "height_m": 3,
+      "id": "wall:l1-partition-designed",
+      "level_id": "level:l1",
+      "name": "Sample designed partition",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 1,
+          "derivation": "user",
+          "method": "placed by a person in a synthetic design session (made up): partition drawn in a floor-plan editor, 4.5 in",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-design-session-001",
+          "source_kind": "synthetic-design"
+        }
+      ],
+      "thickness_m": 0.1143
+    },
+    {
+      "attributes": {},
+      "centerline": {
+        "kind": "polyline3d",
+        "points": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 3.2
+          },
+          {
+            "x": 8,
+            "y": 0,
+            "z": 3.2
+          }
+        ]
+      },
+      "confidence": 1,
+      "height_m": 3,
+      "id": "wall:l2-south",
+      "level_id": "level:l2",
+      "name": "Sample L2 south wall",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): exterior wall line, height and thickness",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        }
+      ],
+      "thickness_m": 0.2
+    },
+    {
+      "attributes": {},
+      "centerline": {
+        "kind": "polyline3d",
+        "points": [
+          {
+            "x": 8,
+            "y": 0,
+            "z": 3.2
+          },
+          {
+            "x": 8,
+            "y": 7,
+            "z": 3.2
+          }
+        ]
+      },
+      "confidence": 1,
+      "height_m": 3,
+      "id": "wall:l2-east",
+      "level_id": "level:l2",
+      "name": "Sample L2 east wall",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): exterior wall line, height and thickness",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        }
+      ],
+      "thickness_m": 0.2
+    },
+    {
+      "attributes": {},
+      "centerline": {
+        "kind": "polyline3d",
+        "points": [
+          {
+            "x": 8,
+            "y": 7,
+            "z": 3.2
+          },
+          {
+            "x": 0,
+            "y": 7,
+            "z": 3.2
+          }
+        ]
+      },
+      "confidence": 1,
+      "height_m": 3,
+      "id": "wall:l2-north",
+      "level_id": "level:l2",
+      "name": "Sample L2 north wall",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): exterior wall line, height and thickness",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        }
+      ],
+      "thickness_m": 0.2
+    },
+    {
+      "attributes": {},
+      "centerline": {
+        "kind": "polyline3d",
+        "points": [
+          {
+            "x": 0,
+            "y": 7,
+            "z": 3.2
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 3.2
+          }
+        ]
+      },
+      "confidence": 1,
+      "height_m": 3,
+      "id": "wall:l2-west",
+      "level_id": "level:l2",
+      "name": "Sample L2 west wall",
+      "provenance": [
+        {
+          "attributes": {
+            "synthetic": true
+          },
+          "confidence": 0.95,
+          "derivation": "observed",
+          "method": "synthetic survey (made up): exterior wall line, height and thickness",
+          "page": null,
+          "source_element_id": null,
+          "source_id": "synthetic:sample-survey-001",
+          "source_kind": "synthetic-survey"
+        }
+      ],
+      "thickness_m": 0.2
+    }
+  ]
+}

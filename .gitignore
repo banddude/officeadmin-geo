@@ -7,3 +7,6 @@ test-results/
 .env.local
 .DS_Store
 .vite/
+
+# Screenshot evidence from apps/site-twin-demo/scripts/capture.mjs (kept out of git)
+.captures/

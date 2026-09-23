@@ -142,3 +142,5 @@ button { font: inherit; }
   .hint { left: 12px; bottom: 12px; }
   .inspector { top: 66px; right: 10px; bottom: 10px; width: calc(100vw - 20px); }
 }
+
+.interior-error { position: absolute; z-index: 9; left: 50%; top: 60px; transform: translateX(-50%); max-width: 640px; padding: 9px 13px; border-radius: 10px; background: #b3261e; color: #fff; font-size: 11px; line-height: 1.4; }
