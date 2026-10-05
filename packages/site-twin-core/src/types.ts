@@ -25,6 +25,7 @@ export interface BuildingFeature {
   id: string;
   polygon: Position[];
   heightM?: number;
+  groundElevationM?: number;
   roofElevationM?: number;
   areaSqM?: number;
   levels?: number;
@@ -118,6 +119,24 @@ export interface VisualFacadeObservation {
   doors: VisualOpening[];
 }
 
+export interface VisualMassingVolume {
+  level: number;
+  widthFraction: number;
+  depthFraction?: number;
+  horizontalCenter: number;
+  setback?: "none" | "slight" | "moderate" | "deep" | "unknown";
+  color?: string;
+  material?: string;
+  confidence: number;
+}
+
+export interface VisualMassingObservation {
+  storiesVisible?: number;
+  stepped?: boolean;
+  volumes: VisualMassingVolume[];
+  confidence: number;
+}
+
 export interface VisualObservation {
   sourceImageId: string;
   visible: boolean;
@@ -129,6 +148,7 @@ export interface VisualObservation {
     material?: string;
     rooftopDeck?: boolean;
   };
+  massing?: VisualMassingObservation;
   facades: VisualFacadeObservation[];
   site: {
     stairs?: boolean;
@@ -174,6 +194,14 @@ export interface SemanticFacade {
   doors: SemanticOpening[];
 }
 
+export interface SemanticMassing {
+  storiesVisible?: number;
+  stepped: boolean;
+  volumes: VisualMassingVolume[];
+  confidence: number;
+  sourceImageIds: string[];
+}
+
 export interface SemanticSiteModel {
   schemaVersion: 1;
   facadeAlignment?: {
@@ -186,6 +214,7 @@ export interface SemanticSiteModel {
   generatedAt: string;
   geometry: SiteGeometry;
   storiesApprox?: FusedValue<number>;
+  massing?: SemanticMassing;
   roof: FusedValue<{
     type: RoofType;
     color?: string;

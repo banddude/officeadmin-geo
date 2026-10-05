@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { angularDifferenceDegrees, bearingDegrees, haversineMeters, nearestFacadeEdgeIndex, rankStreetImages, selectDistinctStreetImages } from "./geometry";
+import { angularDifferenceDegrees, bearingDegrees, extentPolygon, haversineMeters, nearestFacadeEdgeIndex, rankStreetImages, renderedBuildingHeightM, selectDistinctStreetImages } from "./geometry";
 
 const target = { latitude: 34.09962, longitude: -118.25278 };
 
@@ -44,6 +44,24 @@ describe("site twin geometry", () => {
     ];
     const southCamera = { latitude: 33.9998, longitude: -118.0 };
     expect(nearestFacadeEdgeIndex(polygon, southCamera)).toBe(0);
+  });
+
+  it("builds a context extent around multiple building polygons", () => {
+    expect(extentPolygon([
+      [[-118.3, 34.0], [-118.2, 34.1]],
+      [[-118.4, 33.9], [-118.1, 34.2]],
+    ])).toEqual([
+      [-118.4, 33.9],
+      [-118.1, 33.9],
+      [-118.1, 34.2],
+      [-118.4, 34.2],
+      [-118.4, 33.9],
+    ]);
+  });
+
+  it("derives building height from absolute roof and local ground elevations", () => {
+    expect(renderedBuildingHeightM({ heightM: 28.84, groundElevationM: 160.93, roofElevationM: 165.11 })).toBeCloseTo(4.18, 2);
+    expect(renderedBuildingHeightM({ heightM: 9.32, groundElevationM: 164.11, roofElevationM: 174.21 })).toBeCloseTo(10.1, 2);
   });
 
 });

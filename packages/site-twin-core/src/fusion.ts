@@ -248,6 +248,15 @@ export function fuseSiteModel(
     .filter((o): o is VisualObservation & { storiesApprox: number } => typeof o.storiesApprox === "number")
     .map((o) => ({ value: Math.max(1, Math.round(o.storiesApprox)), weight: observationWeight(o, imagery), sourceImageId: o.sourceImageId }));
 
+  const massingCandidates = useful
+    .filter((observation) => observation.massing?.volumes.length)
+    .map((observation) => ({
+      observation,
+      weight: observationWeight(observation, imagery) * (observation.massing?.confidence ?? 0.5),
+    }))
+    .sort((a, b) => b.weight - a.weight);
+  const bestMassing = massingCandidates[0];
+
   const warnings: string[] = [];
   if (imagery.length === 0) warnings.push("No street imagery was available for this reconstruction.");
   if (useful.length === 0) warnings.push("No useful vision observations were available. Rendering measured geometry only.");
@@ -273,6 +282,13 @@ export function fuseSiteModel(
     generatedAt: new Date().toISOString(),
     geometry,
     storiesApprox: storyEntries.length ? weightedMode(storyEntries, 1) : undefined,
+    massing: bestMassing?.observation.massing ? {
+      storiesVisible: bestMassing.observation.massing.storiesVisible,
+      stepped: bestMassing.observation.massing.stepped ?? bestMassing.observation.massing.volumes.length > 1,
+      volumes: bestMassing.observation.massing.volumes,
+      confidence: clamp01(bestMassing.weight),
+      sourceImageIds: [bestMassing.observation.sourceImageId],
+    } : undefined,
     roof: {
       value: {
         type: roofType.value,

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { SemanticSiteModel } from "@officeadmin-geo/site-twin-core";
+import { renderedBuildingHeightM } from "@officeadmin-geo/site-twin-core";
 import { SiteTwinScene } from "@officeadmin-geo/site-twin-renderer";
 
 function feet(meters?: number) {
@@ -9,10 +10,13 @@ function feet(meters?: number) {
 export function App() {
   const [model, setModel] = useState<SemanticSiteModel | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [debug, setDebug] = useState(true);
+  const [debug, setDebug] = useState(false);
+  const [showData, setShowData] = useState(false);
+  const [view, setView] = useState<"facade" | "overview">("facade");
 
   useEffect(() => {
-    fetch("./site-twin.json")
+    const modelUrl = `./site-twin.json?v=${Date.now()}`;
+    fetch(modelUrl, { cache: "no-store" })
       .then(async (response) => {
         if (!response.ok) throw new Error(`site-twin.json returned ${response.status}`);
         return response.json() as Promise<SemanticSiteModel>;
@@ -49,15 +53,20 @@ export function App() {
             <p className="eyebrow">SITE TWIN LAB</p>
             <h1>Corralitas prototype</h1>
           </div>
-          <button className={debug ? "toggle active" : "toggle"} onClick={() => setDebug((value) => !value)}>
-            {debug ? "Debug on" : "Debug off"}
-          </button>
+          <div className="view-controls">
+            <button className={view === "facade" ? "toggle active" : "toggle"} onClick={() => setView("facade")}>House</button>
+            <button className={view === "overview" ? "toggle active" : "toggle"} onClick={() => setView("overview")}>Hill</button>
+            <button className={showData ? "toggle active" : "toggle"} onClick={() => setShowData((value) => !value)}>Data</button>
+            <button className={debug ? "toggle active" : "toggle"} onClick={() => setDebug((value) => !value)}>
+              {debug ? "Debug on" : "Debug"}
+            </button>
+          </div>
         </header>
-        <SiteTwinScene model={model} debug={debug} className="scene" />
+        <SiteTwinScene model={model} debug={debug} view={view} className="scene" />
         <div className="hint">Drag to orbit. Scroll to zoom.</div>
       </section>
 
-      <aside className="inspector">
+      {showData ? <aside className="inspector">
         <div className="inspector-top">
           <p className="eyebrow">RECONSTRUCTION</p>
           <h2>{model.address}</h2>
@@ -66,7 +75,9 @@ export function App() {
 
         <div className="metric-grid">
           <div><span>Building</span><strong>{primaryBuilding?.id ?? "none"}</strong></div>
-          <div><span>Measured height</span><strong>{feet(primaryBuilding?.heightM)}</strong></div>
+          <div><span>Rendered height</span><strong>{primaryBuilding ? feet(renderedBuildingHeightM(primaryBuilding)) : "unknown"}</strong></div>
+          <div><span>Roof elevation</span><strong>{feet(primaryBuilding?.roofElevationM)}</strong></div>
+          <div><span>Ground elevation</span><strong>{feet(primaryBuilding?.groundElevationM)}</strong></div>
           <div><span>Roof</span><strong>{model.roof.value.type}</strong></div>
           <div><span>Roof confidence</span><strong>{Math.round(model.roof.confidence * 100)}%</strong></div>
           <div><span>Street frames</span><strong>{model.imagery.length}</strong></div>
@@ -115,7 +126,7 @@ export function App() {
             {model.warnings.map((warning) => <p key={warning}>{warning}</p>)}
           </section>
         ) : null}
-      </aside>
+      </aside> : null}
     </main>
   );
 }

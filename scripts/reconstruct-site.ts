@@ -1,13 +1,13 @@
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, dirname, join } from "node:path";
-import { fuseSiteModel, rankStreetImages, selectDistinctStreetImages, type Coordinate, type StreetImageCandidate, type VisualObservation } from "../packages/site-twin-core/src/index.ts";
+import { extentPolygon, fuseSiteModel, polygonCentroid, rankStreetImages, selectDistinctStreetImages, type Coordinate, type StreetImageCandidate, type VisualObservation } from "../packages/site-twin-core/src/index.ts";
 import { getLandCoverSamples, getLosAngelesSiteGeometry } from "../packages/provider-lacounty/src/index.ts";
 import { findKartaViewImages } from "../packages/provider-kartaview/src/index.ts";
 import { downloadGoogleStreetViewFrame, findGoogleStreetViewImages } from "../packages/provider-google-streetview-research/src/index.ts";
 import { analyzeImageWithOllama } from "../packages/provider-ollama/src/index.ts";
 import { geocodeAddress, getNearbyStreetContext } from "../packages/provider-openstreetmap/src/index.ts";
-import { sampleTerrainGrid } from "../packages/provider-usgs/src/index.ts";
+import { getElevation, sampleTerrainGrid } from "../packages/provider-usgs/src/index.ts";
 
 interface CliOptions {
   address: string;
@@ -84,25 +84,42 @@ async function main() {
   console.log(`Target: ${options.address}`);
 
   const countyGeometry = await getLosAngelesSiteGeometry(point);
-  const terrainPolygon = countyGeometry.parcel?.polygon ?? countyGeometry.buildings[0]?.polygon ?? [];
-  const [streetContext, terrain, landCover] = await Promise.all([
+  const contextPolygon = extentPolygon([
+    ...(countyGeometry.parcel ? [countyGeometry.parcel.polygon] : []),
+    ...countyGeometry.buildings.map((building) => building.polygon),
+  ]);
+  const terrainPolygon = contextPolygon.length ? contextPolygon : countyGeometry.parcel?.polygon ?? countyGeometry.buildings[0]?.polygon ?? [];
+  const [streetContext, terrain, landCover, buildingGroundElevations] = await Promise.all([
     getNearbyStreetContext(point).catch((error) => {
       console.warn(`Street context unavailable: ${error instanceof Error ? error.message : String(error)}`);
       return { roads: [], sidewalks: [] };
     }),
-    sampleTerrainGrid(terrainPolygon, 5, 55).catch((error) => {
+    sampleTerrainGrid(terrainPolygon, 9, 18).catch((error) => {
       console.warn(`Terrain unavailable: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }),
-    getLandCoverSamples(terrainPolygon, 36, 45).catch((error) => {
+    getLandCoverSamples(terrainPolygon, 64, 12).catch((error) => {
       console.warn(`Land cover unavailable: ${error instanceof Error ? error.message : String(error)}`);
       return { samples: [], provenance: undefined };
     }),
+    Promise.all(countyGeometry.buildings.map(async (building) => {
+      const center = polygonCentroid(building.polygon);
+      try {
+        const sample = await getElevation(center);
+        return [building.id, sample.elevationM] as const;
+      } catch {
+        return [building.id, undefined] as const;
+      }
+    })),
   ]);
 
   const terrainProvenance = terrain.find((sample) => sample.provenance)?.provenance;
   const geometry = {
     ...countyGeometry,
+    buildings: countyGeometry.buildings.map((building) => ({
+      ...building,
+      groundElevationM: buildingGroundElevations.find(([id]) => id === building.id)?.[1],
+    })),
     roads: streetContext.roads,
     sidewalks: streetContext.sidewalks,
     terrain,

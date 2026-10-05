@@ -30,6 +30,16 @@ const observations: VisualObservation[] = [
     confidence: 0.95,
     storiesApprox: 2,
     roof: { type: "flat", color: "dark gray", rooftopDeck: true },
+    massing: {
+      storiesVisible: 3,
+      stepped: true,
+      confidence: 0.92,
+      volumes: [
+        { level: 0, widthFraction: 0.8, depthFraction: 0.9, horizontalCenter: 0.5, setback: "none", confidence: 0.9 },
+        { level: 1, widthFraction: 0.7, depthFraction: 0.82, horizontalCenter: 0.5, setback: "slight", confidence: 0.9 },
+        { level: 2, widthFraction: 0.62, depthFraction: 0.74, horizontalCenter: 0.5, setback: "moderate", confidence: 0.9 },
+      ],
+    },
     facades: [{
       wall: "front",
       confidence: 0.9,
@@ -85,6 +95,14 @@ describe("site twin fusion", () => {
     expect(model.site.driveway.confidence).toBe(0);
     expect(model.site.retainingWalls.value).toBe(false);
     expect(model.site.fence.value).toBe(false);
+  });
+
+  it("preserves the strongest stepped massing observation", () => {
+    const model = fuseSiteModel("test", geometry, imagery, observations);
+    expect(model.massing?.stepped).toBe(true);
+    expect(model.massing?.storiesVisible).toBe(3);
+    expect(model.massing?.volumes).toHaveLength(3);
+    expect(model.massing?.volumes[2]?.setback).toBe("moderate");
   });
 
 });

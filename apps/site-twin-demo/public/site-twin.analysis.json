@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-04T22:38:33.567Z",
+  "generatedAt": "2026-09-05T00:10:32.043Z",
   "target": {
     "address": "2629 Corralitas Dr, Los Angeles, CA 90039",
     "latitude": 34.09962,
@@ -114,7 +114,8 @@
         "status": "Modified",
         "heightFeet": 30.57
       }
-    }
+    },
+    "groundElevationM": 164.109527588
   },
   "rankedImagery": [
     {
@@ -137,7 +138,7 @@
       "distanceToTargetM": 20.034797729766538,
       "bearingToTargetDeg": 269.6923818714949,
       "headingErrorDeg": 0,
-      "score": 0.9339663669350166,
+      "score": 0.9339649431921357,
       "scoreReasons": [
         "distance:20.0m",
         "heading-error:0.0deg",
@@ -369,7 +370,7 @@
       "distanceToTargetM": 20.034797729766538,
       "bearingToTargetDeg": 269.6923818714949,
       "headingErrorDeg": 0,
-      "score": 0.9339663669350166,
+      "score": 0.9339649431921357,
       "scoreReasons": [
         "distance:20.0m",
         "heading-error:0.0deg",
@@ -434,156 +435,111 @@
     {
       "sourceImageId": "ZbZi32upfDcCdgarXH_tTQ",
       "visible": true,
-      "confidence": 0.95,
+      "confidence": 0.97,
       "storiesApprox": 2,
       "roof": {
-        "type": "flat",
-        "color": "dark gray",
-        "material": "membrane"
+        "type": "unknown"
+      },
+      "massing": {
+        "storiesVisible": 2,
+        "stepped": false,
+        "volumes": [
+          {
+            "level": 0,
+            "widthFraction": 0.75,
+            "depthFraction": 0.6,
+            "horizontalCenter": 0.5,
+            "setback": "moderate",
+            "color": "gray",
+            "material": "concrete",
+            "confidence": 0.98
+          },
+          {
+            "level": 1,
+            "widthFraction": 0.75,
+            "depthFraction": 0.6,
+            "horizontalCenter": 0.5,
+            "setback": "moderate",
+            "color": "gray",
+            "material": "concrete",
+            "confidence": 0.98
+          }
+        ],
+        "confidence": 0.98
       },
       "facades": [
         {
           "wall": "front",
-          "confidence": 0.95,
+          "confidence": 0.98,
           "colors": [
+            "gray",
             "white"
           ],
           "materials": [
-            "stucco"
+            "concrete",
+            "aluminum"
           ],
           "windows": [
             {
-              "x": 0.35,
-              "y": 0.65,
-              "width": 0.18,
-              "height": 0.32,
-              "confidence": 0.95,
-              "color": "dark",
-              "shape": "rect"
-            }
-          ],
-          "doors": [
-            {
-              "x": 0.75,
-              "y": 0.05,
-              "width": 0.14,
-              "height": 0.28,
-              "confidence": 0.95,
-              "color": "brown",
-              "material": "wood",
-              "shape": "rect"
-            }
-          ]
-        }
-      ],
-      "site": {
-        "stairs": true,
-        "grass": true,
-        "sidewalk": true,
-        "curb": true,
-        "trees": true,
-        "dominantHardscape": "concrete"
-      },
-      "notes": [
-        "The building appears to be a two-story structure with stucco exterior."
-      ]
-    },
-    {
-      "sourceImageId": "nEbwXhyt7GxeKcN0YYyvyQ",
-      "visible": true,
-      "confidence": 0.95,
-      "storiesApprox": 2,
-      "roof": {
-        "type": "flat",
-        "color": "dark gray",
-        "material": "membrane"
-      },
-      "facades": [
-        {
-          "wall": "front",
-          "confidence": 0.95,
-          "colors": [
-            "white"
-          ],
-          "materials": [
-            "stucco"
-          ],
-          "windows": [
-            {
-              "x": 0.35,
-              "y": 0.65,
-              "width": 0.2,
+              "x": 0.25,
+              "y": 0.3,
+              "width": 0.15,
               "height": 0.25,
-              "confidence": 0.95,
-              "color": "dark",
+              "confidence": 0.75,
+              "color": "clear",
+              "material": "aluminum",
+              "shape": "rect"
+            },
+            {
+              "x": 0.6,
+              "y": 0.3,
+              "width": 0.15,
+              "height": 0.25,
+              "confidence": 0.75,
+              "color": "clear",
+              "material": "aluminum",
+              "shape": "rect"
+            },
+            {
+              "x": 0.25,
+              "y": 0.6,
+              "width": 0.15,
+              "height": 0.25,
+              "confidence": 0.75,
+              "color": "clear",
+              "material": "aluminum",
+              "shape": "rect"
+            },
+            {
+              "x": 0.6,
+              "y": 0.6,
+              "width": 0.15,
+              "height": 0.25,
+              "confidence": 0.75,
+              "color": "clear",
+              "material": "aluminum",
               "shape": "rect"
             }
           ],
-          "doors": [
-            {
-              "x": 0.75,
-              "y": 0.1,
-              "width": 0.1,
-              "height": 0.2,
-              "confidence": 0.95,
-              "color": "brown",
-              "material": "wood",
-              "shape": "rect"
-            }
-          ]
-        }
-      ],
-      "site": {
-        "stairs": true,
-        "grass": true,
-        "sidewalk": true,
-        "curb": true,
-        "trees": true,
-        "dominantHardscape": "concrete"
-      },
-      "notes": [
-        "The building appears to be a two-story structure with a flat roof.",
-        "The facade is primarily stucco and white in color."
-      ]
-    },
-    {
-      "sourceImageId": "vM0lvFfkARmcElUoxHItbw",
-      "visible": true,
-      "confidence": 0.95,
-      "storiesApprox": 2,
-      "roof": {
-        "type": "flat",
-        "color": "dark gray",
-        "material": "membrane"
-      },
-      "facades": [
+          "doors": []
+        },
         {
-          "wall": "front",
-          "confidence": 0.95,
+          "wall": "rear",
+          "confidence": 0.98,
           "colors": [
-            "white"
+            "gray"
           ],
           "materials": [
-            "stucco"
+            "concrete"
           ],
-          "windows": [
-            {
-              "x": 0.35,
-              "y": 0.65,
-              "width": 0.2,
-              "height": 0.25,
-              "confidence": 0.95,
-              "color": "dark",
-              "shape": "rect"
-            }
-          ],
+          "windows": [],
           "doors": [
             {
-              "x": 0.75,
+              "x": 0.5,
               "y": 0.1,
-              "width": 0.1,
-              "height": 0.2,
-              "confidence": 0.95,
+              "width": 0.2,
+              "height": 0.8,
+              "confidence": 0.6,
               "color": "brown",
               "material": "wood",
               "shape": "rect"
@@ -593,18 +549,255 @@
       ],
       "site": {
         "stairs": false,
-        "grass": true,
+        "retainingWalls": true,
+        "driveway": false,
+        "grass": false,
         "sidewalk": true,
         "curb": true,
         "trees": true,
+        "fence": true,
         "dominantHardscape": "concrete"
       },
-      "notes": [
-        "The target building is a single-story dwelling with a flat roof."
-      ]
+      "notes": []
+    },
+    {
+      "sourceImageId": "nEbwXhyt7GxeKcN0YYyvyQ",
+      "visible": true,
+      "confidence": 0.97,
+      "storiesApprox": 2,
+      "roof": {
+        "type": "flat"
+      },
+      "massing": {
+        "storiesVisible": 2,
+        "stepped": false,
+        "volumes": [
+          {
+            "level": 0,
+            "widthFraction": 0.75,
+            "depthFraction": 0.3,
+            "horizontalCenter": 0.5,
+            "setback": "moderate",
+            "color": "light gray",
+            "material": "concrete",
+            "confidence": 0.98
+          },
+          {
+            "level": 1,
+            "widthFraction": 0.75,
+            "depthFraction": 0.3,
+            "horizontalCenter": 0.5,
+            "setback": "moderate",
+            "color": "light gray",
+            "material": "concrete",
+            "confidence": 0.98
+          }
+        ],
+        "confidence": 0.98
+      },
+      "facades": [
+        {
+          "wall": "front",
+          "confidence": 0.98,
+          "colors": [
+            "white",
+            "light gray"
+          ],
+          "materials": [
+            "concrete",
+            "glass"
+          ],
+          "windows": [
+            {
+              "x": 0.25,
+              "y": 0.3,
+              "width": 0.15,
+              "height": 0.2,
+              "confidence": 0.75,
+              "color": "dark gray",
+              "material": "glass",
+              "shape": "rect"
+            },
+            {
+              "x": 0.6,
+              "y": 0.3,
+              "width": 0.15,
+              "height": 0.2,
+              "confidence": 0.75,
+              "color": "dark gray",
+              "material": "glass",
+              "shape": "rect"
+            },
+            {
+              "x": 0.25,
+              "y": 0.6,
+              "width": 0.15,
+              "height": 0.2,
+              "confidence": 0.75,
+              "color": "dark gray",
+              "material": "glass",
+              "shape": "rect"
+            },
+            {
+              "x": 0.6,
+              "y": 0.6,
+              "width": 0.15,
+              "height": 0.2,
+              "confidence": 0.75,
+              "color": "dark gray",
+              "material": "glass",
+              "shape": "rect"
+            }
+          ],
+          "doors": []
+        },
+        {
+          "wall": "rear",
+          "confidence": 0.98,
+          "colors": [
+            "light gray"
+          ],
+          "materials": [
+            "concrete"
+          ],
+          "windows": [],
+          "doors": []
+        }
+      ],
+      "site": {
+        "stairs": false,
+        "retainingWalls": true,
+        "driveway": false,
+        "grass": false,
+        "sidewalk": true,
+        "curb": true,
+        "trees": true,
+        "fence": false,
+        "dominantHardscape": "concrete"
+      },
+      "notes": []
+    },
+    {
+      "sourceImageId": "vM0lvFfkARmcElUoxHItbw",
+      "visible": true,
+      "confidence": 0.97,
+      "storiesApprox": 2,
+      "roof": {
+        "type": "flat"
+      },
+      "massing": {
+        "storiesVisible": 2,
+        "stepped": false,
+        "volumes": [
+          {
+            "level": 0,
+            "widthFraction": 0.75,
+            "depthFraction": 0.6,
+            "horizontalCenter": 0.5,
+            "setback": "moderate",
+            "color": "white",
+            "material": "siding",
+            "confidence": 0.98
+          }
+        ],
+        "confidence": 0.98
+      },
+      "facades": [
+        {
+          "wall": "front",
+          "confidence": 0.97,
+          "colors": [
+            "white",
+            "gray"
+          ],
+          "materials": [
+            "siding",
+            "brick"
+          ],
+          "windows": [
+            {
+              "x": 0.25,
+              "y": 0.3,
+              "width": 0.18,
+              "height": 0.4,
+              "confidence": 0.75,
+              "color": "brown",
+              "material": "glass",
+              "shape": "rect"
+            },
+            {
+              "x": 0.6,
+              "y": 0.3,
+              "width": 0.18,
+              "height": 0.4,
+              "confidence": 0.75,
+              "color": "brown",
+              "material": "glass",
+              "shape": "rect"
+            },
+            {
+              "x": 0.25,
+              "y": 0.7,
+              "width": 0.18,
+              "height": 0.4,
+              "confidence": 0.6,
+              "color": "brown",
+              "material": "glass",
+              "shape": "rect"
+            },
+            {
+              "x": 0.6,
+              "y": 0.7,
+              "width": 0.18,
+              "height": 0.4,
+              "confidence": 0.6,
+              "color": "brown",
+              "material": "glass",
+              "shape": "rect"
+            }
+          ],
+          "doors": [
+            {
+              "x": 0.35,
+              "y": 0.2,
+              "width": 0.1,
+              "height": 0.8,
+              "confidence": 0.8,
+              "color": "brown",
+              "material": "wood",
+              "shape": "rect"
+            }
+          ]
+        },
+        {
+          "wall": "rear",
+          "confidence": 0.97,
+          "colors": [
+            "white",
+            "gray"
+          ],
+          "materials": [
+            "siding",
+            "brick"
+          ],
+          "windows": [],
+          "doors": []
+        }
+      ],
+      "site": {
+        "stairs": false,
+        "retainingWalls": true,
+        "driveway": true,
+        "grass": false,
+        "sidewalk": true,
+        "curb": true,
+        "trees": true,
+        "fence": false,
+        "dominantHardscape": "concrete"
+      },
+      "notes": []
     }
   ],
   "rejected": [],
-  "warnings": [],
-  "recomputedFromSavedObservations": true
+  "warnings": []
 }

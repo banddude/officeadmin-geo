@@ -73,8 +73,8 @@ def main() -> None:
     parser.add_argument("--pano-id", required=True)
     parser.add_argument("--pano-heading", required=True, type=float)
     parser.add_argument("--view-heading", required=True, type=float)
-    parser.add_argument("--zoom", type=int, default=3)
-    parser.add_argument("--fov", type=float, default=100.0)
+    parser.add_argument("--zoom", type=int, default=4)
+    parser.add_argument("--fov", type=float, default=110.0)
     args = parser.parse_args()
 
     image = render_crop(args.pano_id, args.pano_heading, args.view_heading, args.zoom, args.fov)

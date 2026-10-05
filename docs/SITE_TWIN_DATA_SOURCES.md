@@ -225,3 +225,7 @@ LA County LARIAC 2023 exposes a public four-inch classified land-cover map servi
 - other paving.
 
 These cells drive deterministic stylized ground surfaces. AI may refine semantic details, but it does not need to guess where broad grass, paving, roads, or tree canopy exist when measured classification is available.
+
+### Building elevation rule on hillsides
+
+The 2023 building layer exposes both roof elevation and a `HEIGHT` attribute. On steep terrain, `HEIGHT` can include terrain relief and produce visually impossible towers. The prototype therefore samples USGS ground elevation at each building centroid and preserves the County roof elevation. The renderer derives visible building height from the difference. Raw `HEIGHT` remains provenance/fallback data only.

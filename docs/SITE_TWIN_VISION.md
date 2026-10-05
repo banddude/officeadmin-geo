@@ -172,3 +172,21 @@ For every reconstruction run, preserve a machine-readable analysis report contai
 - final semantic values with confidence.
 
 This is essential for improving automation without manually inspecting every failure.
+
+## Semantic massing extraction
+
+A building footprint is a plan-view envelope, not a guarantee that every notch in that polygon extends from local grade to the highest roof elevation. This matters on hillside homes, where raw full-height extrusion can create false tower walls.
+
+When the target building is visible, the vision stage must also describe visible architectural massing:
+
+- number of visible street-facing levels,
+- whether the facade is stepped or terraced,
+- one normalized volume per visible level or major mass,
+- each volume's relative width and depth,
+- horizontal center within the measured footprint envelope,
+- street-facing setback class,
+- observed material and color when clear.
+
+Hidden rear geometry must not be invented. The massing observation only controls the visible stylized representation. Measured GIS remains authoritative for geospatial placement, overall footprint envelope, local ground elevation, and absolute roof elevation.
+
+The fuser currently selects the strongest useful massing observation rather than averaging incompatible volume layouts. This is intentional for the research prototype. A future implementation may fit a joint multi-view volume model once enough independent camera views are available.
