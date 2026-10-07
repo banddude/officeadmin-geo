@@ -30,6 +30,13 @@ const observations: VisualObservation[] = [
     confidence: 0.95,
     storiesApprox: 2,
     roof: { type: "flat", color: "dark gray", rooftopDeck: true },
+    facadeComposition: {
+      confidence: 0.94,
+      components: [
+        { kind: "volume", x: 0.2, width: 0.35, bottom: 0, top: 0.7, color: "wood", confidence: 0.9 },
+        { kind: "tower", x: 0.52, width: 0.18, bottom: 0, top: 1, color: "gray", material: "concrete", confidence: 0.95 },
+      ],
+    },
     massing: {
       storiesVisible: 3,
       stepped: true,
@@ -103,6 +110,13 @@ describe("site twin fusion", () => {
     expect(model.massing?.storiesVisible).toBe(3);
     expect(model.massing?.volumes).toHaveLength(3);
     expect(model.massing?.volumes[2]?.setback).toBe("moderate");
+  });
+
+  it("preserves the strongest facade composition as evidence instead of averaging it into generic massing", () => {
+    const model = fuseSiteModel("test", geometry, imagery, observations);
+    expect(model.facadeComposition?.sourceImageIds).toEqual(["a"]);
+    expect(model.facadeComposition?.components).toHaveLength(2);
+    expect(model.facadeComposition?.components[1]?.kind).toBe("tower");
   });
 
 });

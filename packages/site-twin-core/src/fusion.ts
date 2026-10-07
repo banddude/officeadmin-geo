@@ -256,6 +256,14 @@ export function fuseSiteModel(
     }))
     .sort((a, b) => b.weight - a.weight);
   const bestMassing = massingCandidates[0];
+  const compositionCandidates = useful
+    .filter((observation) => observation.facadeComposition?.components.length)
+    .map((observation) => ({
+      observation,
+      weight: observationWeight(observation, imagery) * (observation.facadeComposition?.confidence ?? 0.5),
+    }))
+    .sort((a, b) => b.weight - a.weight);
+  const bestComposition = compositionCandidates[0];
 
   const warnings: string[] = [];
   if (imagery.length === 0) warnings.push("No street imagery was available for this reconstruction.");
@@ -288,6 +296,11 @@ export function fuseSiteModel(
       volumes: bestMassing.observation.massing.volumes,
       confidence: clamp01(bestMassing.weight),
       sourceImageIds: [bestMassing.observation.sourceImageId],
+    } : undefined,
+    facadeComposition: bestComposition?.observation.facadeComposition ? {
+      components: bestComposition.observation.facadeComposition.components,
+      confidence: clamp01(bestComposition.weight),
+      sourceImageIds: [bestComposition.observation.sourceImageId],
     } : undefined,
     roof: {
       value: {

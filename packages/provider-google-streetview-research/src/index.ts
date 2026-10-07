@@ -68,6 +68,16 @@ export function parseGoogleStreetViewSearch(text: string): RawPanorama[] {
       : undefined;
   });
 
+  // Google's response keeps the current panorama date outside the historical
+  // timeline. Without this, a current panorama can look undated and rank below
+  // an older construction-phase image even when the current image is newer.
+  const currentPanoId = at(data, 1, 1, 1);
+  const currentYear = Number(at(data, 1, 6, 7, 0));
+  const currentMonth = Number(at(data, 1, 6, 7, 1));
+  const currentCapturedAt = Number.isFinite(currentYear) && Number.isFinite(currentMonth)
+    ? `${currentYear}-${String(currentMonth).padStart(2, "0")}-01 00:00:00`
+    : undefined;
+
   return rawPanos.flatMap((pano, index) => {
     const panoId = at(pano, 0, 1);
     const latitude = Number(at(pano, 2, 0, 2));
@@ -81,7 +91,7 @@ export function parseGoogleStreetViewSearch(text: string): RawPanorama[] {
       panoramaHeadingDeg: Number.isFinite(panoramaHeadingDeg) ? panoramaHeadingDeg : 0,
       pitchDeg: Number.isFinite(Number(at(pano, 2, 2, 1))) ? Number(at(pano, 2, 2, 1)) : undefined,
       rollDeg: Number.isFinite(Number(at(pano, 2, 2, 2))) ? Number(at(pano, 2, 2, 2)) : undefined,
-      capturedAt: dates[index],
+      capturedAt: panoId === currentPanoId ? currentCapturedAt ?? dates[index] : dates[index],
       elevationM: Number.isFinite(Number(at(pano, 3, 0))) ? Number(at(pano, 3, 0)) : undefined,
     }];
   });
