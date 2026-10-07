@@ -9,7 +9,10 @@ export function buildingRepresentation(model: Pick<SemanticSiteModel, "facadeCom
     const primary = visible.filter((component) => component.kind === "volume" || component.kind === "tower");
     const finite = visible.every((component) =>
       [component.x, component.width, component.bottom, component.top, component.confidence].every(Number.isFinite)
-      && component.width > 0 && component.top > component.bottom);
+      && component.x >= 0 && component.x <= 1
+      && component.width > 0 && component.width <= 1
+      && component.bottom >= 0 && component.top <= 1
+      && component.top > component.bottom && component.confidence <= 1);
     // Until there is a supported-component graph, conservatively retain the
     // measured shell when primary visual masses start above its lowest floor.
     const grounded = primary.length > 0 && primary.every((component) => component.bottom <= 0.08);

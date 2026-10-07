@@ -32,6 +32,11 @@ describe("grounded render selection", () => {
   it("fails closed for nonfinite geometry", () => {
     expect(buildingRepresentation(model([{ kind: "volume", x: NaN, width: 1, bottom: 0, top: 1, confidence: 0.9 }]))).toBe("measured");
   });
+  it.each([
+    { bottom: -0.5 }, { top: 1.5 }, { width: 3 }, { x: -1 }, { confidence: 2 },
+  ])("rejects out-of-range normalized geometry %j", (invalid) => {
+    expect(buildingRepresentation(model([{ kind: "volume", x: 0.5, width: 1, bottom: 0, top: 1, confidence: 0.9, ...invalid }]))).toBe("measured");
+  });
   it("keeps the existing massing fallback when no composition was supplied", () => {
     const input = model([]);
     expect(buildingRepresentation(input)).toBe("massing");
