@@ -2,7 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { Line, OrbitControls, Sky } from "@react-three/drei";
 import * as THREE from "three";
 import type { BuildingFeature, GroundCoverClass, Position, SemanticFacade, SemanticSiteModel } from "@officeadmin-geo/site-twin-core";
-import { haversineMeters, localMeters, polygonCentroid, renderedBuildingHeightM } from "@officeadmin-geo/site-twin-core";
+import { haversineMeters, localMeters, polygonCentroid, renderedBuildingHeightM, buildingRepresentation, terrainContactBottomY } from "@officeadmin-geo/site-twin-core";
 
 export interface SiteTwinSceneProps {
   model: SemanticSiteModel;
@@ -293,8 +293,8 @@ function terrainConformingWallGeometry(building: BuildingFeature, model: Semanti
     if (!bPosition) return;
     const [ax, az] = localMeters(aPosition, model.center);
     const [bx, bz] = localMeters(bPosition, model.center);
-    const aGround = Math.min(topY - 0.8, terrainHeightAtPosition(model, aPosition));
-    const bGround = Math.min(topY - 0.8, terrainHeightAtPosition(model, bPosition));
+    const aGround = terrainContactBottomY(topY, terrainHeightAtPosition(model, aPosition));
+    const bGround = terrainContactBottomY(topY, terrainHeightAtPosition(model, bPosition));
     const offset = vertices.length / 3;
     vertices.push(
       ax, aGround, az,
@@ -302,37 +302,6 @@ function terrainConformingWallGeometry(building: BuildingFeature, model: Semanti
       bx, topY, bz,
       ax, topY, az,
     );
-    indices.push(offset, offset + 1, offset + 2, offset, offset + 2, offset + 3);
-  });
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
-  geometry.setIndex(indices);
-  geometry.computeVertexNormals();
-  return geometry;
-}
-
-function cappedTerrainWallGeometry(
-  building: BuildingFeature,
-  model: SemanticSiteModel,
-  topY: number,
-  maxExposedHeight = 2.2,
-) {
-  const ring = building.polygon.length > 1 && building.polygon[0]?.[0] === building.polygon.at(-1)?.[0] && building.polygon[0]?.[1] === building.polygon.at(-1)?.[1]
-    ? building.polygon.slice(0, -1)
-    : building.polygon;
-  const vertices: number[] = [];
-  const indices: number[] = [];
-  ring.forEach((aPosition, index) => {
-    const bPosition = ring[(index + 1) % ring.length];
-    if (!bPosition) return;
-    const [ax, az] = localMeters(aPosition, model.center);
-    const [bx, bz] = localMeters(bPosition, model.center);
-    const aTerrain = terrainHeightAtPosition(model, aPosition);
-    const bTerrain = terrainHeightAtPosition(model, bPosition);
-    const aGround = Math.min(topY - 0.25, Math.max(aTerrain, topY - maxExposedHeight));
-    const bGround = Math.min(topY - 0.25, Math.max(bTerrain, topY - maxExposedHeight));
-    const offset = vertices.length / 3;
-    vertices.push(ax, aGround, az, bx, bGround, bz, bx, topY, bz, ax, topY, az);
     indices.push(offset, offset + 1, offset + 2, offset, offset + 2, offset + 3);
   });
   const geometry = new THREE.BufferGeometry();
@@ -360,7 +329,7 @@ function ContextBuilding({ building, model, subdued = false }: { building: Build
   const measuredHeight = renderedBuildingHeightM(building, 5.6);
   const visibleHeight = Math.max(3.8, Math.min(subdued ? 4.6 : 6.2, building.levels ? building.levels * 2.65 : Math.min(measuredHeight, subdued ? 4.4 : 5.8)));
   const visibleBaseY = topY - visibleHeight;
-  const plinthGeometry = cappedTerrainWallGeometry(building, model, visibleBaseY, subdued ? 0.9 : 1.25);
+  const plinthGeometry = terrainConformingWallGeometry(building, model, visibleBaseY);
   const palette = buildingPalette(building.id);
   const wallColor = subdued ? "#dddcd5" : palette.wall;
   const roofColor = subdued ? "#b7b9b3" : palette.roof;
@@ -995,9 +964,9 @@ function StylizedMassingBuilding({ building, model }: { building: BuildingFeatur
 }
 
 function BuildingMass({ building, model }: { building: BuildingFeature; model: SemanticSiteModel }) {
-  if (model.facadeComposition?.components.length) return <ComposedFacadeBuilding building={building} model={model} />;
-  if (model.massing?.volumes.length) return <StylizedMassingBuilding building={building} model={model} />;
-  const { shape } = shapeFromPolygon(building.polygon, model.center);
+  const representation = buildingRepresentation(model);
+  if (representation === "composed") return <ComposedFacadeBuilding building={building} model={model} />;
+  if (representation === "massing") return <StylizedMassingBuilding building={building} model={model} />;
   const height = renderedBuildingHeightM(building, (model.storiesApprox?.value ?? 2) * 3.1);
   const front = model.facades.find((facade) => facade.wall === "front");
   const side = model.facades.find((facade) => facade.wall === "left");
@@ -1006,14 +975,15 @@ function BuildingMass({ building, model }: { building: BuildingFeature; model: S
   const baseY = buildingBaseY(building, model);
 
   return (
-    <group position={[0, baseY, 0]}>
-      <mesh castShadow receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
-        <extrudeGeometry args={[shape, { depth: height, bevelEnabled: true, bevelSize: 0.045, bevelThickness: 0.045, bevelSegments: 2 }]} />
-        <meshPhysicalMaterial color={wallColor} roughness={0.76} metalness={0} clearcoat={0.04} clearcoatRoughness={0.9} />
+    <group>
+      <mesh geometry={terrainConformingWallGeometry(building, model, baseY + height)} castShadow receiveShadow>
+        <meshPhysicalMaterial color={wallColor} roughness={0.76} metalness={0} clearcoat={0.04} clearcoatRoughness={0.9} side={THREE.DoubleSide} />
       </mesh>
-      <Roof building={building} model={model} height={height} />
-      <FacadeOpenings building={building} model={model} facade={front} height={height} side="front" />
-      <FacadeOpenings building={building} model={model} facade={side} height={height} side="left" />
+      <group position={[0, baseY, 0]}>
+        <Roof building={building} model={model} height={height} />
+        <FacadeOpenings building={building} model={model} facade={front} height={height} side="front" />
+        <FacadeOpenings building={building} model={model} facade={side} height={height} side="left" />
+      </group>
     </group>
   );
 }
@@ -1599,3 +1569,4 @@ export function SiteTwinScene({ model, debug = false, className, view = "facade"
     </div>
   );
 }
+
