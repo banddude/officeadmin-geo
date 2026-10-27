@@ -93,4 +93,19 @@ describe("Ollama visual observation normalization", () => {
     });
   });
 
+  it("accepts a box_2d tuple nested under bbox", () => {
+    expect(normalizeTargetHouseRegion({
+      visible: true,
+      confidence: 0.9,
+      bbox: { box_2d: [0.18, 0.2, 0.84, 0.9] },
+    })).toEqual({
+      visible: true,
+      confidence: 0.9,
+      x: 0.18,
+      y: 0.2,
+      width: 0.66,
+      height: 0.7,
+    });
+  });
+
 });

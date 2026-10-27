@@ -58,7 +58,11 @@ export function normalizeTargetHouseRegion(value: unknown): TargetHouseRegion {
   if (Array.isArray(rawValue) && rawValue.length >= 4) {
     raw = { left: rawValue[0], top: rawValue[1], right: rawValue[2], bottom: rawValue[3] };
   } else if (rawValue && typeof rawValue === "object") {
-    raw = rawValue as Record<string, unknown>;
+    const candidate = rawValue as Record<string, unknown>;
+    const box2d = candidate.box_2d;
+    raw = Array.isArray(box2d) && box2d.length >= 4
+      ? { left: box2d[0], top: box2d[1], right: box2d[2], bottom: box2d[3] }
+      : candidate;
   } else {
     throw new Error("Target localization result is missing bbox coordinates");
   }
@@ -316,8 +320,8 @@ export async function locateTargetHouseWithOllama(
   const instruction = [
     "Locate the TARGET HOUSE in this street-level image. This is localization only, not architectural analysis.",
     "The frame was programmatically aimed at the target parcel, so prefer the building structure near the target direction and horizontal center. Do not select a neighboring house just because it is larger or clearer.",
-    "Return ONLY one JSON object with visible, confidence, and bbox.",
-    "bbox must contain left, top, right, bottom as normalized image coordinates from 0 to 1.",
+    "Return ONLY one JSON object exactly shaped as: {visible: boolean, confidence: number, bbox: {left: number, top: number, right: number, bottom: number}}.",
+    "bbox must be an OBJECT, not an array, and must contain left, top, right, bottom as normalized image coordinates from 0 to 1.",
     "The bbox must tightly enclose the visible TARGET BUILDING STRUCTURE, including attached balconies and roof/parapet, but exclude retaining walls, street, sidewalk, detached vegetation, sky, and neighboring buildings.",
     "If vegetation partially hides the building, bound the building silhouette you can infer directly from connected visible structure. Do not expand the box to include the vegetation itself.",
     "If the target cannot be distinguished confidently, set visible=false rather than guessing.",
