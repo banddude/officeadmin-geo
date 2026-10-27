@@ -1,0 +1,13 @@
+{
+  "wallColor": "#f0eee7",
+  "roofColor": "#b9b8b3",
+  "roofType": "flat",
+  "roofConfidence": 0.62,
+  "facadeConfidence": 0.1,
+  "openings": [],
+  "notes": [
+    "Flat roof is provisional, based on the 2020 listing description of a rooftop terrace.",
+    "Wall color and facade openings are placeholders until current local photos are analyzed.",
+    "No inferred window or door geometry is rendered until it is observed from imagery."
+  ]
+}
